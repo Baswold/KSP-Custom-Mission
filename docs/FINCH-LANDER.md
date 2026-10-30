@@ -161,3 +161,13 @@ incorrectly spawned another copy on the new scene. The disposable run was stoppe
 The probe now guards that spawn once per process and logs whether KSP accepted
 the switch; the next run uses a fresh QA save. Until that run completes, there
 is still no valid stability or docking-event result.
+
+The corrected-orbit probe switched focus successfully, but observed only 18 of
+35 candidate parts on the active carrier after 12 and 32 seconds; its remaining
+port reported `Ready` with neither undock nor decouple available. The temporary
+fixture serialized both mated docking modules as `Ready` from the editor before
+flight initialization. That fixture does not reproduce stock launch's
+`PreAttached` state, so it cannot distinguish a craft defect from an invalid
+fixture. A new isolated test sets the two linked ports to the stock
+`PreAttached` state before loading and records all vessels; this is test-fixture
+initialization, not a production change or proof that stock launch will do so.

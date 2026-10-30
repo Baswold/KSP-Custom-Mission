@@ -10,11 +10,11 @@ public sealed class FinchOrbitStart : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(5);
         string root=KSPUtil.ApplicationRootPath;
-        string marker=Path.Combine(root,"FinchSpawn3QA.enable");
+        string marker=Path.Combine(root,"FinchSpawn4QA.enable");
         if(!File.Exists(marker)) yield break;
-        File.Move(marker,Path.Combine(root,"FinchSpawn3QA.consumed"));
+        File.Move(marker,Path.Combine(root,"FinchSpawn4QA.consumed"));
         try {
-            const string folder="MegaCrew Finch Spawn3 QA";
+            const string folder="MegaCrew Finch Spawn4 QA";
             var game=GamePersistence.LoadGame("persistent",folder,true,false);
             if(game==null)throw new Exception("Disposable save could not load");
             HighLogic.SaveFolder=folder;HighLogic.CurrentGame=game;
@@ -29,7 +29,7 @@ public sealed class FinchOrbitCheck : MonoBehaviour
     static bool attempted;
     IEnumerator Start()
     {
-        if(HighLogic.SaveFolder!="MegaCrew Finch Spawn3 QA")yield break;
+        if(HighLogic.SaveFolder!="MegaCrew Finch Spawn4 QA")yield break;
         if(attempted){yield return StartCoroutine(Observe());yield break;}
         attempted=true;
         yield return new WaitForSecondsRealtime(12);
@@ -47,6 +47,11 @@ public sealed class FinchOrbitCheck : MonoBehaviour
             foreach(var snapshot in dummyProto.protoPartSnapshots)snapshot.storePartRefs();
             var nodes=new ConfigNode[dummyProto.protoPartSnapshots.Count];
             for(int i=0;i<nodes.Length;i++){nodes[i]=new ConfigNode("PART");dummyProto.protoPartSnapshots[i].Save(nodes[i]);}
+            // ShipConstruct snapshots are editor-state: KSP has not yet initialized
+            // the two mated ports. Reproduce the stock launched "PreAttached"
+            // state in this test-only fixture, then verify actual flight behavior.
+            foreach(int idx in new[]{17,21})foreach(var module in nodes[idx].GetNodes("MODULE"))
+                if(module.GetValue("name")=="ModuleDockingNode")module.SetValue("state","PreAttached",true);
             var orbit=new Orbit(0,0,900000,0,0,0,Planetarium.GetUniversalTime(),FlightGlobals.GetHomeBody());
             var node=ProtoVessel.CreateVesselNode("Finch Orbit QA",VesselType.Station,orbit,0,nodes);
             var proto=game.AddVessel(node);Destroy(dummyObject);
@@ -63,6 +68,7 @@ public sealed class FinchOrbitCheck : MonoBehaviour
         var v=FlightGlobals.ActiveVessel;
         if(v==null||v.vesselName!="Finch Orbit QA"){Debug.LogError("[FinchOrbitQA] Target not active");yield break;}
         Debug.Log("[FinchOrbitQA] Vessel="+v.vesselName+" parts="+v.parts.Count+" situation="+v.situation+" Pe="+v.orbit.PeA+" Ap="+v.orbit.ApA);
+        foreach(var other in FlightGlobals.Vessels)if(other!=null)Debug.Log("[FinchOrbitQA] WORLD "+other.vesselName+" loaded="+other.loaded+" parts="+(other.loaded?other.parts.Count:other.protoVessel.protoPartSnapshots.Count));
         foreach(var p in v.parts)foreach(PartModule m in p.Modules)if(m.moduleName=="ModuleDockingNode"){
             var node=m as ModuleDockingNode;var decouple=m.Events["Decouple"];var undock=m.Events["Undock"];
             Debug.Log("[FinchOrbitQA] DOCK id="+p.flightID+" state="+node.state+" decouple="+(decouple!=null&&decouple.active)+" undock="+(undock!=null&&undock.active));
