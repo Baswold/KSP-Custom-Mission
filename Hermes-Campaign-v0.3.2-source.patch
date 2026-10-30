@@ -1,0 +1,1003 @@
+diff --git a/Source/MegaCrew.cs b/Source/MegaCrew.cs
+--- a/Source/MegaCrew.cs
++++ b/Source/MegaCrew.cs
+@@ -18,6 +18,8 @@
+     {
+         public string Name, Role, Injury = "None";
+         public double Fatigue, Recovery, Hunger, Thirst;
++        public double Hygiene=100, Conditioning=100, Morale=100;
++        public double HygieneDoneUT=-1, ExerciseDoneUT=-1, SocialDoneUT=-1;
+         public bool Resting;
+         public bool Treated;
+         public CrewRecord(string name, string role) { Name=name; Role=role; }
+@@ -38,13 +40,14 @@
+         string pilot = "Hamish Kerman";
+         string radius = "15", rpm = "4.76", isp = "800", wet = "300", dry = "150";
+         HashSet<string> checks = new HashSet<string>();
+-        List<CrewRecord> crew = new List<CrewRecord> {
++        List<CrewRecord> crew = NewCrew();
++        static List<CrewRecord> NewCrew(){return new List<CrewRecord> {
+             new CrewRecord("Hamish Kerman", "Commander / navigation"),
+             new CrewRecord("Basil Kerman", "Flight engineer"),
+             new CrewRecord("Ada Kerman", "NPC physician / relief commander"),
+             new CrewRecord("Vikram Kerman", "NPC systems engineer")
+-        };
+-        readonly string[] tabs = {"Mission", "Crew & cryosleep", "Engineering", "Emergency", "Practice", "Crew needs", "Setup"};
++        };}
++        readonly string[] tabs = {"Mission", "Crew & cryosleep", "Engineering", "Emergency", "Practice", "Crew needs", "Campaign", "Setup"};
+         readonly string[] titles = {"01 / Design and assemble", "02 / Launch and rendezvous", "03 / Commission Hermes", "04 / Cryogenic handover", "05 / Emergency exercise", "06 / Orbital science", "07 / Prepare Duna expedition", "08 / Return and recovery"};
+         readonly string[][] tasks = {
+             new[]{"Design a Hermes-inspired long spine, rotating habitat, command deck and cryobay.","Fit four crew berths, four cryopod spaces, reserve batteries and an independent control core.","Choose the radius from the installed habitat's geometry; calculate rpm and gravity.","Provide docking, radiators, redundant power and a return vehicle. Record mass and delta-v."},
+@@ -57,7 +60,7 @@
+             new[]{"Wake and medically assess every crew member before recovery.","Return to Kerbin on a planned trajectory with a thermal protection and landing system.","Recover the crew and archive the mission log.","Review incidents and update the next mission's design."}
+         };
+ 
+-        public void Awake() { DontDestroyOnLoad(this); Debug.Log("[MegaCrew] Mission console 0.3.0 loaded; single-player / real-time watch operations."); }
++        public void Awake() { DontDestroyOnLoad(this); Debug.Log("[MegaCrew] Mission console 0.3.2-care-candidate loaded; single-player / campaign clock candidate; accelerated coast disabled."); }
+         bool InGame { get { return HighLogic.CurrentGame != null && HighLogic.LoadedScene != GameScenes.MAINMENU; } }
+         bool Allowed { get { return InGame && (HighLogic.SaveFolder ?? "").StartsWith("MegaCrew", StringComparison.OrdinalIgnoreCase); } }
+         string StatePath { get { return Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "MegaCrewMission.cfg"); } }
+@@ -71,8 +74,11 @@
+             // This rule applies only to the new MegaCrew save. Cryosleep never advances the clock.
+             if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene==GameScenes.TRACKSTATION) && TimeWarp.CurrentRateIndex>0) TimeWarp.SetRate(0,true);
+             double ut=Planetarium.GetUniversalTime(), dt=ut-lastUt; lastUt=ut;
++            BindCampaignCrew();
++            UpdateCampaignSupplies(dt);
+             UpdateNeeds(dt);
+             UpdateInterior();
++            UpdateCare(dt);
+             UpdatePractice(dt);
+             // Do not count closed-game time, scene-load jumps, or a skipped/warped interval as a watch.
+             if (dt<=0 || dt>5 || !HighLogic.LoadedSceneIsFlight || !running) return;
+@@ -98,7 +104,7 @@
+             return false;
+         }
+         bool Frozen(string name) { return CryoBridge.IsFrozen(name); }
+-        void ResetState(){ResetPractice();checks.Clear();wakeQueue.Clear();phase=0;running=false;shiftElapsed=0;drillActive=false;alarmTime=0;pilot=crew[0].Name;foreach(var c in crew){c.Fatigue=0;c.Hunger=0;c.Thirst=0;c.Resting=false;c.Recovery=0;c.Injury="None";c.Treated=false;} }
++        void ResetState(){crew=NewCrew();careAction="";ResetPractice();checks.Clear();wakeQueue.Clear();phase=0;running=false;shiftElapsed=0;drillActive=false;alarmTime=0;pilot=crew[0].Name;foreach(var c in crew){c.Fatigue=0;c.Hunger=0;c.Thirst=0;c.Resting=false;c.Recovery=0;c.Injury="None";c.Treated=false;} }
+         void WakeRelief() {
+             wakeQueue.Clear();
+             foreach(var c in crew)if(Frozen(c.Name))wakeQueue.Enqueue(c.Name);
+@@ -113,7 +119,7 @@
+             DrawInterior();if(!visible)return;
+             window.width=Math.Min(760,Screen.width-20);window.height=Math.Min(650,Screen.height-45);
+             window.x=Mathf.Clamp(window.x,0,Math.Max(0,Screen.width-window.width));window.y=Mathf.Clamp(window.y,0,Math.Max(0,Screen.height-window.height));
+-            window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.3",GUILayout.Width(window.width),GUILayout.Height(window.height));
++            window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.3.2 candidate",GUILayout.Width(window.width),GUILayout.Height(window.height));
+         }
+         void Draw(int id)
+         {
+@@ -121,7 +127,7 @@
+             tab=GUILayout.Toolbar(tab,tabs);
+             scroll=GUILayout.BeginScrollView(scroll);
+             if(!Allowed)GUILayout.Label("MISSION EDITING LOCKED: create/load a Sandbox save whose name begins MegaCrew. Other saves are unaffected.");
+-            if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else if(tab==5)DrawNeeds();else DrawSetup();
++            if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else if(tab==5)DrawNeeds();else if(tab==6)DrawCampaign();else DrawSetup();
+             GUILayout.Space(12);GUILayout.Label(message);GUILayout.EndScrollView();GUI.DragWindow(new Rect(0,0,10000,24));
+         }
+         void DrawMission()
+@@ -259,6 +265,19 @@
+         }
+         static object Info(string name) { try{var d=FrozenCrew;return d!=null&&d.Contains(name)?d[name]:null;}catch{return null;} }
+         public static string Status { get { return DfType==null?"DeepFreeze not loaded":Instance==null?"DeepFreeze installed; enter a game":"DeepFreeze connected"; } }
++        public static bool TryFrozen(string name,out bool frozen)
++        {
++            frozen=false;
++            try {
++                var d=FrozenCrew;var v=FlightGlobals.ActiveVessel;
++                if(d==null||v==null)return false;
++                if(!d.Contains(name))return true;
++                var info=d[name];if(info==null)return false;
++                var f=info.GetType().GetField("vesselID");if(f==null)return false;
++                if((Guid)f.GetValue(info)!=v.id)return false;
++                frozen=true;return true;
++            }catch{return false;}
++        }
+         public static bool IsFrozen(string name) {
+             var info=Info(name);var v=FlightGlobals.ActiveVessel;if(info==null||v==null)return false;
+             var field=info.GetType().GetField("vesselID");return field!=null&&(Guid)field.GetValue(info)==v.id;
+diff --git a/Source/CrewNeeds.cs b/Source/CrewNeeds.cs
+--- a/Source/CrewNeeds.cs
++++ b/Source/CrewNeeds.cs
+@@ -26,12 +26,17 @@
+         public static double Clamp(double n){return Math.Max(0,Math.Min(100,n));}
+         public static void Tick(CrewRecord c,double seconds,bool frozen)
+         {
++            if(c==null||double.IsNaN(seconds)||double.IsInfinity(seconds)||seconds<0)throw new ArgumentOutOfRangeException("seconds");
+             if(frozen){c.Resting=false;c.Fatigue=Clamp(c.Fatigue-seconds*100/7200);return;}
++            c.Hygiene=Clamp(c.Hygiene-seconds*25/86400);
++            c.Conditioning=Clamp(c.Conditioning-seconds*15/86400);
++            c.Morale=Clamp(c.Morale-seconds*10/86400);
+             c.Hunger=Clamp(c.Hunger+seconds*100/21600);
+             c.Thirst=Clamp(c.Thirst+seconds*100/14400);
+             c.Fatigue=Clamp(c.Fatigue+seconds*(c.Resting?-100.0/7200:100.0/14400));
+         }
+-        public static bool Fit(CrewRecord c){return c!=null&&!c.Resting&&c.Hunger<90&&c.Thirst<90&&c.Fatigue<90;}
++        public static bool CareReady(CrewRecord c){return c!=null&&!c.Resting&&c.Hunger<90&&c.Thirst<90&&c.Fatigue<90;}
++        public static bool Fit(CrewRecord c){return CareReady(c)&&c.Hygiene>10&&c.Conditioning>10&&c.Morale>10;}
+     }
+ 
+     public sealed partial class MissionConsole
+@@ -45,11 +50,11 @@
+         }
+         void SaveNeeds(ConfigNode n)
+         {
+-            foreach(var c in crew){var x=n.AddNode("NEEDS");x.AddValue("name",c.Name);x.AddValue("hunger",c.Hunger);x.AddValue("thirst",c.Thirst);x.AddValue("resting",c.Resting);}
++            foreach(var c in crew){var x=n.AddNode("NEEDS");x.AddValue("name",c.Name);x.AddValue("hunger",c.Hunger);x.AddValue("thirst",c.Thirst);x.AddValue("resting",c.Resting);SaveCare(x,c);}
+         }
+         void LoadNeeds(ConfigNode n)
+         {
+-            foreach(var x in n.GetNodes("NEEDS")){var c=crew.Find(z=>z.Name==x.GetValue("name"));if(c==null)continue;double h,t;double.TryParse(x.GetValue("hunger"),out h);double.TryParse(x.GetValue("thirst"),out t);c.Hunger=NeedsModel.Clamp(h);c.Thirst=NeedsModel.Clamp(t);bool.TryParse(x.GetValue("resting"),out c.Resting);}
++            foreach(var x in n.GetNodes("NEEDS")){var c=crew.Find(z=>z.Name==x.GetValue("name"));if(c==null)continue;double h,t;double.TryParse(x.GetValue("hunger"),out h);double.TryParse(x.GetValue("thirst"),out t);c.Hunger=NeedsModel.Clamp(h);c.Thirst=NeedsModel.Clamp(t);bool.TryParse(x.GetValue("resting"),out c.Resting);LoadCare(x,c);}
+         }
+         bool UseSupply(string name,double amount)
+         {
+@@ -71,10 +76,12 @@
+         void DrawNeeds()
+         {
+             GUILayout.Label("CREW NEEDS / 1x TIME");
++            GUILayout.Label("Quarters also offer timed hygiene, exercise and a paired social check-in. These are gameplay activities; character animations are not implemented.");
+             GUILayout.Label("Walk to the quarters/galley and press I to eat, drink or rest. Meters advance during loaded flight, even with watch tracking paused. No offline catch-up or instant sleep recovery.");
+             foreach(var c in crew)GUILayout.Label(c.Name+" | Hunger "+c.Hunger.ToString("F0")+"% | Thirst "+c.Thirst.ToString("F0")+"% | Fatigue "+c.Fatigue.ToString("F0")+"% | "+(Frozen(c.Name)?"FROZEN":c.Resting?"RESTING":NeedsModel.Fit(c)?"FIT":"NEEDS ATTENTION"));
++            foreach(var c in crew)GUILayout.Label(c.Name+" | Hygiene "+c.Hygiene.ToString("F0")+" | Conditioning "+c.Conditioning.ToString("F0")+" | Morale "+c.Morale.ToString("F0"));
+             if(Ship!=null)foreach(string name in new[]{"Food","Water"}){double a=0,b=0;foreach(var p in Ship.parts)foreach(PartResource r in p.Resources)if(r.resourceName==name){a+=r.amount;b+=r.maxAmount;}GUILayout.Label(name+": "+a.ToString("F2")+" / "+b.ToString("F2"));}
+-            GUILayout.Label("Game tuning: empty-to-urgent hunger in 6 h, thirst/fatigue in 4 h; full fatigue recovery in 2 h of ordinary rest. Frozen crew pause food/water needs. At 90% any unmet need blocks custom engineering/science work until addressed. Stock flight controls and emergency treatment remain available. No deaths are simulated. These are fictional Kerbal gameplay rates.");
++            GUILayout.Label("Game tuning: empty-to-urgent hunger in 6 h, thirst/fatigue in 4 h; full fatigue recovery in 2 h of ordinary rest. Frozen crew pause food/water needs. Hunger/thirst/fatigue at 90%, or hygiene/conditioning/morale at 10% or below, block custom engineering/science work until addressed. Daily care remains available when basic food/water/sleep needs are met. Stock flight controls and emergency treatment remain available. No deaths are simulated. These are fictional Kerbal gameplay rates.");
+         }
+     }
+ }
+diff --git a/Source/Interior.cs b/Source/Interior.cs
+--- a/Source/Interior.cs
++++ b/Source/Interior.cs
+@@ -59,8 +59,9 @@
+             bool quarters=name.Contains("habitation")||name.Contains("centrifuge");
+             bool lab=name.Contains("lab");bool cryo=name.Contains("Freezer");bool engineering=name.Contains("tube")||name.Contains("centrifuge");bool cockpit=name.Contains("core");
+             if(quarters){GUILayout.Label("GALLEY / BUNKS");GUI.enabled=!c.Resting&&!Frozen(c.Name);if(GUILayout.Button("Eat ration / 0.5 Food"))Eat(c);if(GUILayout.Button("Drink / 0.25 Water"))Drink(c);GUI.enabled=true;if(GUILayout.Button(c.Resting?"Wake from ordinary sleep":"Sleep in crew quarters"))Rest(c);}
++            if(quarters)DrawCare(c,room);
+             bool fit=NeedsModel.Fit(c)&&!Frozen(c.Name);
+-            if(!fit)GUILayout.Label("Address food, water or sleep before engineering/science duty. Wake through the galley/bunk controls; emergency care is available.");
++            if(!fit)GUILayout.Label("Address food, water, sleep or daily care before engineering/science duty. Wake through the galley/bunk controls; emergency care is available.");
+             if(engineering){GUILayout.Label("ENGINEERING / POWER & COOLING");GUI.enabled=fit;foreach(var p in Ship.parts)foreach(PartModule m in p.Modules)if(m.moduleName=="ModuleDeployableSolarPanel"||m.moduleName=="ModuleDeployableRadiator"){
+                 GUILayout.Label(p.partInfo.title+" #"+p.flightID);GUILayout.BeginHorizontal();if(GUILayout.Button("Extend"))Deploy(m,true);if(GUILayout.Button("Retract"))Deploy(m,false);GUILayout.EndHorizontal();
+             }GUI.enabled=true;}
+diff --git a/Source/Campaign.cs b/Source/Campaign.cs
+new file mode 100644
+--- /dev/null
++++ b/Source/Campaign.cs
+@@ -0,0 +1,131 @@
++using System;
++using System.Globalization;
++using System.Collections.Generic;
++using UnityEngine;
++
++namespace MegaCrew
++{
++    // Added only on explicit campaign start in a MegaCrew flight save. KSP owns
++    // serialization, so quicksave/load restores epoch and vessel together.
++    public sealed class HermesCampaign : ScenarioModule
++    {
++        public List<CrewRecord> CrewSnapshot;
++        public bool Started;
++        public double EpochUT;
++        public Guid VesselId;
++        public string LoadError="";
++        public bool RationsEnabled;
++        public double SupplyUT, FoodUsed, WaterUsed, FoodMissing, WaterMissing;
++        public int PreviousUnfrozen;
++        public string SupplyError="";
++        public double LastTakenFood,LastTakenWater; // transient transaction results
++        static bool ReadAmount(ConfigNode n,string key,out double value)
++        {return double.TryParse(n.GetValue(key),NumberStyles.Float,CultureInfo.InvariantCulture,out value)&&CampaignTiming.Finite(value)&&value>=0;}
++        public override void OnSave(ConfigNode node)
++        {
++            base.OnSave(node);
++            node.AddValue("schema",1);node.AddValue("started",Started);
++            node.AddValue("epochUT",EpochUT.ToString("R",CultureInfo.InvariantCulture));
++            node.AddValue("vesselID",VesselId.ToString());
++            node.AddValue("rationsEnabled",RationsEnabled);node.AddValue("supplyError",SupplyError);
++            node.AddValue("supplyUT",SupplyUT.ToString("R",CultureInfo.InvariantCulture));
++            node.AddValue("foodUsed",FoodUsed.ToString("R",CultureInfo.InvariantCulture));
++            node.AddValue("waterUsed",WaterUsed.ToString("R",CultureInfo.InvariantCulture));
++            node.AddValue("foodMissing",FoodMissing.ToString("R",CultureInfo.InvariantCulture));
++            node.AddValue("waterMissing",WaterMissing.ToString("R",CultureInfo.InvariantCulture));
++            node.AddValue("previousUnfrozen",PreviousUnfrozen);
++            if(CrewSnapshot!=null)CrewStateCodec.Save(node,CrewSnapshot);
++        }
++        public override void OnLoad(ConfigNode node)
++        {
++            base.OnLoad(node);CrewSnapshot=null;Started=false;LoadError="";RationsEnabled=false;SupplyError="";
++            bool requested;
++            if(!bool.TryParse(node.GetValue("started"),out requested)||!requested)return;
++            int schema;double epoch;Guid vessel;
++            if(!int.TryParse(node.GetValue("schema"),out schema)||schema!=1||
++                !double.TryParse(node.GetValue("epochUT"),NumberStyles.Float,CultureInfo.InvariantCulture,out epoch)||
++                !CampaignTiming.Finite(epoch)||epoch<0||!Guid.TryParse(node.GetValue("vesselID"),out vessel)||vessel==Guid.Empty)
++            {LoadError="Invalid campaign save data; campaign disabled.";return;}
++            EpochUT=epoch;VesselId=vessel;Started=true;
++            if(node.HasNode("CAMPAIGN_CREW"))
++            {
++                try{CrewSnapshot=CrewStateCodec.Load(node);}
++                catch(FormatException){Started=false;LoadError="Invalid campaign crew snapshot; campaign disabled.";return;}
++            }
++            bool.TryParse(node.GetValue("rationsEnabled"),out RationsEnabled);
++            if(RationsEnabled)
++            {
++                SupplyError=node.GetValue("supplyError")??"";
++                if(!ReadAmount(node,"supplyUT",out SupplyUT)||SupplyUT<EpochUT||
++                   !ReadAmount(node,"foodUsed",out FoodUsed)||!ReadAmount(node,"waterUsed",out WaterUsed)||
++                   !ReadAmount(node,"foodMissing",out FoodMissing)||!ReadAmount(node,"waterMissing",out WaterMissing)||
++                   !int.TryParse(node.GetValue("previousUnfrozen"),out PreviousUnfrozen)||PreviousUnfrozen<0||PreviousUnfrozen>4)
++                    SupplyError="Invalid saved supply ledger; coast blocked.";
++            }
++        }
++    }
++    public sealed partial class MissionConsole
++    {
++        HermesCampaign Campaign
++        {
++            get
++            {
++                if(!Allowed)return null;
++                foreach(var proto in HighLogic.CurrentGame.scenarios)
++                    if(proto.moduleName==typeof(HermesCampaign).Name)return proto.moduleRef as HermesCampaign;
++                return null;
++            }
++        }
++        void BindCampaignCrew()
++        {
++            var campaign=Campaign;if(campaign==null||!campaign.Started)return;
++            if(campaign.CrewSnapshot==null)campaign.CrewSnapshot=crew;
++            else if(!object.ReferenceEquals(crew,campaign.CrewSnapshot)){careAction="";crew=campaign.CrewSnapshot;}
++        }
++        void BeginCampaign()
++        {
++            if(!Allowed||!HighLogic.LoadedSceneIsFlight||Ship==null)return;
++            var existing=Campaign;
++            if(existing!=null&&(existing.Started||existing.LoadError.Length>0))return;
++            if(!Aboard(crew[0].Name)||!Aboard(crew[1].Name)||Frozen(crew[0].Name)||Frozen(crew[1].Name))
++            {message="Both Hamish and Basil must be awake aboard Hermes to start.";return;}
++            foreach(var c in crew)if(!Aboard(c.Name)&&!Frozen(c.Name)){message="All four mission crew must be aboard Hermes, awake or in its pods.";return;}
++            double now=Planetarium.GetUniversalTime();
++            if(!CampaignTiming.Finite(now)||now<0)return;
++            var campaign=existing;
++            if(campaign==null){
++                var proto=HighLogic.CurrentGame.AddProtoScenarioModule(typeof(HermesCampaign),GameScenes.FLIGHT,GameScenes.SPACECENTER,GameScenes.TRACKSTATION);
++                campaign=proto.moduleRef as HermesCampaign;
++            }
++            if(campaign==null){message="Campaign module is not ready. No clock was started.";return;}
++            campaign.EpochUT=now;campaign.VesselId=Ship.id;campaign.CrewSnapshot=crew;campaign.Started=true;
++            message="Campaign epoch recorded in this game's scenario state. Save the game to persist it. Accelerated coast is not enabled yet.";
++        }
++        void DrawCampaign()
++        {
++            GUILayout.Label("HERMES EXPEDITION / 24 MISSION MONTHS");
++            GUILayout.Label("Three rotations: four months Hamish/Basil, then four months Ada/Vikram. Mission months are 30 standard 24-hour days. Actual KSP UT determines progress, including time spent burning.");
++            var campaign=Campaign;
++            if(campaign==null||(!campaign.Started&&campaign.LoadError.Length==0))
++            {
++                GUI.enabled=Allowed&&HighLogic.LoadedSceneIsFlight&&Ship!=null;
++                if(GUILayout.Button("Start campaign on this vessel"))BeginCampaign();GUI.enabled=true;
++                GUILayout.Label("Start once all four crew are aboard. This starts the campaign clock in the current game's scenario state; normal KSP saves/quicksaves preserve it.");return;
++            }
++            if(!campaign.Started){GUILayout.Label(campaign.LoadError.Length>0?campaign.LoadError:"Campaign state has not been initialized.");return;}
++            double now=Planetarium.GetUniversalTime();
++            if(!CampaignTiming.Finite(now)||now<campaign.EpochUT){GUILayout.Label("Campaign clock is inconsistent with saved epoch. Coast is disabled.");return;}
++            DrawCampaignSupplies(campaign);
++            int watch=CampaignTiming.WatchAt(campaign.EpochUT,now);
++            double months=Math.Min(24,(now-campaign.EpochUT)/CampaignTiming.MonthSeconds);
++            GUILayout.Label("Elapsed: "+months.ToString("F3")+" / 24 mission months");
++            if(watch==6){GUILayout.Label("Expedition clock complete. Perform crew recovery and mission review.");return;}
++            bool human=CampaignTiming.HumanWatch(watch);
++            GUILayout.Label("Watch "+(watch+1)+" / 6: "+(human?"Hamish + Basil":"Ada + Vikram")+" | Remaining mission days: "+((CampaignTiming.WatchEndUT(campaign.EpochUT,watch)-now)/86400).ToString("F2"));
++            bool bound=HighLogic.LoadedSceneIsFlight&&Ship!=null&&Ship.id==campaign.VesselId;
++            GUILayout.Label(bound?"Campaign vessel active":"Activate the original campaign vessel; vessel changes never silently rebind the campaign.");
++            GUILayout.Label("Coast BLOCKED: background needs, cryopod power and resource accounting are not yet certified. Current build retains 1x. Targets after qualification: human 540x, NPC 172800x. Minimum coast-only play time 16h3m; burns and handovers add time.");
++            GUILayout.Label("Burn plan and dual verification integration pending. Single-player role selection is rehearsal, not two authenticated player approvals.");
++        }
++    }
++}
+diff --git a/Source/CampaignTiming.cs b/Source/CampaignTiming.cs
+new file mode 100644
+--- /dev/null
++++ b/Source/CampaignTiming.cs
+@@ -0,0 +1,47 @@
++using System;
++
++namespace MegaCrew
++{
++    // Pure UT contract for the future warp controller and maneuver planner.
++    // No method here changes KSP time, crew, resources, nodes or throttle.
++    public static class CampaignTiming
++    {
++        public const double MonthSeconds = 30 * 24 * 3600;
++        public const double WatchSeconds = 4 * MonthSeconds;
++        public const double MissionSeconds = 24 * MonthSeconds;
++        public const double HumanCoastRate = MonthSeconds / (80 * 60);
++        public const double NpcCoastRate = WatchSeconds / 60;
++        public const double BaselinePlaySeconds = 3 * (4 * 80 * 60 + 60);
++        public static bool Finite(double value){return !double.IsNaN(value)&&!double.IsInfinity(value);}
++        static void Time(double value,string name){if(!Finite(value)||value<0)throw new ArgumentOutOfRangeException(name);}
++        // Returns 6 at/after completion; never wraps back to the first watch.
++        public static int WatchAt(double epochUT,double currentUT)
++        {
++            Time(epochUT,"epochUT");Time(currentUT,"currentUT");
++            if(currentUT<epochUT)throw new ArgumentOutOfRangeException("currentUT","Clock is before the recorded campaign epoch");
++            return (int)Math.Min(6,Math.Floor((currentUT-epochUT)/WatchSeconds));
++        }
++        public static bool HumanWatch(int watch){if(watch<0||watch>5)throw new ArgumentOutOfRangeException("watch");return watch%2==0;}
++        public static double WatchEndUT(double epochUT,int watch)
++        {
++            Time(epochUT,"epochUT");if(watch<0||watch>5)throw new ArgumentOutOfRangeException("watch");
++            double end=epochUT+(watch+1)*WatchSeconds;if(!Finite(end))throw new ArgumentOutOfRangeException("epochUT");return end;
++        }
++        // The entire alignment/burn/verification interval must lie in one human watch.
++        // The solver must revise the watch plan if this fails; never move a burn epoch arbitrarily.
++        public static bool CoversBurn(double epochUT,double ignitionUT,double burnSeconds,double alignSeconds,double verifySeconds)
++        {
++            Time(epochUT,"epochUT");Time(ignitionUT,"ignitionUT");Time(burnSeconds,"burnSeconds");Time(alignSeconds,"alignSeconds");Time(verifySeconds,"verifySeconds");
++            double start=ignitionUT-alignSeconds,end=ignitionUT+burnSeconds+verifySeconds;
++            if(!Finite(end)||start<epochUT)return false;
++            int watch=WatchAt(epochUT,start);
++            return watch<6&&HumanWatch(watch)&&end<=WatchEndUT(epochUT,watch);
++        }
++        public static double ExtraBurnPlaySeconds(double burnSeconds,double executionRate=1)
++        {
++            Time(burnSeconds,"burnSeconds");if(!Finite(executionRate)||executionRate<=0||executionRate>HumanCoastRate)throw new ArgumentOutOfRangeException("executionRate");
++            double extra=burnSeconds/executionRate-burnSeconds/HumanCoastRate;
++            if(!Finite(extra))throw new ArgumentOutOfRangeException("burnSeconds");return extra;
++        }
++    }
++}
+diff --git a/Source/CampaignCoast.cs b/Source/CampaignCoast.cs
+new file mode 100644
+--- /dev/null
++++ b/Source/CampaignCoast.cs
+@@ -0,0 +1,44 @@
++using System;
++namespace MegaCrew
++{
++    // Pure decision only. A future KSP adapter must refresh every observation on
++    // each dispatch, cap stock warp safely, and stop BEFORE StopUT. Never set UT.
++    public struct CoastObservation
++    {
++        public double EpochUT, CurrentUT, ObservedUT, NextStopUT, ResourcesVerifiedThroughUT;
++        public bool CampaignVessel, HumanPairAwake, HumanPairFrozen, ReliefPairAwake;
++        public bool CryoStateVerified, BackgroundAccountingVerified, HaltRequested;
++    }
++    public struct CoastDecision
++    {
++        public readonly double TargetRate, StopUT;
++        public readonly string Reason;
++        public bool CanAccelerate { get { return TargetRate>1; } }
++        public CoastDecision(double rate,double stop,string reason){TargetRate=rate;StopUT=stop;Reason=reason;}
++    }
++    public static class CampaignCoast
++    {
++        public static CoastDecision Decide(CoastObservation s)
++        {
++            if(!CampaignTiming.Finite(s.CurrentUT)||s.CurrentUT<0)return new CoastDecision(1,0,"Invalid clock");
++            double now=s.CurrentUT;
++            if(!CampaignTiming.Finite(s.EpochUT)||s.EpochUT<0||now<s.EpochUT)return Hold(now,"Invalid campaign epoch");
++            // Exact sample epoch: stale/future snapshots must never grant warp.
++            if(s.ObservedUT!=now)return Hold(now,"Refresh vessel observations");
++            if(!s.CampaignVessel||s.HaltRequested)return Hold(now,"Coast not authorized");
++            int watch=CampaignTiming.WatchAt(s.EpochUT,now);
++            if(watch==6)return Hold(now,"Campaign complete");
++            if(!s.CryoStateVerified||!s.BackgroundAccountingVerified)return Hold(now,"Cryo/resource accounting unverified");
++            bool human=CampaignTiming.HumanWatch(watch);
++            if(human&&(!s.HumanPairAwake||s.HumanPairFrozen))return Hold(now,"Human watch requires both human crew awake");
++            if(!human&&(!s.HumanPairFrozen||s.HumanPairAwake||!s.ReliefPairAwake))return Hold(now,"NPC watch requires frozen human crew and awake relief crew");
++            // NextStopUT includes alignment, work, handover, and operational limits,
++            // not merely ignition. Unknown next event refuses accelerated coast.
++            if(!CampaignTiming.Finite(s.NextStopUT)||s.NextStopUT<=now)return Hold(now,"Next operational stop missing or due");
++            double stop=Math.Min(s.NextStopUT,CampaignTiming.WatchEndUT(s.EpochUT,watch));
++            if(!CampaignTiming.Finite(s.ResourcesVerifiedThroughUT)||s.ResourcesVerifiedThroughUT<stop)return Hold(now,"Insufficient verified resource horizon");
++            return new CoastDecision(human?CampaignTiming.HumanCoastRate:CampaignTiming.NpcCoastRate,stop,"Coast candidate; runtime rate limits still apply");
++        }
++        static CoastDecision Hold(double now,string reason){return new CoastDecision(1,now,reason);}
++    }
++}
+diff --git a/Source/CampaignSupplies.cs b/Source/CampaignSupplies.cs
+new file mode 100644
+--- /dev/null
++++ b/Source/CampaignSupplies.cs
+@@ -0,0 +1,82 @@
++using System;
++using System.Globalization;
++using UnityEngine;
++namespace MegaCrew
++{
++    // Fictional game tuning: routine meals/drinks are distributed continuously
++    // over a standard day. Frozen crew use neither. Extra manual meals cost extra.
++    public static class CampaignRations
++    {
++        public const double FoodPerCrewDay=1.5, WaterPerCrewDay=0.75;
++        public static double Demand(double seconds,int unfrozenCrew,double perCrewDay)
++        {
++            if(!CampaignTiming.Finite(seconds)||seconds<0||unfrozenCrew<0||unfrozenCrew>4||!CampaignTiming.Finite(perCrewDay)||perCrewDay<0)throw new ArgumentOutOfRangeException();
++            double amount=(seconds/86400)*unfrozenCrew*perCrewDay;
++            if(!CampaignTiming.Finite(amount))throw new ArgumentOutOfRangeException();return amount;
++        }
++        public static double Take(double available,double demand)
++        {
++            if(!CampaignTiming.Finite(available)||available<0||!CampaignTiming.Finite(demand)||demand<0)throw new ArgumentOutOfRangeException();
++            return Math.Min(available,demand);
++        }
++    }
++    public sealed partial class MissionConsole
++    {
++        void UpdateCampaignSupplies(double dt)
++        {
++            var c=Campaign;
++            if(c==null||!c.Started||!c.RationsEnabled||!HighLogic.LoadedSceneIsFlight||Ship==null||Ship.id!=c.VesselId||FlightDriver.Pause)return;
++            double now=Planetarium.GetUniversalTime();
++            if(!CampaignTiming.Finite(now)||now<c.SupplyUT){c.SupplyError="Supply clock regressed. Restore a consistent KSP save.";return;}
++            if(c.SupplyError.Length>0)return;
++            double elapsed=now-c.SupplyUT;
++            // Do not infer unknown crew histories across a scene load or offline
++            // interval. The future background adapter must reconcile these.
++            if(elapsed>60||dt<0||dt>60){c.SupplyError="Unobserved supply interval. Background reconciliation required; coast blocked.";return;}
++            if(elapsed<=0)return;
++            int awake=0;
++            foreach(var person in crew)
++            {
++                bool frozen;
++                if(!CryoBridge.TryFrozen(person.Name,out frozen)||(!frozen&&!Aboard(person.Name)))
++                {c.SupplyError="Crew/pod state unavailable. Supply history requires reconciliation.";return;}
++                if(!frozen)awake++;
++            }
++            // Charge the higher awake count on transitions. No free food from
++            // freezing at the end of an interval or double credit on thaw.
++            int charge=Math.Max(awake,c.PreviousUnfrozen);
++            double food=CampaignRations.Demand(elapsed,charge,CampaignRations.FoodPerCrewDay);
++            double water=CampaignRations.Demand(elapsed,charge,CampaignRations.WaterPerCrewDay);
++            c.FoodUsed+=ConsumeCampaignSupply("Food",food);
++            c.WaterUsed+=ConsumeCampaignSupply("Water",water);
++            // A shortfall becomes a durable unmet balance, never negative stores.
++            c.FoodMissing+=Math.Max(0,food-c.LastTakenFood);
++            c.WaterMissing+=Math.Max(0,water-c.LastTakenWater);
++            c.SupplyUT=now;c.PreviousUnfrozen=awake;
++            if(c.FoodMissing>1e-8||c.WaterMissing>1e-8)c.SupplyError="Routine rations depleted. Unmet supply demand recorded; coast blocked.";
++        }
++        double ConsumeCampaignSupply(string name,double demand)
++        {
++            double left=demand;
++            foreach(var p in Ship.parts)foreach(PartResource r in p.Resources)
++                if(r.resourceName==name&&r.flowState){double take=CampaignRations.Take(r.amount,left);r.amount-=take;left-=take;}
++            double taken=demand-left;var c=Campaign;
++            if(name=="Food")c.LastTakenFood=taken;else c.LastTakenWater=taken;
++            return taken;
++        }
++        void DrawCampaignSupplies(HermesCampaign c)
++        {
++            GUILayout.Label("Routine ration plan: 1.5 Food + 0.75 Water per unfrozen crew per standard day. Frozen crew consume neither; manual meals/drinks are additional. This accounts stores, not automatic task completion or physiological care.");
++            if(!c.RationsEnabled)
++            {
++                GUI.enabled=HighLogic.LoadedSceneIsFlight&&Ship!=null&&Ship.id==c.VesselId;
++                if(GUILayout.Button("Enable finite routine ration plan"))
++                {c.RationsEnabled=true;c.SupplyUT=Planetarium.GetUniversalTime();c.PreviousUnfrozen=4;message="Routine ration plan enabled. Save the game to persist the plan and ledger.";}
++                GUI.enabled=true;
++            }
++            GUILayout.Label("Routine used: Food "+c.FoodUsed.ToString("F3")+", Water "+c.WaterUsed.ToString("F3")+" | Unmet: "+c.FoodMissing.ToString("F3")+" / "+c.WaterMissing.ToString("F3"));
++            if(c.SupplyError.Length>0)GUILayout.Label(c.SupplyError);
++            GUILayout.Label("24-month baseline with two unfrozen crew: 2160 Food + 1080 Water, before reserve, handovers and extra meals. Existing small pantry alone is insufficient. No free provisions are added by this plan.");
++        }
++    }
++}
+diff --git a/Source/CrewCare.cs b/Source/CrewCare.cs
+new file mode 100644
+--- /dev/null
++++ b/Source/CrewCare.cs
+@@ -0,0 +1,84 @@
++using System;
++using System.Globalization;
++using UnityEngine;
++namespace MegaCrew
++{
++    public sealed partial class MissionConsole
++    {
++        string careAction="", careCrew="",carePartner="";
++        uint careRoom;
++        double careElapsed;
++        static void SaveCare(ConfigNode x,CrewRecord c)
++        {
++            x.AddValue("hygiene",c.Hygiene.ToString("R",CultureInfo.InvariantCulture));
++            x.AddValue("conditioning",c.Conditioning.ToString("R",CultureInfo.InvariantCulture));
++            x.AddValue("morale",c.Morale.ToString("R",CultureInfo.InvariantCulture));
++            x.AddValue("hygieneDoneUT",c.HygieneDoneUT.ToString("R",CultureInfo.InvariantCulture));
++            x.AddValue("exerciseDoneUT",c.ExerciseDoneUT.ToString("R",CultureInfo.InvariantCulture));
++            x.AddValue("socialDoneUT",c.SocialDoneUT.ToString("R",CultureInfo.InvariantCulture));
++        }
++        static double CareValue(ConfigNode n,string key,double fallback,bool timestamp=false)
++        {
++            double v;if(!double.TryParse(n.GetValue(key),NumberStyles.Float,CultureInfo.InvariantCulture,out v)||double.IsNaN(v)||double.IsInfinity(v))return fallback;
++            return timestamp?Math.Max(-1,v):NeedsModel.Clamp(v);
++        }
++        static void LoadCare(ConfigNode x,CrewRecord c)
++        {
++            c.Hygiene=CareValue(x,"hygiene",100);c.Conditioning=CareValue(x,"conditioning",100);c.Morale=CareValue(x,"morale",100);
++            c.HygieneDoneUT=CareValue(x,"hygieneDoneUT",-1,true);c.ExerciseDoneUT=CareValue(x,"exerciseDoneUT",-1,true);c.SocialDoneUT=CareValue(x,"socialDoneUT",-1,true);
++        }
++        static double CareDuration(string action){return action=="Exercise"?120:action=="Hygiene"?45:60;}
++        void BeginCare(CrewRecord c,Part room,string action)
++        {
++            if(careAction.Length>0||!NeedsModel.CareReady(c)||Frozen(c.Name)||!Aboard(c.Name))return;
++            double done=action=="Exercise"?c.ExerciseDoneUT:action=="Hygiene"?c.HygieneDoneUT:c.SocialDoneUT;
++            double now=Planetarium.GetUniversalTime();
++            if(done>=0&&now-done<21600){message="This care activity was recently completed. Return after six mission hours.";return;}
++            carePartner="";
++            if(action=="Social")
++            {
++                var partner=crew.Find(p=>p!=c&&Aboard(p.Name)&&!Frozen(p.Name)&&!p.Resting);
++                if(partner==null){message="Wake an available second crew member for the check-in.";return;}
++                carePartner=partner.Name;
++            }
++            careAction=action;careCrew=c.Name;careRoom=room.flightID;careElapsed=0;
++            message=action+" started. Remain in this compartment as this Kerbal. Leaving, pausing or starting warp cancels it without reward.";
++        }
++        void UpdateCare(double dt)
++        {
++            if(careAction.Length==0)return;
++            var c=InteriorCrew;var room=CurrentRoom;
++            var partner=crew.Find(p=>p.Name==carePartner);
++            bool valid=HighLogic.LoadedSceneIsFlight&&!FlightDriver.Pause&&TimeWarp.CurrentRateIndex==0&&c!=null&&c.Name==careCrew&&room!=null&&room.flightID==careRoom&&NeedsModel.CareReady(c)&&!Frozen(c.Name)&&Aboard(c.Name);
++            if(careAction=="Social")valid=valid&&partner!=null&&Aboard(partner.Name)&&!Frozen(partner.Name)&&!partner.Resting;
++            if(!valid||dt<0||dt>5){careAction="";message="Care activity cancelled; no supplies or benefit awarded.";return;}
++            careElapsed+=dt;
++            if(careElapsed<CareDuration(careAction))return;
++            double now=Planetarium.GetUniversalTime();
++            if(careAction=="Hygiene")
++            {
++                if(!UseSupply("Water",0.25)){careAction="";return;}
++                c.Hygiene=NeedsModel.Clamp(c.Hygiene+40);c.HygieneDoneUT=now;
++            }
++            else if(careAction=="Exercise"){c.Conditioning=NeedsModel.Clamp(c.Conditioning+30);c.Fatigue=NeedsModel.Clamp(c.Fatigue+5);c.ExerciseDoneUT=now;}
++            else {c.Morale=NeedsModel.Clamp(c.Morale+25);c.SocialDoneUT=now;partner.Morale=NeedsModel.Clamp(partner.Morale+15);}
++            message=careAction+" completed by "+c.Name+(carePartner.Length>0?" with "+carePartner:"")+". No walking or interaction animation is simulated.";
++            careAction="";Save();
++        }
++        void DrawCare(CrewRecord c,Part room)
++        {
++            GUILayout.Label("DAILY CREW CARE | Hygiene "+c.Hygiene.ToString("F0")+" | Conditioning "+c.Conditioning.ToString("F0")+" | Morale "+c.Morale.ToString("F0"));
++            if(careAction.Length>0)
++            {
++                GUILayout.Label(careAction+" / "+careCrew+": "+careElapsed.ToString("F0")+" / "+CareDuration(careAction).ToString("F0")+" seconds");
++                if(GUILayout.Button("Cancel care activity")){careAction="";message="Care activity cancelled.";}return;
++            }
++            GUI.enabled=NeedsModel.CareReady(c)&&!Frozen(c.Name)&&!FlightDriver.Pause&&TimeWarp.CurrentRateIndex==0;
++            if(GUILayout.Button("Hygiene routine / 45 seconds / 0.25 Water"))BeginCare(c,room,"Hygiene");
++            if(GUILayout.Button("Exercise routine / 2 minutes"))BeginCare(c,room,"Exercise");
++            if(GUILayout.Button("Social check-in / 1 minute / second awake crew"))BeginCare(c,room,"Social");
++            GUI.enabled=true;
++            GUILayout.Label("Game abstractions: care meters decay per unfrozen mission day; activities require this actual room and viewed Kerbal. Partner availability is roster-based, not an animated meeting. Each activity has a six-mission-hour cooldown.");
++        }
++    }
++}
+diff --git a/Source/CrewStateCodec.cs b/Source/CrewStateCodec.cs
+new file mode 100644
+--- /dev/null
++++ b/Source/CrewStateCodec.cs
+@@ -0,0 +1,51 @@
++using System;
++using System.Collections.Generic;
++using System.Globalization;
++namespace MegaCrew
++{
++    // KSP scenario snapshot shares the same save/quicksave as vessel resources.
++    public static class CrewStateCodec
++    {
++        static readonly string[] Names={"Hamish Kerman","Basil Kerman","Ada Kerman","Vikram Kerman"};
++        static void Number(ConfigNode n,string key,double value){n.AddValue(key,value.ToString("R",CultureInfo.InvariantCulture));}
++        static double Read(ConfigNode n,string key,double max)
++        {
++            double v;
++            if(!double.TryParse(n.GetValue(key),NumberStyles.Float,CultureInfo.InvariantCulture,out v)||double.IsNaN(v)||double.IsInfinity(v)||v<0||v>max)throw new FormatException("Invalid crew metric");
++            return v;
++        }
++        static double Stamp(ConfigNode n,string key)
++        {
++            double v;if(!double.TryParse(n.GetValue(key),NumberStyles.Float,CultureInfo.InvariantCulture,out v)||double.IsNaN(v)||double.IsInfinity(v)||v< -1)throw new FormatException("Invalid care timestamp");return v;
++        }
++        public static void Save(ConfigNode root,List<CrewRecord> crew)
++        {
++            foreach(var c in crew)
++            {
++                var n=root.AddNode("CAMPAIGN_CREW");n.AddValue("name",c.Name);n.AddValue("role",c.Role);n.AddValue("injury",c.Injury);
++                n.AddValue("resting",c.Resting);n.AddValue("treated",c.Treated);
++                Number(n,"hunger",c.Hunger);Number(n,"thirst",c.Thirst);Number(n,"fatigue",c.Fatigue);Number(n,"recovery",c.Recovery);
++                Number(n,"hygiene",c.Hygiene);Number(n,"conditioning",c.Conditioning);Number(n,"morale",c.Morale);
++                Number(n,"hygieneDoneUT",c.HygieneDoneUT);Number(n,"exerciseDoneUT",c.ExerciseDoneUT);Number(n,"socialDoneUT",c.SocialDoneUT);
++            }
++        }
++        public static List<CrewRecord> Load(ConfigNode root)
++        {
++            var nodes=root.GetNodes("CAMPAIGN_CREW");if(nodes.Length!=4)throw new FormatException("Expected four crew");
++            var result=new List<CrewRecord>();
++            foreach(string name in Names)
++            {
++                ConfigNode found=null;
++                foreach(var n in nodes)if(n.GetValue("name")==name){if(found!=null)throw new FormatException("Duplicate crew");found=n;}
++                if(found==null)throw new FormatException("Missing crew");
++                var c=new CrewRecord(name,found.GetValue("role")??"");
++                c.Hunger=Read(found,"hunger",100);c.Thirst=Read(found,"thirst",100);c.Fatigue=Read(found,"fatigue",100);c.Recovery=Read(found,"recovery",double.MaxValue);
++                c.Hygiene=Read(found,"hygiene",100);c.Conditioning=Read(found,"conditioning",100);c.Morale=Read(found,"morale",100);
++                c.HygieneDoneUT=Stamp(found,"hygieneDoneUT");c.ExerciseDoneUT=Stamp(found,"exerciseDoneUT");c.SocialDoneUT=Stamp(found,"socialDoneUT");
++                if(!bool.TryParse(found.GetValue("resting"),out c.Resting)||!bool.TryParse(found.GetValue("treated"),out c.Treated))throw new FormatException("Invalid crew flags");
++                c.Injury=found.GetValue("injury")??"None";result.Add(c);
++            }
++            return result;
++        }
++    }
++}
+diff --git a/tests/CampaignTimingTests.cs b/tests/CampaignTimingTests.cs
+new file mode 100644
+--- /dev/null
++++ b/tests/CampaignTimingTests.cs
+@@ -0,0 +1,50 @@
++using System;
++using MegaCrew;
++class CampaignTimingTests
++{
++    static void Yes(bool v){if(!v)throw new Exception("Assertion failed");}
++    static void Equal(double a,double b){if(Math.Abs(a-b)>1e-7)throw new Exception("Expected "+b+", got "+a);}
++    static void Reject(Action f){try{f();}catch(ArgumentOutOfRangeException){return;}throw new Exception("Invalid time accepted");}
++    static void Main()
++    {
++        Equal(CampaignTiming.HumanCoastRate,540);Equal(CampaignTiming.NpcCoastRate,172800);Equal(CampaignTiming.BaselinePlaySeconds,57780);
++        double epoch=100000,w=CampaignTiming.WatchSeconds;
++        for(int i=0;i<6;i++){Equal(CampaignTiming.WatchAt(epoch,epoch+i*w),i);Yes(CampaignTiming.HumanWatch(i)==(i%2==0));Equal(CampaignTiming.WatchEndUT(epoch,i),epoch+(i+1)*w);}
++        Equal(CampaignTiming.WatchAt(epoch,epoch+CampaignTiming.MissionSeconds),6);
++        Equal(CampaignTiming.WatchAt(epoch,epoch+CampaignTiming.MissionSeconds+100),6);
++        Yes(CampaignTiming.CoversBurn(epoch,epoch+1000,60,120,60));
++        Yes(!CampaignTiming.CoversBurn(epoch,epoch+w+1000,60,120,60));
++        Yes(!CampaignTiming.CoversBurn(epoch,epoch+w-10,60,0,0));
++        Yes(!CampaignTiming.CoversBurn(epoch,epoch+10,60,120,60));
++        Yes(CampaignTiming.CoversBurn(epoch,epoch+w-60,60,0,0));
++        Equal(CampaignTiming.ExtraBurnPlaySeconds(540),539);
++        Equal(CampaignTiming.ExtraBurnPlaySeconds(540,540),0);
++        // Actual UT continues through a 1x burn: it may cross a shift boundary.
++        Equal(CampaignTiming.WatchAt(epoch,epoch+w-1),0);Equal(CampaignTiming.WatchAt(epoch,epoch+w+1),1);
++        Reject(()=>CampaignTiming.WatchAt(epoch,epoch-1));Reject(()=>CampaignTiming.WatchAt(0,double.NaN));Reject(()=>CampaignTiming.WatchEndUT(0,6));Reject(()=>CampaignTiming.HumanWatch(6));Reject(()=>CampaignTiming.ExtraBurnPlaySeconds(1,0));Reject(()=>CampaignTiming.CoversBurn(0,100,double.PositiveInfinity,0,0));
++        Equal(CampaignRations.Demand(86400,2,CampaignRations.FoodPerCrewDay),3);
++        Equal(CampaignRations.Demand(86400,2,CampaignRations.WaterPerCrewDay),1.5);
++        Equal(CampaignRations.Demand(CampaignTiming.MissionSeconds,2,CampaignRations.FoodPerCrewDay),2160);
++        Equal(CampaignRations.Demand(CampaignTiming.MissionSeconds,2,CampaignRations.WaterPerCrewDay),1080);
++        Equal(CampaignRations.Demand(86400,0,1.5),0);
++        Equal(CampaignRations.Take(1,3),1);Equal(CampaignRations.Take(5,3),3);
++        Equal(CampaignRations.Demand(30,2,1.5)*2,CampaignRations.Demand(60,2,1.5));
++        Reject(()=>CampaignRations.Demand(double.NaN,2,1.5));Reject(()=>CampaignRations.Demand(1,5,1.5));Reject(()=>CampaignRations.Take(-1,1));
++        Console.WriteLine("PASS: finite routine demand, frozen exclusion, partitioning, depletion and 24-month supply budget.");
++        var state=new CoastObservation {EpochUT=epoch,CurrentUT=epoch,ObservedUT=epoch,NextStopUT=epoch+w+100,ResourcesVerifiedThroughUT=epoch+w,CampaignVessel=true,HumanPairAwake=true,CryoStateVerified=true,BackgroundAccountingVerified=true};
++        var coast=CampaignCoast.Decide(state);Yes(coast.CanAccelerate);Equal(coast.TargetRate,540);Equal(coast.StopUT,epoch+w);
++        state.ObservedUT--;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.ObservedUT=state.CurrentUT;
++        state.ResourcesVerifiedThroughUT--;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.ResourcesVerifiedThroughUT=epoch+2*w;
++        state.BackgroundAccountingVerified=false;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.BackgroundAccountingVerified=true;
++        state.CurrentUT=state.ObservedUT=epoch+w;state.NextStopUT=epoch+2*w;
++        Yes(!CampaignCoast.Decide(state).CanAccelerate);state.HumanPairAwake=false;state.HumanPairFrozen=true;
++        Yes(!CampaignCoast.Decide(state).CanAccelerate);state.ReliefPairAwake=true;
++        Equal(CampaignCoast.Decide(state).TargetRate,172800);
++        state.NextStopUT=state.CurrentUT;Yes(!CampaignCoast.Decide(state).CanAccelerate);
++        state.NextStopUT=epoch+2*w;state.HaltRequested=true;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.HaltRequested=false;
++        state.CurrentUT=state.ObservedUT=epoch+CampaignTiming.MissionSeconds;Yes(!CampaignCoast.Decide(state).CanAccelerate);
++        state.CurrentUT=double.NaN;Yes(!CampaignCoast.Decide(state).CanAccelerate);
++        Console.WriteLine("PASS: coast preconditions, fresh observations, resource horizon, awake/frozen watch handovers, stop boundaries and fail-closed invalid state.");
++        Console.WriteLine("PASS: campaign rates, six watch boundaries, completion, full burn windows, non-paused UT, added burn time and invalid inputs.");
++    }
++}
+diff --git a/tests/CampaignSupplyAdapterTests.cs b/tests/CampaignSupplyAdapterTests.cs
+new file mode 100644
+--- /dev/null
++++ b/tests/CampaignSupplyAdapterTests.cs
+@@ -0,0 +1,68 @@
++using System;
++using System.Collections.Generic;
++using MegaCrew;
++namespace UnityEngine
++{
++    public static class GUI{public static bool enabled;}
++    public static class GUILayout{public static void Label(string s){}public static bool Button(string s){return false;}}
++}
++public static class HighLogic{public static bool LoadedSceneIsFlight=true;}
++public static class FlightDriver{public static bool Pause;}
++public static class Planetarium{public static double UT;public static double GetUniversalTime(){return UT;}}
++public class PartResource{public string resourceName;public bool flowState=true;public double amount;}
++public class Part{public List<PartResource> Resources=new List<PartResource>();}
++public class Vessel{public Guid id=Guid.NewGuid();public List<Part> parts=new List<Part>();}
++namespace MegaCrew
++{
++    public class CrewRecord{public string Name;}
++    public class HermesCampaign
++    {
++        public bool Started=true,RationsEnabled=true;
++        public Guid VesselId;
++        public double SupplyUT,FoodUsed,WaterUsed,FoodMissing,WaterMissing,LastTakenFood,LastTakenWater;
++        public int PreviousUnfrozen;
++        public string SupplyError="";
++    }
++    public static class CryoBridge
++    {
++        public static bool Verified=true;
++        public static HashSet<string> Frozen=new HashSet<string>();
++        public static bool TryFrozen(string name,out bool frozen){frozen=Frozen.Contains(name);return Verified;}
++    }
++    public sealed partial class MissionConsole
++    {
++        HermesCampaign Campaign;Vessel Ship;string message;
++        List<CrewRecord> crew=new List<CrewRecord>();
++        bool Aboard(string n){return true;}
++        public MissionConsole(HermesCampaign c,Vessel v){Campaign=c;Ship=v;for(int i=0;i<4;i++)crew.Add(new CrewRecord{Name=i.ToString()});}
++        public void Step(double dt){UpdateCampaignSupplies(dt);}
++    }
++}
++class CampaignSupplyAdapterTests
++{
++    static void Yes(bool x){if(!x)throw new Exception("Assertion failed");}
++    static void Eq(double x,double y){if(Math.Abs(x-y)>1e-10)throw new Exception(x+" != "+y);}
++    static void Main()
++    {
++        var food=new PartResource{resourceName="Food",amount=10};var water=new PartResource{resourceName="Water",amount=10};
++        var part=new Part();part.Resources.Add(food);part.Resources.Add(water);
++        var locked=new PartResource{resourceName="Food",amount=100,flowState=false};part.Resources.Add(locked);
++        var ship=new Vessel();ship.parts.Add(part);
++        var state=new HermesCampaign{VesselId=ship.id,PreviousUnfrozen=2};
++        var console=new MissionConsole(state,ship);CryoBridge.Frozen.Add("2");CryoBridge.Frozen.Add("3");
++        Planetarium.UT=30;console.Step(30);
++        double demand=CampaignRations.Demand(30,2,1.5);Eq(state.FoodUsed,demand);Eq(food.amount,10-demand);Eq(locked.amount,100);
++        console.Step(0);Eq(state.FoodUsed,demand); // duplicate UT must not double charge
++        CryoBridge.Frozen.Add("0");CryoBridge.Frozen.Add("1");Planetarium.UT=60;console.Step(30);
++        Eq(state.FoodUsed,2*demand); // conservative old/new transition count
++        Planetarium.UT=90;console.Step(30);Eq(state.FoodUsed,2*demand); // all genuinely frozen
++        CryoBridge.Frozen.Clear();Planetarium.UT=120;console.Step(30);Eq(state.FoodUsed,4*demand);
++        food.amount=0;water.amount=0;Planetarium.UT=150;console.Step(30);
++        Yes(state.FoodMissing>0&&state.WaterMissing>0);Eq(food.amount,0);Eq(water.amount,0);Yes(state.SupplyError.Length>0);
++        double used=state.FoodUsed;Planetarium.UT=180;console.Step(30);Eq(state.FoodUsed,used); // no repeated debt charges after failure
++        state.SupplyError="";state.SupplyUT=180;Planetarium.UT=300;console.Step(120);Yes(state.SupplyError.Contains("Unobserved"));Eq(state.SupplyUT,180);
++        state.SupplyError="";Planetarium.UT=170;console.Step(-10);Yes(state.SupplyError.Contains("regressed"));
++        state.SupplyError="";state.SupplyUT=300;Planetarium.UT=330;CryoBridge.Verified=false;console.Step(30);Yes(state.SupplyError.Contains("unavailable"));Eq(state.SupplyUT,300);
++        Console.WriteLine("PASS: production supply adapter transactions, locked stores, duplicate UT, freeze/thaw transitions, depletion, unknown intervals and API failure (KSP stubs; runtime still required).");
++    }
++}
+diff --git a/tests/run_campaign_tests.py b/tests/run_campaign_tests.py
+new file mode 100644
+--- /dev/null
++++ b/tests/run_campaign_tests.py
+@@ -0,0 +1,22 @@
++"""Run pure production campaign timing and coast decisions without launching Unity/KSP."""
++import argparse,json,pathlib,subprocess,tempfile
++p=argparse.ArgumentParser();p.add_argument('--runtime',type=pathlib.Path,required=True);p.add_argument('--csc',type=pathlib.Path,required=True);a=p.parse_args()
++root=pathlib.Path(__file__).resolve().parents[1]
++with tempfile.TemporaryDirectory() as d:
++ d=pathlib.Path(d);(d/'Model.cs').write_text((root/'Source/CampaignTiming.cs').read_text());(d/'Coast.cs').write_text((root/'Source/CampaignCoast.cs').read_text());ration=(root/'Source/CampaignSupplies.cs').read_text();(d/'Rations.cs').write_text(ration[:ration.index('    public sealed partial class MissionConsole')].replace('using UnityEngine;','')+'}')
++ refs=['System.Private.CoreLib.dll','System.Runtime.dll','System.Console.dll']
++ args=['-nologo','-nostdlib+','-target:exe',f'-out:"{d}/Tests.dll"']+[f'-reference:"{a.runtime.resolve()/r}"' for r in refs]+[f'"{d}/Model.cs"',f'"{d}/Coast.cs"',f'"{d}/Rations.cs"',f'"{root}/tests/CampaignTimingTests.cs"']
++ (d/'args.rsp').write_text('\n'.join(args))
++ subprocess.run(['dotnet',str(a.csc),'@'+str(d/'args.rsp')],check=True)
++ (d/'Tests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+a.runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':a.runtime.name}}}))
++ subprocess.run(['dotnet',str(d/'Tests.dll')],check=True)
++
++# Exercise the production vessel adapter against minimal KSP/Unity test doubles.
++with tempfile.TemporaryDirectory() as folder:
++ d=pathlib.Path(folder)
++ refs=['System.Private.CoreLib.dll','System.Runtime.dll','System.Console.dll','System.Collections.dll']
++ args=['-nologo','-nostdlib+','-target:exe',f'-out:"{d}/AdapterTests.dll"']+[f'-reference:"{a.runtime.resolve()/r}"' for r in refs]+[f'"{root}/Source/CampaignTiming.cs"',f'"{root}/Source/CampaignSupplies.cs"',f'"{root}/tests/CampaignSupplyAdapterTests.cs"']
++ (d/'args.rsp').write_text('\n'.join(args))
++ subprocess.run(['dotnet',str(a.csc),'@'+str(d/'args.rsp')],check=True)
++ (d/'AdapterTests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+a.runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':a.runtime.name}}}))
++ subprocess.run(['dotnet',str(d/'AdapterTests.dll')],check=True)
+diff --git a/tests/NeedsModelTests.cs b/tests/NeedsModelTests.cs
+--- a/tests/NeedsModelTests.cs
++++ b/tests/NeedsModelTests.cs
+@@ -4,6 +4,22 @@
+ {
+     static void Equal(double a,double b){if(Math.Abs(a-b)>1e-7)throw new Exception("Expected "+b+", got "+a);}
+     static void Yes(bool value){if(!value)throw new Exception("Condition failed");}
++    static void TestSnapshot()
++    {
++        var crew=new System.Collections.Generic.List<CrewRecord>();
++        foreach(string name in new[]{"Hamish Kerman","Basil Kerman","Ada Kerman","Vikram Kerman"})crew.Add(new CrewRecord(name,"test"));
++        var c=crew[0];c.Hunger=44.5;c.Thirst=62.25;c.Fatigue=12;c.Resting=true;c.Injury="Training sprain";c.Treated=true;c.Recovery=17;c.Hygiene=33;c.Conditioning=47;c.Morale=51;c.HygieneDoneUT=1234.56789;
++        var root=new ConfigNode();CrewStateCodec.Save(root,crew);
++        var old=System.Globalization.CultureInfo.CurrentCulture;System.Globalization.CultureInfo.CurrentCulture=new System.Globalization.CultureInfo("fr-FR");
++        var restored=CrewStateCodec.Load(root);System.Globalization.CultureInfo.CurrentCulture=old;
++        Equal(restored[0].Hunger,44.5);Equal(restored[0].Thirst,62.25);Equal(restored[0].Recovery,17);Equal(restored[0].Hygiene,33);Equal(restored[0].Conditioning,47);Equal(restored[0].Morale,51);Equal(restored[0].HygieneDoneUT,1234.56789);Yes(restored[0].Resting&&restored[0].Treated);Yes(restored[0].Injury=="Training sprain");
++        c.Hunger=0;Equal(restored[0].Hunger,44.5); // no shared mutable alias on load
++        root.GetNodes("CAMPAIGN_CREW")[0].Values["hunger"]="NaN";
++        bool rejected=false;try{CrewStateCodec.Load(root);}catch(FormatException){rejected=true;}Yes(rejected);
++        root.GetNodes("CAMPAIGN_CREW")[0].Values["hunger"]="44.5";root.GetNodes("CAMPAIGN_CREW")[1].Values["name"]="Hamish Kerman";
++        rejected=false;try{CrewStateCodec.Load(root);}catch(FormatException){rejected=true;}Yes(rejected);
++        Console.WriteLine("PASS: campaign crew snapshot round-trip, locale independence, restoration isolation and malformed/duplicate crew rejection (ConfigNode test double).");
++    }
+     static void Main()
+     {
+         var c=new CrewRecord("test","test");NeedsModel.Tick(c,3600,false);Equal(c.Hunger,100.0/6);Equal(c.Thirst,25);Equal(c.Fatigue,25);
+@@ -12,6 +28,23 @@
+         c=new CrewRecord("test","test");c.Resting=true;c.Fatigue=100;NeedsModel.Tick(c,7200,false);Equal(c.Fatigue,0);Equal(c.Hunger,100.0/3);Equal(c.Thirst,50);
+         c.Resting=true;c.Hunger=10;c.Thirst=20;c.Fatigue=100;NeedsModel.Tick(c,7200,true);Equal(c.Hunger,10);Equal(c.Thirst,20);Equal(c.Fatigue,0);Yes(!c.Resting);
+         c.Hunger=89.9;c.Thirst=89.9;c.Fatigue=89.9;Yes(NeedsModel.Fit(c));c.Hunger=90;Yes(!NeedsModel.Fit(c));c.Hunger=0;c.Thirst=90;Yes(!NeedsModel.Fit(c));c.Thirst=0;c.Fatigue=90;Yes(!NeedsModel.Fit(c));c.Fatigue=0;c.Resting=true;Yes(!NeedsModel.Fit(c));Yes(!NeedsModel.Fit(null));
++        c=new CrewRecord("test","test");NeedsModel.Tick(c,86400,false);Equal(c.Hygiene,75);Equal(c.Conditioning,85);Equal(c.Morale,90);
++        c=new CrewRecord("test","test");NeedsModel.Tick(c,86400,true);Equal(c.Hygiene,100);Equal(c.Conditioning,100);Equal(c.Morale,100);
++        c.Hygiene=10;Yes(!NeedsModel.Fit(c));Yes(NeedsModel.CareReady(c));c.Hygiene=100;c.Conditioning=10;Yes(!NeedsModel.Fit(c));c.Conditioning=100;c.Morale=10;Yes(!NeedsModel.Fit(c));
++        bool rejected=false;try{NeedsModel.Tick(c,double.NaN,false);}catch(ArgumentOutOfRangeException){rejected=true;}Yes(rejected);
++        TestSnapshot();
+         Console.WriteLine("PASS: rates, frame partitioning, upper limits, ordinary sleep, frozen needs and duty thresholds.");
+     }
+ }
++
++// Only the ConfigNode boundary is doubled; CrewStateCodec is production source.
++public class ConfigNode
++{
++    public System.Collections.Generic.Dictionary<string,string> Values=new System.Collections.Generic.Dictionary<string,string>();
++    System.Collections.Generic.List<ConfigNode> Children=new System.Collections.Generic.List<ConfigNode>();
++    string Name;
++    public ConfigNode AddNode(string name){var n=new ConfigNode{Name=name};Children.Add(n);return n;}
++    public void AddValue(string key,object value){Values[key]=value.ToString();}
++    public string GetValue(string key){return Values.ContainsKey(key)?Values[key]:null;}
++    public ConfigNode[] GetNodes(string name){return Children.FindAll(n=>n.Name==name).ToArray();}
++}
+diff --git a/tests/run_needs_tests.py b/tests/run_needs_tests.py
+--- a/tests/run_needs_tests.py
++++ b/tests/run_needs_tests.py
+@@ -10,8 +10,8 @@
+ model='using System; namespace MegaCrew {\n'+actual_class(root/'Source/MegaCrew.cs','sealed class CrewRecord')+'\n'+actual_class(root/'Source/CrewNeeds.cs','static class NeedsModel')+'\n}'
+ with tempfile.TemporaryDirectory() as d:
+  d=pathlib.Path(d);(d/'Model.cs').write_text(model)
+- refs=['System.Private.CoreLib.dll','System.Runtime.dll','System.Console.dll']
+- args=['-nologo','-nostdlib+','-target:exe',f'-out:"{d}/Tests.dll"']+[f'-reference:"{a.runtime.resolve()/r}"' for r in refs]+[f'"{d}/Model.cs"',f'"{root}/tests/NeedsModelTests.cs"']
++ refs=['System.Private.CoreLib.dll','System.Runtime.dll','System.Console.dll','System.Collections.dll','System.Globalization.dll']
++ args=['-nologo','-nostdlib+','-target:exe',f'-out:"{d}/Tests.dll"']+[f'-reference:"{a.runtime.resolve()/r}"' for r in refs]+[f'"{d}/Model.cs"',f'"{root}/Source/CrewStateCodec.cs"',f'"{root}/tests/NeedsModelTests.cs"']
+  (d/'args.rsp').write_text('\n'.join(args))
+  subprocess.run(['dotnet',str(a.csc),'@'+str(d/'args.rsp')],check=True)
+  (d/'Tests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+a.runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':a.runtime.name}}}))
+diff --git a/docs/CAMPAIGN-SHIFTS.md b/docs/CAMPAIGN-SHIFTS.md
+new file mode 100644
+--- /dev/null
++++ b/docs/CAMPAIGN-SHIFTS.md
+@@ -0,0 +1,148 @@
++# Owner-approved campaign timing — supersedes the no-warp draft
++
++Status: requirements and integration design. The installed 0.3 plugin still blocks time warp; this document does not claim that accelerated watches, autonomous NPC maintenance, dual-client burn approval or the maneuver solver are implemented.
++
++## Calendar and baseline
++
++Use a mission month of 30 standard 24-hour days: 2,592,000 KSP UT seconds. A 24-month expedition spans 62,208,000 UT seconds. This is a campaign convention, not the stock Kerbin calendar month.
++
++One human mission month should take 80 minutes (4,800 real seconds), so the target awake coast rate is **540x**. A four-month NPC watch should take one minute, so its target coast rate is **172,800x**. These require custom rates and runtime validation; stock warp settings and loaded mod behavior cannot simply be assumed safe at those rates.
++
++| Mission months | Awake pair | Target play time |
++| --- | --- | --- |
++| 0–4 | Hamish / Basil | 5 h 20 m |
++| 4–8 | Ada / Vikram | 1 m |
++| 8–12 | Hamish / Basil | 5 h 20 m |
++| 12–16 | Ada / Vikram | 1 m |
++| 16–20 | Hamish / Basil | 5 h 20 m |
++| 20–24 | Ada / Vikram | 1 m |
++
++Baseline: **16 h 3 m**, excluding additional operational time. Four-month watches are long duty assignments, not continuous wakefulness; they include ordinary daily sleep/rest and watch coverage within the pair.
++
++The owner explicitly chose actual KSP orbital time, not a cosmetic mission-calendar offset. Never teleport UT to fabricate a completed watch. The vessel must advance along its actual orbit; real engine burns consume propellant. Passive coasting does not consume propulsion fuel just because time passes. Life-support and cryopod systems must account for elapsed simulation time.
++
++## Burns and watch planning
++
++Plan human awake watches around required maneuver windows before committing the campaign schedule. A maneuver's required epoch is a trajectory constraint; do not move it arbitrarily to make the crew timetable fit. If the timetable cannot cover a burn, revise the watch plan and show the changed play-time estimate.
++
++The shift clock keeps advancing during burns. Reduce physical simulation speed as needed for a real burn, but never pause the campaign/shift clock. For a burn lasting B seconds at 1x instead of 540x, the added real time is approximately B × (1 − 1/540), before attitude alignment and other operations. Exact session duration must therefore be estimated from a validated burn plan, not promised as precisely 16 h 3 m.
++
++Onboard planning should supply a versioned plan: vessel ID, reference body, burn epoch/window, frame, delta-v vector, expected duration, propellant budget, target trajectory, clearance and verification residuals. Both Hamish and Basil verify the same immutable version. Any edit invalidates both approvals. Local crew-role switching is only a single-player rehearsal; actual two-person approval later requires distinct authenticated Luna clients.
++
++Basil's Codex is designing the maneuver solver/node planner. Claimed planetary intercept, atmospheric periapsis or docking accuracy requires explicit numerical and in-game verification, with failure reported rather than hidden. If mission-control computation is used, the round-trip signal delay is 2d/c, with CommNet/path assumptions stated.
++
++## Cryosleep and NPC upkeep
++
++Incoming crew wake and are checked before outgoing crew freeze. Verify the real DeepFreeze state, resources, safe trajectory and independent control before accelerating. During the NPC watch, Ada/Vikram must perform modeled routine upkeep with finite resources and persistent records; do not replace this with an unearned “everything repaired” flag.
++
++Test actual E/C generation and consumption, eclipses, pod temperature/power, supplies, physics transitions and save/reload at the candidate rates in a disposable save. Missing/background-unreliable behavior must block the high-speed mode. Encounter, atmosphere, docking/EVA or unverified burn windows require safe handling. High-speed cryosleep must not silently kill, duplicate or teleport crew.
++
++## Useful work throughout an 80-minute month
++
++This is an initial workload budget, not an installed set of timed missions:
++
++| Work block | Active play budget | Evidence/variation |
++| --- | --- | --- |
++| Briefing and duty assignment | 5 m | Read the previous watch log; choose responsibilities |
++| Power and reserve checks | 10 m | Compare readings, adjust real hardware, verify the trend |
++| Cooling and mechanical inspection | 10 m | Inspect a different route/component; diagnose before acting |
++| Science observations | 15 m | Prepare, measure, compare and record results |
++| Interior/exterior inspection route | 12 m | Navigate to equipment and gather evidence; EVA only if qualified |
++| Medical, exercise and hygiene duties | 8 m | Assess the crew and complete appropriate care tasks |
++| Meals, drinking and rest planning | 10 m | Use finite supplies, maintain awake coverage |
++| Maintenance record and handover preparation | 10 m | Cross-check outcomes and leave an actionable log |
++
++Total: **80 minutes**. Vary the task sequence across months. Use multi-step diagnosis, measurements, choices and observable verification rather than repeated checkboxes or a long idle countdown. Rest/observation intervals should support other crew activity. Human-style needs are requested gameplay systems, with rates and abstractions documented; the current 0.3 food/water/fatigue model is only the initial foundation.
++
++## One emergency and authored stories
++
++Exactly one planned emergency for the expedition. Its schedule must not be shown in normal UI, comments, player-facing logs or documentation. Store a persistent issued/resolved state so reloading cannot duplicate the event. Routine maintenance, social friction and normal crew needs do not count as extra emergency events. Emergency story proposals replace the single planned event, rather than adding another.
++
++The story workshop is GitHub issue #7. It provides a base handover story and a writing template covering problem, location, crew, supplies, actions, dialogue, workload, outcomes and missing mechanics. Narrative text is data, not executable instructions.
++
++## Coast decision candidate (not wired to KSP)
++
++`Source/CampaignCoast.cs` is a pure fail-closed gate. It requires observations
++sampled at the current UT, the campaign vessel, verified cryo and background
++accounting, and the appropriate awake/frozen pair. It caps the next stop at the
++watch boundary and requires a verified resource horizon through that stop.
++Unknown/due next stops, incomplete handovers, stale samples and completion return
++1x. A future adapter must include alignment, maintenance and handover stops,
++refresh observations at dispatch, obey KSP's altitude/physics limits, and brake
++before the stop; the decision alone does not make a high warp rate safe.
++No adapter, NPC upkeep scheduler or live resource certification exists yet.
++Run `tests/run_campaign_tests.py` for production timing/coast tests.
++
++## Saved-game campaign candidate
++
++`Source/Campaign.cs` adds a Campaign tab and an explicitly started
++`HermesCampaign : ScenarioModule`. It is added only to the allowed MegaCrew game
++when the user starts a campaign in flight with all four crew aboard and the
++human pair awake. Epoch UT and original vessel GUID live in KSP scenario data,
++not the loose `MegaCrewMission.cfg`; normal/quicksave restoration is intended to
++restore the clock alongside the vessel. The tab reads actual UT, six watch
++boundaries and terminal completion. Invalid loaded schema/time/GUID disables the
++campaign. No rebind/reset button silently changes the original vessel.
++
++This code compiles against KSP 1.12.5. Scenario creation, scene transitions,
++quicksave/revert behavior and GUI are **not yet runtime verified**. Existing 1x
++restriction remains while background accounting and maneuver integration are
++unfinished. This candidate is not installed into the user's running game.
++
++## Routine supply ledger candidate
++
++The Campaign tab can enable a finite routine ration plan. `CampaignSupplies.cs`
++charges actual flow-enabled Food/Water on the active bound vessel by observed UT
++and actual unfrozen crew count (including ordinary resting crew). This is
++fictional tuning: 1.5 Food and 0.75 Water per unfrozen crew per standard day,
++distributed continuously rather than discrete animated meals. Manual meals and
++drinks are additional; this ledger does not automatically restore needs meters,
++perform maintenance, or animate eating. No provisions are created.
++
++The baseline 720-day expedition with two unfrozen crew requires 2160 Food and
++1080 Water, before reserve, handovers or extra meals. The practice pantry's
++84/42 units cannot sustain it. Full provisioning and physiological daily routines
++remain unfinished; the ration plan alone does not qualify background support.
++
++Ledger timestamps, actual consumption and unmet demand are serialized with the
++KSP scenario. Frozen/awake transitions use the greater old/new awake count for
++the sampling interval. Missing crew/pod state, clock regression, or an unobserved
++interval longer than 60 simulation seconds quarantines the ledger, retaining the
++last accounted timestamp; no fabricated catch-up or free repaired flag occurs.
++This deliberately does not yet support high warp or unloaded-vessel accounting.
++
++Production adapter tests using KSP/Unity doubles verify transactions, duplicate
++UT, locked stores, freeze/thaw transitions, depletion/shortfall recording, missing
++API and unobserved intervals. These are not live KSP save/resource verification.
++
++
++## Daily care and campaign crew snapshot candidate (0.3.2)
++
++Quarters now offer hygiene (45 seconds, 0.25 Water), exercise (120 seconds,
+++5 fatigue), and a paired social check-in (60 seconds). The actual viewed Kerbal
++and current compartment must remain unchanged, unpaused and at 1x throughout.
++Leaving, switching crew/room, sleeping/freezing, pausing, warp, or a loading gap
++cancels progress with no reward or supply charge. Completion gives finite meter
++benefits and a six-mission-hour cooldown; in-progress actions do not persist.
++The social partner must remain awake aboard, but physical co-location/animation
++is not implemented. These are explicit gameplay abstractions, not physiological
++predictions or a claim of animated crew interactions.
++
++Hygiene, conditioning and morale start at 100, lose 25/15/10 points per unfrozen
++standard day, and pause during cryosleep. At 10 or below they restrict custom
++engineering/science duty. Basic food/water/sleep must be addressed before care,
++but low care meters do not block their own recovery. Existing real food/water
++and treatment/stock flight access remain available.
++
++A started campaign stores all four crew's needs, injury/recovery, ordinary rest
++and completed care timestamps inside its KSP ScenarioModule. On load, named
++records are validated, decoded with invariant culture and restored together with
++the campaign clock. Switching saves creates fresh local record objects rather
++than mutating the previous game's snapshot. The original non-campaign practice
++uses its existing mission CFG with backward-compatible new care fields. Old
++campaigns without a snapshot seed it from their existing mission records once.
++
++Tests prove production needs/decay and crew codec round trips, invalid data and
++duplicate crew rejection, and locale independence using a ConfigNode double.
++Actual KSP quicksave/revert, timed IVA activities and animations remain unverified.
++This does not enable accelerated watches or autonomous NPC work.
