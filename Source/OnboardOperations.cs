@@ -143,7 +143,7 @@ namespace MegaCrew
             }
             if (!found) GUILayout.Label("Fit a stock science experiment to this vessel to operate it here.");
             GUILayout.Label("Reported inventory lists currently retained reports by container. Repeated views do not necessarily represent new progress or unique reports.");
-            scienceObservation.Draw(Ship, HighLogic.SaveFolder, HighLogic.CurrentGame, Planetarium.GetUniversalTime(), Role("Scientist"), FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0);
+            scienceObservation.Draw(Ship, HighLogic.SaveFolder, HighLogic.CurrentGame, Planetarium.GetUniversalTime(), FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0);
             GUILayout.Label("Run uses the stock experiment and its result dialog. No science points are fabricated; results are never automatically discarded or transmitted.");
         }
         void Supplies()

@@ -95,11 +95,10 @@ namespace MegaCrew
             hasLastUT = true;
         }
 
-        bool CaptureAllowed(Vessel vessel, double now, bool scientist, bool paused, bool warped, out string reason)
+        bool CaptureAllowed(Vessel vessel, double now, bool paused, bool warped, out string reason)
         {
             reason = "";
-            if (!scientist) reason = "Scientist crew role required to capture an observation.";
-            else if (paused) reason = "Resume the game before capturing.";
+            if (paused) reason = "Resume the game before capturing.";
             else if (warped) reason = "Return to 1x before capturing.";
             else if (!Finite(now) || now < 0) reason = "Universal time is invalid.";
             else if (vessel == null || vessel.isEVA || !vessel.loaded || vessel.packed) reason = "Active vessel must be loaded, unpacked, and not EVA.";
@@ -162,11 +161,11 @@ namespace MegaCrew
             }
         }
 
-        public void Draw(Vessel vessel, string save, object game, double now, bool scientist, bool paused, bool warped)
+        public void Draw(Vessel vessel, string save, object game, double now, bool paused, bool warped)
         {
             UpdateContext(vessel, save, game, now);
             string reason;
-            bool canCapture = CaptureAllowed(vessel, now, scientist, paused, warped, out reason);
+            bool canCapture = CaptureAllowed(vessel, now, paused, warped, out reason);
 
             GUILayout.Label("Retained science data observation (read-only; session only)");
             GUILayout.Label("Captures currently stored science reports and groups measured data units by subject. Repeated views recognized as the same report are counted once.");
@@ -227,7 +226,7 @@ namespace MegaCrew
             if (baseline != null)
             {
                 GUILayout.Label("Baseline: UT " + baseline.UT.ToString("F1") + " | " + baseline.VesselName + " | " + baseline.VesselId + " | " + baseline.BodyName);
-                if (current != null) GUILayout.Label("Current: UT " + current.UT.ToString("F1") + " | " + current.VesselName + " | " + current.VesselId + " | " + current.BodyName);
+                if (current != null) GUILayout.Label("Comparison capture: UT " + current.UT.ToString("F1") + " | " + current.VesselName + " | " + current.VesselId + " | " + current.BodyName);
             }
             if (comparison != null)
             {
@@ -241,7 +240,7 @@ namespace MegaCrew
                 if (comparison.Subjects.Count == 0) GUILayout.Label("No retained science data in either snapshot.");
             }
             GUILayout.Label(status);
-            GUILayout.Label("These numbers measure data currently retained aboard this vessel; they do not verify experiment completion, science points, transmission, or recovery. Some third-party containers may expose duplicate-looking reports that cannot be reliably distinguished.");
+            GUILayout.Label("These captures measure data retained at their recorded times; they do not verify experiment completion, science points, transmission, or recovery. Some third-party containers may expose duplicate-looking reports that cannot be reliably distinguished.");
         }
 
         static int CountFor(VesselSnapshot snapshot, string subject)

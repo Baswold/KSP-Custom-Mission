@@ -8,7 +8,7 @@ a particular experiment uses biome-specific results.
 
 ## Procedure and meaning
 
-1. With a scientist on the roster, an unpacked active vessel and normal unpaused
+1. With an unpacked active vessel and normal unpaused
    1x time, capture the baseline. The panel records vessel identity and UT.
 2. Operate a fitted experiment through its existing stock Run button and choose
    how to handle the result in the stock dialog. The request itself earns no
@@ -53,9 +53,12 @@ disposable save after the overnight runtime restriction clears.
 | Transmit or remove | Comparison reports retained inventory change, without inferring rewards or failure |
 | Failed read | No partial/fresh result is shown; retry path is clear |
 | Quickload/revert/context | Prior session baseline is invalidated correctly |
-| Role/pause/warp | Capture controls disable; no stock experiment controls are bypassed |
+| Pause/warp | Capture controls disable; stock Run retains its existing scientist roster gate |
 | Input and layout | Science, room and engineering panels coexist; locks and scrolling recover on close/scene exit |
 
-These remain local single-player overlays with roster-based role checks. No
+Read-only captures are available to any panel operator, including the human
+pilot/engineer watch while the scientist is frozen. The stock Run action retains
+its scientist roster requirement; human-watch experiment operation and shared
+duty-readiness gating remain integration work. These are local single-player overlays. No
 physical scientist occupancy, authenticated player identity or LMP synchronization
 is established by this candidate.
