@@ -1,7 +1,9 @@
 import io
+import json
 import os
 from pathlib import Path
 import stat
+import subprocess
 import tempfile
 import unittest
 import zipfile
@@ -153,6 +155,91 @@ class BuilderSafetyTests(unittest.TestCase):
             ])
             with self.assertRaisesRegex(builder.BuildError, "Duplicate/case-colliding"):
                 builder.safe_extract(archive, root)
+
+    def test_ordered_patch_sequence_is_verified_and_applied_before_overlay(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp = Path(temp)
+            repo = temp / "fixture-repo"
+            repo.mkdir()
+            subprocess.run(["git", "init", "--quiet", str(repo)], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.name", "Fixture"], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "fixture@example.invalid"], check=True)
+
+            archive = make_zip([(zipfile.ZipInfo("README.md"), b"fixture base\n")])
+            first_patch = (
+                "diff --git a/Source/Sequence.txt b/Source/Sequence.txt\n"
+                "new file mode 100644\n"
+                "--- /dev/null\n"
+                "+++ b/Source/Sequence.txt\n"
+                "@@ -0,0 +1 @@\n"
+                "+stage one\n"
+            ).encode("utf-8")
+            second_patch = (
+                "diff --git a/Source/Sequence.txt b/Source/Sequence.txt\n"
+                "--- a/Source/Sequence.txt\n"
+                "+++ b/Source/Sequence.txt\n"
+                "@@ -1 +1 @@\n"
+                "-stage one\n"
+                "+stage two\n"
+            ).encode("utf-8")
+            (repo / builder.ZIP_PATH).write_bytes(archive)
+            (repo / "first.patch").write_bytes(first_patch)
+            (repo / "second.patch").write_bytes(second_patch)
+            nav = repo / "Source" / "Navigation" / "Fixture.cs"
+            nav.parent.mkdir(parents=True)
+            nav.write_text("// fixture navigation source\n")
+            subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+            subprocess.run([
+                "git", "-C", str(repo), "-c", "commit.gpgsign=false",
+                "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "fixture inputs",
+            ], check=True)
+            fixture_ref = subprocess.run(
+                ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+                stdout=subprocess.PIPE, text=True,
+            ).stdout.strip()
+
+            patch_sequence = (
+                {"ref": fixture_ref, "path": "first.patch", "expected_sha256": builder.sha256(first_patch)},
+                {"ref": fixture_ref, "path": "second.patch", "expected_sha256": builder.sha256(second_patch)},
+            )
+            output = temp / "candidate"
+            args = type("Args", (), {
+                "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "output": output, "prepare_only": True, "managed": None, "csc": None,
+            })()
+
+            # A bad later hash is rejected before the builder creates its destination.
+            bad_sequence = (patch_sequence[0], dict(patch_sequence[1], expected_sha256="0" * 64))
+            bad_args = type("Args", (), {
+                "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "output": temp / "rejected", "prepare_only": True, "managed": None, "csc": None,
+            })()
+            with self.assertRaisesRegex(builder.BuildError, "SHA-256 mismatch"):
+                builder.build(bad_args, patch_sequence=bad_sequence,
+                              expected_zip_sha256=builder.sha256(archive))
+            self.assertFalse(bad_args.output.exists())
+
+            built = builder.build(args, patch_sequence=patch_sequence,
+                                  expected_zip_sha256=builder.sha256(archive))
+            self.assertEqual((built / "Source" / "Sequence.txt").read_text(), "stage two\n")
+            manifest = json.loads((built / "manifest.json").read_text())
+            self.assertEqual([item["path"] for item in manifest["patch_sequence"]],
+                             ["first.patch", "second.patch"])
+            self.assertEqual([item["index"] for item in manifest["patch_sequence"]], [1, 2])
+            self.assertEqual([item["sha256"] for item in manifest["patch_sequence"]],
+                             [builder.sha256(first_patch), builder.sha256(second_patch)])
+            self.assertEqual([item["expected_sha256"] for item in manifest["patch_sequence"]],
+                             [builder.sha256(first_patch), builder.sha256(second_patch)])
+            self.assertEqual([item["commit"] for item in manifest["patch_sequence"]],
+                             [fixture_ref, fixture_ref])
+            self.assertEqual(manifest["inputs"][builder.ZIP_PATH]["sha256"], builder.sha256(archive))
+            self.assertTrue((built / "provenance" / "first.patch").is_file())
+            self.assertTrue((built / "provenance" / "second.patch").is_file())
+            repo_status = subprocess.run(
+                ["git", "-C", str(repo), "status", "--porcelain"], check=True,
+                stdout=subprocess.PIPE, text=True,
+            ).stdout
+            self.assertEqual(repo_status, "")
 
 
 if __name__ == "__main__":

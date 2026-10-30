@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reconcile the published 0.3.0 package, campaign patch and nav sources safely.
+"""Reconcile the published 0.3.0 package, cumulative campaign patches and nav sources safely.
 
 This tool reads Git objects only. It never installs into KSP, reads/writes a
 game save outside the published ZIP, accesses server data, downloads inputs, or
@@ -21,10 +21,20 @@ import zipfile
 
 
 EXPECTED_ZIP_SHA256 = "0071eacf3a1b38a63c611fe2a65877ea2f62f6076b7e97d22e9cdf58b412cf40"
-EXPECTED_PATCH_SHA256 = "3d97e71e2aea4f1359ba5528bfd9ef2c0d9be08cfd74ac04d3c26f518b89711a"
 ZIP_PATH = "Hermes-Practice-v0.3.0.zip"
-PATCH_PATH = "Hermes-Campaign-v0.3.4-source.patch"
 NAV_ROOT = "Source/Navigation"
+PATCH_SEQUENCE = (
+    {
+        "ref": "4e86cc0",
+        "path": "Hermes-Campaign-v0.3.5-source.patch",
+        "expected_sha256": "280c77e0128b2201d875343047f8e4ccdff3e723640d9cf87af3bbc9d4d03851",
+    },
+    {
+        "ref": "591ca74",
+        "path": "Hermes-Epoch-Planner.patch",
+        "expected_sha256": "7fc77d8a78da8b81c7f48d35445a72e73ddd8e1eec89e72859869ab06b067ab4",
+    },
+)
 MAX_ENTRIES = 1000
 MAX_MEMBER_BYTES = 128 * 1024 * 1024
 MAX_TOTAL_BYTES = 512 * 1024 * 1024
@@ -163,17 +173,19 @@ def navigation_sources(repo, commit):
     return result
 
 
-def apply_patch_once(root, patch_bytes):
-    patch_file = root / ".integration-campaign.patch"
+def apply_patch_once(root, patch_bytes, patch_label, sequence_number):
+    patch_file = root / (".integration-patch-{}.patch".format(sequence_number))
     patch_file.write_bytes(patch_bytes)
     check = subprocess.run(["git", "apply", "--check", str(patch_file)], cwd=str(root),
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if check.returncode != 0:
-        raise BuildError("Campaign patch dry-run failed: {}".format(check.stderr.decode(errors="replace").strip()))
+        raise BuildError("Patch {} dry-run failed: {}".format(
+            patch_label, check.stderr.decode(errors="replace").strip()))
     apply = subprocess.run(["git", "apply", str(patch_file)], cwd=str(root),
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if apply.returncode != 0:
-        raise BuildError("Campaign patch apply failed: {}".format(apply.stderr.decode(errors="replace").strip()))
+        raise BuildError("Patch {} apply failed: {}".format(
+            patch_label, apply.stderr.decode(errors="replace").strip()))
     patch_file.unlink()
 
 
@@ -249,28 +261,75 @@ def ensure_new_destination(path, repo=None):
     return path
 
 
-def build(args):
+def collect_inputs(repo, upstream_ref, navigation_ref, patch_sequence=PATCH_SEQUENCE,
+                   expected_zip_sha256=EXPECTED_ZIP_SHA256):
+    """Read and verify every pinned input before creating an output directory."""
+    if not patch_sequence:
+        raise BuildError("Patch sequence must contain at least one patch")
+    upstream_commit = resolve_commit(repo, upstream_ref)
+    nav_commit = resolve_commit(repo, navigation_ref)
+    zip_bytes = git_blob(repo, upstream_commit, ZIP_PATH)
+    zip_hash = verify_sha256(zip_bytes, expected_zip_sha256, ZIP_PATH)
+
+    patches = []
+    provenance_names = set()
+    for index, spec in enumerate(patch_sequence, 1):
+        try:
+            ref = spec["ref"]
+            path = spec["path"]
+            expected = spec["expected_sha256"]
+        except (KeyError, TypeError) as exc:
+            raise BuildError("Invalid patch sequence entry {}: {}".format(index, exc))
+        artifact_name = PurePosixPath(path).name
+        if (not artifact_name or artifact_name in (".", "..") or
+                artifact_name in provenance_names or "\\" in path):
+            raise BuildError("Invalid or duplicate patch artifact path: {!r}".format(path))
+        provenance_names.add(artifact_name)
+        commit = resolve_commit(repo, ref)
+        patch_bytes = git_blob(repo, commit, path)
+        patch_hash = verify_sha256(patch_bytes, expected, path)
+        patches.append({
+            "index": index,
+            "ref": ref,
+            "commit": commit,
+            "path": path,
+            "artifact_name": artifact_name,
+            "sha256": patch_hash,
+            "expected_sha256": expected,
+            "bytes": patch_bytes,
+        })
+
+    nav_files = navigation_sources(repo, nav_commit)
+    return {
+        "upstream_commit": upstream_commit,
+        "zip_bytes": zip_bytes,
+        "zip_sha256": zip_hash,
+        "patches": patches,
+        "navigation_commit": nav_commit,
+        "navigation_files": nav_files,
+    }
+
+
+def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
     repo = Path(args.repo).resolve()
     if not repo.is_dir() or not (repo / ".git").exists():
         raise BuildError("--repo must be a Git checkout")
-    upstream_commit = resolve_commit(repo, args.upstream_ref)
-    nav_commit = resolve_commit(repo, args.navigation_ref)
-    zip_bytes = git_blob(repo, upstream_commit, ZIP_PATH)
-    patch_bytes = git_blob(repo, upstream_commit, PATCH_PATH)
-    zip_hash = verify_sha256(zip_bytes, EXPECTED_ZIP_SHA256, ZIP_PATH)
-    patch_hash = verify_sha256(patch_bytes, EXPECTED_PATCH_SHA256, PATCH_PATH)
-    nav_files = navigation_sources(repo, nav_commit)
+    inputs = collect_inputs(repo, args.upstream_ref, args.navigation_ref,
+                            PATCH_SEQUENCE if patch_sequence is None else patch_sequence,
+                            expected_zip_sha256)
 
     output = ensure_new_destination(args.output, repo)
     try:
-        # Preserve exact source inputs in the new output for reproducibility.
+        # Preserve every verified input before applying its patch.
         provenance = output / "provenance"
         provenance.mkdir()
-        (provenance / ZIP_PATH).write_bytes(zip_bytes)
-        (provenance / PATCH_PATH).write_bytes(patch_bytes)
-        count = safe_extract(zip_bytes, output)
-        apply_patch_once(output, patch_bytes)
-        overlay_navigation(output, nav_files)
+        (provenance / ZIP_PATH).write_bytes(inputs["zip_bytes"])
+        for patch in inputs["patches"]:
+            (provenance / patch["artifact_name"]).write_bytes(patch["bytes"])
+        count = safe_extract(inputs["zip_bytes"], output)
+        for patch in inputs["patches"]:
+            apply_patch_once(output, patch["bytes"], patch["path"], patch["index"])
+        overlay_navigation(output, inputs["navigation_files"])
         compiled = False
         compiler_inputs = None
         if not args.prepare_only:
@@ -283,15 +342,20 @@ def build(args):
             "tool": "megacrew-integration-builder",
             "builder_sha256": sha256(Path(__file__).read_bytes()),
             "upstream_ref": args.upstream_ref,
-            "upstream_commit": upstream_commit,
+            "upstream_commit": inputs["upstream_commit"],
             "navigation_ref": args.navigation_ref,
-            "navigation_commit": nav_commit,
+            "navigation_commit": inputs["navigation_commit"],
             "inputs": {
-                ZIP_PATH: {"sha256": zip_hash, "expected_sha256": EXPECTED_ZIP_SHA256},
-                PATCH_PATH: {"sha256": patch_hash, "expected_sha256": EXPECTED_PATCH_SHA256},
+                ZIP_PATH: {
+                    "sha256": inputs["zip_sha256"],
+                    "expected_sha256": expected_zip_sha256,
+                },
             },
+            "patch_sequence": [{key: patch[key] for key in
+                                ("index", "ref", "commit", "path", "sha256", "expected_sha256")}
+                               for patch in inputs["patches"]],
             "zip_member_count": count,
-            "navigation_files": {path: sha256(data) for path, data in sorted(nav_files.items())},
+            "navigation_files": {path: sha256(data) for path, data in sorted(inputs["navigation_files"].items())},
             "compiled": compiled,
             "compiler_language_version": "7.3" if compiled else None,
             "compiler_inputs": compiler_inputs,
@@ -308,8 +372,8 @@ def build(args):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", required=True, help="Git checkout to read (no writes)")
-    parser.add_argument("--upstream-ref", default="9574934", help="Pinned upstream artifact ref (default: 9574934)")
-    parser.add_argument("--navigation-ref", default="11f757e", help="Explicit navigation source ref")
+    parser.add_argument("--upstream-ref", default="f749068", help="Pinned upstream artifact ref (default: f749068)")
+    parser.add_argument("--navigation-ref", default="418229a", help="Explicit navigation source ref (default: 418229a)")
     parser.add_argument("--output", required=True, type=Path, help="New output directory; must not exist")
     parser.add_argument("--managed", type=Path, help="KSP Data/Managed directory")
     parser.add_argument("--csc", type=Path, help="Roslyn csc.dll")
