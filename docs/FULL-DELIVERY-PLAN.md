@@ -1,6 +1,6 @@
 # MegaCrew KSP campaign implementation and acceptance plan
 
-**Read-only planning baseline:** upstream `main` at `f76e437` and open Issues/PRs checked on 2026-10-30. This plan preserves the complete requested campaign. It is an execution order and evidence map, not a claim that the work is implemented or qualified.
+**Planning baseline:** cumulative core `f76e437`, newer upstream build-helper fix `3eddae5`, and open Issues/PRs checked on 2026-10-31. This plan preserves the complete requested campaign. It is an execution order and evidence map, not a claim that the work is implemented or qualified.
 
 
 **Current reconstruction:** pristine published 0.3.0 ZIP → cumulative 0.3.7
@@ -16,7 +16,7 @@ navigation comparison. Preserve the normal-play installation.
 
 - The repository README at this baseline still describes the published 0.3.0 package: single-player only, `MegaCrew*` time warp blocked, no offline simulation, no autonomous NPC maintenance, and no campaign-wide watch or LMP authority. It also marks generated-save load, complete practice, pantry persistence, cryosleep handover, IVA traversal and controls as needing further game verification.
 - The 0.3.1–0.3.7 campaign work is available as source-only patch artifacts and issue updates, not as a published replacement package. Integrate the latest cumulative patch against its documented 0.3.0 base in an isolated review tree; do not stack cumulative patches or overlay an old ZIP/DLL onto newer source. PRs #4–#8 remain drafts; their reports have candidate-level scope and do not establish release acceptance.
-- A user update in Issue #9 explicitly asked that KSP not be used until about 9 o'clock, noting that the Mac may lock. Respect that runtime restriction; do not start, automate, or perform KSP testing before the stated window has passed and the machine is available. Source/model work, document review, deterministic tests and build planning can continue. No runtime checks were performed for this plan.
+- A user update in Issue #9 explicitly asked that KSP not be used until about 9 o'clock, noting that the Mac may lock. The 31 October morning attempt occurred after 09:00 Sydney with an unlocked desktop. It reached the main menu but usable UI capture failed, so flight/cryo checks remain inconclusive. Future runtime work still requires an available desktop, isolated copy and matching inputs.
 - Preserve the user's original saves, the Luna server Universe, installed server configuration and backups. Use a separate clean KSP 1.12.5 build 03190 copy, disposable QA saves, pinned dependencies and backups for all runtime gates. Do not post credentials, private paths or raw unredacted logs.
 - Evidence must distinguish source inspection, model/unit tests, successful compilation, KSP main-menu startup, actual single-player flight behavior, save/reload/revert behavior, and two-client LMP observations. A lower tier never substitutes for a higher tier.
 
@@ -417,3 +417,34 @@ scene grants no mission achievement, physical repair or extra emergency.
 Verify the Build is a proposed ordinary handover of source/probe identities.
 Its test results remain blank until observed; it adds no campaign achievement,
 animated interaction or emergency.
+
+### Docking instruments and first morning runtime attempt
+
+- **#5 `2a2a91f`:** Operations now offers read-only own/target port selection,
+  separation, signed axial offset, lateral offset, opposing-face angle and
+  measured closing rate. Live identity/context and part checks prevent stale
+  selections; pause/warp invalidate readings. The feature never sets a stock
+  target or controls attitude, engines or docking. Full branch compilation and
+  all eight operations test suites pass, including the production controller
+  against recording KSP/Unity fakes. Actual stock-port axis/sign, UI and physical
+  docking acceptance remain open.
+- **#8 `a6de258`:** reproducible builder accepts the complete seven-file docking
+  group from an explicit operations ref, preserves old refs without the group,
+  and rejects partial groups before output creation. Twenty-two Python checks
+  pass. The exact 0.3.7 + nav294c667 + ops2a2a91f candidate compiles 38 sources;
+  all 15 model/boundary suite groups pass. Prior 35 source blobs are unchanged;
+  the intended rendezvous hook changes and two docking sources are added. This
+  candidate remains outside all game installs.
+- **Runtime evidence:** the separate fresh manual cryo profile retained the
+  earlier verified 36-source candidate and original provider, with no probe or
+  automation marker. KSP reached MAINMENU at 10:21 local on 31 October. Computer
+  control returned only an icon-sized capture and no usable game interface.
+  The process was closed and logs/provenance retained. No flight, refusal,
+  freeze, thaw or gameplay pass was observed. The separate automated patched
+  profile is prepared and unlaunched; manual refusal remains first.
+
+Compare the Port Readings is a proposed ordinary instrument cross-check. It
+asks the crew to read port labels and sample time aloud before comparing the
+figures. It adds no docking clearance, completed task, animated interaction or
+campaign emergency. Live validation is the next priority once UI observation
+is restored; LMP authority and synchronization remain later gates.
