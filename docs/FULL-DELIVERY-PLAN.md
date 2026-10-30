@@ -264,3 +264,32 @@ Morning order remains: review and build the current combined source artifact;
 use only disposable install/save copies; first establish full loaded cradle
 state and stock-versus-detached prediction evidence. Then qualify UI/input and
 actual flight behavior. Source tests do not advance those runtime gates.
+
+
+### Onboard rendezvous instrumentation checkpoint
+
+PR #5 `c08d4f6` adds an Operations rendezvous tab with internal same-body vessel
+selection, including labelled unloaded orbit snapshots. Both orbits are sampled
+at the same UT. Readouts include separation, signed closing speed, relative
+speed and a bounded constant-relative-velocity minimum over the 60 seconds
+after the observation. Boundary labels distinguish the start from the horizon.
+Coincident positions have no defined radial/closing direction. The instrument
+does not set the stock target or command controls, nodes, engines or warp.
+
+The source clears stale observations on vessel/body/save/target changes, packing,
+pause/warp, invalid time and clock regression. It shows observation time and age.
+A pure C# model suite passes approach/recession, crossing, stationary/coincident,
+horizon, invalid-input and overflow cases; resource-model and six preflight tests
+also pass. Branch and latest campaign/operations/navigation integration builds
+compile. These checks establish source compatibility only. Runtime comparison
+with stock target instruments, loaded/unloaded behavior, reverts, UI interaction
+and input-lock cleanup remain open in docs/ONBOARD-RENDEZVOUS.md on #5.
+
+The branch retains an older expanded base; integrate only the addon sources with
+the latest cumulative campaign patch and rebuild into a disposable output.
+Pre-existing DLLs/ZIPs do not contain this new feature. No game was launched or
+installed package changed during this pass.
+
+PR #5 `62ec16c` adds Compare the Epoch, a proposed routine crew briefing about
+reading identity, timestamp and projection horizon together. It awards no
+rendezvous, docking success or new emergency.
