@@ -22,5 +22,17 @@
     "version": "2.3",
     "url": "https://github.com/ihsoft/EasyVesselSwitch/releases/download/2.3/EasyVesselSwitch_v2.3.zip",
     "sha256": "420576178a60c8259f4d147cb3de2e483a0800fdcc2e663e9b5a3583d7bb9ed4"
+  },
+  {
+    "name": "EVE Redux",
+    "version": "1.11.7.2",
+    "url": "https://github.com/LGhassen/EnvironmentalVisualEnhancements/releases/download/1.11.7.2/Environmental_Visual_Enhancements_Redux-1.11.7.2.zip",
+    "sha256": "fe1ad45337f65976ae27001d629408b653ee75f7a88274a1621f6cedc3506ecc"
+  },
+  {
+    "name": "BoulderCo stock-planet clouds",
+    "version": "1.2.2.1",
+    "url": "https://github.com/WazWaz/EnvironmentalVisualEnhancements/releases/download/EVE-1.2.2-1/EnvironmentalVisualEnhancements-Configs-1.2.2.1.zip",
+    "sha256": "d4cb6f9ec08abae876e2ca8eba7b6159213ebd6fe612c138ed5b5e91325cfd84"
   }
 ]
