@@ -67,3 +67,17 @@ is perpendicular to prograde and is not generally the direct radial vector in
 an eccentric orbit. The inputs must share a right-handed inertial frame; KSP's
 Orbit coordinate conversions and `ManeuverNode.GetBurnVector` still require
 runtime verification before this can safely write nodes.
+
+## Burn-approval guard
+
+`BurnApprovals` is a pure workflow guard for a future trusted identity adapter.
+It requires the assigned Hamish and Basil roles to resolve to distinct authenticated
+principals, enforces the request's round-trip delay and expiry, clears approvals
+when a plan is revised or connection is lost, and checks the live plan fingerprint
+again at readiness. The adapter must supply a canonical fingerprint covering the
+vessel, node, burn time, vector and target, and must bind role to authenticated
+session identity. Calling code must not use a KSP crew name as proof of a human
+identity. This class does not authenticate, communicate, persist, create nodes or
+execute a burn. It is not connected to the shift system or multiplayer yet.
+Single-player rehearsal requires a separately identified rehearsal path and must
+never be presented as two authenticated people.
