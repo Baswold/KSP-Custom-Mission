@@ -133,3 +133,33 @@ window against the watch and both reviewers' awake/fit windows. It never shifts
 UT or pauses a watch. Half-open windows permit an operation to end exactly at the
 watch boundary but reject any positive extension beyond it. These are pure
 models: no shift, daily routine, coast or flight-control adapter is connected yet.
+
+
+## Isolated candidate builds
+
+`tools/build.py` accepts `--output /tmp/megacrew-candidate/MegaCrew.dll` alongside
+the existing `--managed` and `--csc` arguments. This compiles the branch without
+replacing its generated GameData DLL. A successful build does not install the
+plugin or establish in-game behavior. Keep this branch's older expanded base
+separate from the current campaign package; source compatibility with the latest
+cumulative campaign patch is checked in a disposable integration tree.
+
+Approval requests now reject a communication round trip that reaches or passes
+ignition. The reply must also arrive before the half-open expiry boundary. This
+prevents a request from waiting on a response that could never be accepted; it
+does not supply a real communication link or establish two human identities.
+
+
+## Read-only onboard panel
+
+The standalone navigation addon exposes the preview through a stock toolbar
+button and an IVA-accessible overlay. It accepts target Pe in kilometres and a
+lead time, shows current orbit plus detached predicted result, and invalidates
+results when inputs, physical orbit, vessel/patch or validity window change.
+It does not connect the approval helper to flight controls.
+
+See [the candidate validation checklist](NAVIGATION-PREVIEW-VALIDATION.md) for
+controls, scope and pending in-game checks. The panel has compiled against KSP
+assemblies, including in a disposable 0.3.4 campaign source integration. Toolbar
+visibility in IVA, text/mouse input isolation, stable previews and lock cleanup
+remain runtime acceptance gates.

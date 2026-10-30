@@ -54,3 +54,21 @@ measurements at the next handover.
 This coda uses existing KSP readouts and a player-written log. Automatic
 post-burn verification, persistent shared logs and animated handoffs remain
 implementation work; the dialogue alone never establishes success.
+
+
+**Routine planning beat: A second view of the orbit**
+
+During the command watch, Hamish asks to compare a lower-periapsis proposal
+without leaving the cabin. Basil reads the current vessel and body first, then
+the target, proposed burn time, retrograde delta-v and predicted periapsis.
+
+“That is where the calculation puts us,” Hamish says.
+
+“If we do that burn, from this orbit,” Basil replies. “A preview is a question
+we can check. It is not a maneuver we have performed.”
+
+They keep the plan uncommitted while checking the watch window. If the orbit
+changes or the preview expires, they refresh it and review the new values. This
+beat is routine planning; the panel remains a build-tested candidate awaiting
+in-game qualification. It assumes no new sensors, animated crew, authenticated
+approvals or successful burn. Any outcome must use actual KSP observations.

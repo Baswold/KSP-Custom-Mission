@@ -76,6 +76,20 @@ class MissionControlMathTests
         approvals.Connection(false);approvals.Connection(true);Yes(!approvals.Approve("b","Basil","req2",2,"plan-B",106));
         try { approvals.Request("req2",107,1,30); throw new Exception("reused request accepted"); } catch(InvalidOperationException) {}
         try { approvals.Request("req3",107,0,30); throw new Exception("delay floor bypassed"); } catch(ArgumentException) {}
+        var windowGate=new BurnApprovals((id,role)=>(id=="h"&&role=="Hamish")||(id=="b"&&role=="Basil"),0);
+        windowGate.Connection(true);windowGate.Revise("window-plan",120);
+        try { windowGate.Request("ends-at-burn",100,20,30); throw new Exception("round trip ending exactly at burn accepted"); } catch(ArgumentException) {}
+        try { windowGate.Request("past-burn",100,20.001,30); throw new Exception("round trip ending after burn accepted"); } catch(ArgumentException) {}
+        try { windowGate.Request("expires-at-ready",100,5,5); throw new Exception("round trip ending exactly at expiry accepted"); } catch(ArgumentException) {}
+        windowGate.Request("finishes-before-burn",100,19.999,30);
+        Yes(windowGate.Approve("h","Hamish","finishes-before-burn",1,"window-plan",119.999));
+        Yes(!windowGate.Ready("window-plan",120));
+        var overflowGate=new BurnApprovals((id,role)=>true,0);
+        overflowGate.Connection(true);overflowGate.Revise("overflow-plan",double.MaxValue);
+        try { overflowGate.Request("overflowed-round-trip",double.MaxValue/2,double.MaxValue/2,double.MaxValue/2); throw new Exception("overflowed approval window accepted"); } catch(ArgumentException) {}
+        try { windowGate.Request("negative-ut",-1,0,1); throw new Exception("negative request UT accepted"); } catch(ArgumentException) {}
+        Yes(!windowGate.Approve("h","Hamish","finishes-before-burn",1,"window-plan",-1));
+        Yes(!windowGate.Ready("window-plan",-1));
         // Exercise boundary gates with a fully approved request, not a previously invalidated one.
         var gate=new BurnApprovals((id,role)=>(id=="h"&&role=="Hamish")||(id=="b"&&role=="Basil"),2);
         gate.Connection(true);gate.Revise("exact",200);gate.Request("window",100,2,10);
