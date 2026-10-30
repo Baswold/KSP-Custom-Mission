@@ -137,16 +137,20 @@ diff --git a/tools/inspect_cryo_qa.py b/tools/inspect_cryo_qa.py
 new file mode 100644
 --- /dev/null
 +++ b/tools/inspect_cryo_qa.py
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,59 @@
 +"""Read-only procedural evidence check. Never certifies flight or enables warp."""
 +import argparse,json,math,pathlib
 +SCOPE='MEGACREW_DISPOSABLE_CRYO_QA_V1'
 +HASHES={'original':'ed956b9ec2cc5f414586a52a9086423e4c9125fa72097bce2721ea41eb075bc9','patched':'d2c1ab678a0891246dc7b16e66e180ced7e8ad55db8bb9971cc742224dfee45a'}
 +def parse(text):
 + lines=[x.strip() for x in text.splitlines() if x.strip()]
-+ if len(lines)<3 or lines[:2]!=['HERMES_CRYO_QA','{'] or lines[-1]!='}':raise ValueError('Invalid report structure')
++ if not lines:raise ValueError('Empty report')
++ if lines[0]=='HERMES_CRYO_QA':
++  if len(lines)<3 or lines[1]!='{' or lines[-1]!='}':raise ValueError('Invalid report structure')
++  lines=lines[2:-1]
++ if any(x in ['{','}'] for x in lines):raise ValueError('Unexpected nested report')
 + result={}
-+ for line in lines[2:-1]:
++ for line in lines:
 +  if '=' not in line:raise ValueError('Invalid report field')
 +  key,value=map(str.strip,line.split('=',1))
 +  if not key or key in result:raise ValueError('Duplicate or empty report key')
@@ -197,7 +201,7 @@ diff --git a/tests/test_cryo_qa_report.py b/tests/test_cryo_qa_report.py
 new file mode 100644
 --- /dev/null
 +++ b/tests/test_cryo_qa_report.py
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,30 @@
 +import importlib.util,pathlib,tempfile,unittest
 +ROOT=pathlib.Path(__file__).resolve().parents[1]
 +spec=importlib.util.spec_from_file_location('cryo_report',ROOT/'tools/inspect_cryo_qa.py');report=importlib.util.module_from_spec(spec);spec.loader.exec_module(report)
@@ -207,7 +211,7 @@ new file mode 100644
 +  (root/'HermesCryoQA.scope').write_text(report.SCOPE);(root/'HermesCryoQA.variant').write_text('patched');(root/'HermesCryoQA.done').touch()
 +  return dict(schema='1',stage='procedure_finished',run_state='completed',probe_completed='True',flight_qualification='False',variant='patched',provider_sha256=report.HASHES['patched'],actual_frozen_before_unload='True',actual_frozen_after_unload='True',frozen_after_reload='True',actual_thaw_complete='True',initial_parts='17',initial_awake_crew='4',awake_after_reload='3',final_awake_crew='4',unloaded_before_ec='1000',unloaded_after_ec='990',unloaded_elapsed_ut='45',pod_accounted_seconds='45',pod_expected_ec='10',observed_ec_delta='-10')
 + def write(self,root,data):
-+  (root/'HermesCryoQA-result.cfg').write_text('HERMES_CRYO_QA\n{\n'+''.join(' '+k+' = '+v+'\n' for k,v in data.items())+'}\n')
++  (root/'HermesCryoQA-result.cfg').write_text(''.join(k+' = '+v+'\n' for k,v in data.items()))
 + def test_absent_report_is_incomplete(self):
 +  with tempfile.TemporaryDirectory() as d:
 +   root=pathlib.Path(d)/'KSP-Hermes-QA';root.mkdir();self.fixture(root);self.assertEqual(report.inspect(root)['status'],'incomplete')
@@ -222,13 +226,16 @@ new file mode 100644
 + def test_failure_and_stale_markers_are_not_success(self):
 +  with tempfile.TemporaryDirectory() as d:
 +   root=pathlib.Path(d)/'KSP-Hermes-QA';root.mkdir();data=self.fixture(root);data['failure']='Freeze timeout';self.write(root,data);self.assertEqual(report.inspect(root)['status'],'failed');del data['failure'];self.write(root,data);(root/'HermesCryoQA.running').touch();self.assertEqual(report.inspect(root)['status'],'invalid')
++ def test_saved_bare_and_explicit_wrapper_forms_match(self):
++  bare="schema = 1\nprobe_completed = False\n"
++  self.assertEqual(report.parse(bare),report.parse("HERMES_CRYO_QA\n{\n"+bare+"}\n"))
 + def test_duplicate_keys_rejected(self):
 +  with self.assertRaises(ValueError):report.parse('HERMES_CRYO_QA\n{\nprobe_completed = False\nprobe_completed = True\n}\n')
 +if __name__=='__main__':unittest.main()
 diff --git a/docs/CRYO-QA.md b/docs/CRYO-QA.md
 --- a/docs/CRYO-QA.md
 +++ b/docs/CRYO-QA.md
-@@ -42,3 +42,27 @@
+@@ -42,3 +42,31 @@
  BackgroundResources and MegaCrew APIs; preparation/guard tests pass. The marked
  QA copy and patched provider are prepared. Launch was blocked by the locked Mac;
  no runtime report exists yet. Play-copy provider and original saves are unchanged.
@@ -254,5 +261,9 @@ diff --git a/docs/CRYO-QA.md b/docs/CRYO-QA.md
 +battery deltas. It does not substitute for review of raw measurements/logs or
 +validate high-rate/thermal/failure-policy behavior. Its unit-test complete
 +fixtures are synthetic and are not live gameplay evidence. Current host output
-+is incomplete: no runtime report exists. The 19 Python checks and updated probe
++is incomplete: no runtime report exists. The 20 Python checks and updated probe
 +compile pass; no live run is claimed.
++
++The report reader accepts the bare top-level values emitted by ConfigNode.Save
++(as confirmed in an existing host-generated mission CFG), and an explicit
++HERMES_CRYO_QA wrapper. Both forms share duplicate/nesting checks.
