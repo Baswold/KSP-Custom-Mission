@@ -140,3 +140,11 @@ result. The next isolated probe loads the existing practice orbit first, then
 creates the test cradle at a separate 300-km Kerbin orbit through KSP's
 `Game.AddVessel`; the original practice vessel remains in the disposable copy.
 This alternative is awaiting runtime results.
+
+The second orbital attempt loaded the practice station, spawned the test cradle
+in a separate orbit and requested a switch. KSP saved only the disposable QA game,
+then emitted part-initialization errors and had no active vessel. The cause is
+unresolved; the generated craft is not flight-qualified. A third one-shot probe
+copies that generated QA save into a new `MegaCrew Finch Resume QA` directory
+and attempts a clean reload of vessel index 1. This tests reload mechanics only;
+it does not modify any earlier fixture or user save.
