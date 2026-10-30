@@ -23,6 +23,7 @@ class MissionControlMathTests
         Near(MissionControlMath.RoundTripSeconds(0,299792458),1,1e-12);
         Reject(()=>MissionControlMath.RoundTripSeconds(-1,1));
         Reject(()=>MissionControlMath.RoundTripSeconds(double.NaN,1));
+        Yes(!double.IsInfinity(MissionControlMath.RoundTripSeconds(double.MaxValue,double.MaxValue)));
         const double mu=3.5316e12, body=600000, r=750000, altitude=30000;
         double delta=MissionControlMath.CircularApoapsisBurn(mu,body,r,altitude);
         Yes(delta<0);
@@ -35,6 +36,7 @@ class MissionControlMathTests
         Reject(()=>MissionControlMath.CircularApoapsisBurn(mu,body,r,-1));
         Reject(()=>MissionControlMath.CircularApoapsisBurn(0,body,r,0));
         Reject(()=>MissionControlMath.CircularApoapsisBurn(mu,body,double.PositiveInfinity,0));
+        Reject(()=>MissionControlMath.CircularApoapsisBurn(mu,body,r,double.MaxValue));
         // Quarter-circle Kepler arc: analytic endpoints and velocities.
         double radius=700000, n=Math.Sqrt(mu/(radius*radius*radius)), vc=Math.Sqrt(mu/radius);
         var sol=Lambert.SolveShortWay(new Vector3d(radius,0,0),new Vector3d(0,radius,0),Math.PI/(2*n),mu);

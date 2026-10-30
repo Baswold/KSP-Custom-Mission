@@ -10,7 +10,9 @@ namespace MegaCrew.Navigation
         {
             if (!Finite(outboundMetres) || !Finite(inboundMetres) || outboundMetres < 0 || inboundMetres < 0)
                 throw new ArgumentOutOfRangeException("Distances must be finite and nonnegative");
-            return (outboundMetres + inboundMetres) / LightSpeedMetresPerSecond;
+            double seconds = outboundMetres / LightSpeedMetresPerSecond + inboundMetres / LightSpeedMetresPerSecond;
+            if (!Finite(seconds)) throw new ArgumentOutOfRangeException("Path delay overflow");
+            return seconds;
         }
         static bool Finite(double v) { return !double.IsNaN(v) && !double.IsInfinity(v); }
         /// <summary>
@@ -24,6 +26,7 @@ namespace MegaCrew.Navigation
                 mu <= 0 || bodyRadius <= 0 || orbitRadius <= bodyRadius || targetAltitude < 0)
                 throw new ArgumentOutOfRangeException("Invalid orbit or body");
             double rp = bodyRadius + targetAltitude;
+            if (!Finite(rp)) throw new ArgumentOutOfRangeException("Target radius overflow");
             if (rp >= orbitRadius) throw new ArgumentOutOfRangeException("Target must be below the current orbit");
             double current = Math.Sqrt(mu / orbitRadius);
             double transfer = Math.Sqrt(mu * (2 / orbitRadius - 2 / (orbitRadius + rp)));
