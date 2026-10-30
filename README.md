@@ -106,3 +106,11 @@ Tests: `python3 -m unittest discover -s tests -v` runs Basil’s six setup check
 ## Next phase: Luna and authored stories
 
 After the single-player systems, landers and maintenance mission pass testing, integrate Luna with authoritative shared state, then add authored cooperative stories. See [the ordered roadmap](docs/ROADMAP.md). These are future targets; the current package remains single-player with no time warp.
+
+## Onboard operations development candidate
+
+The source checkout also includes [pilot, science, supplies, cryo checks and an
+operations journal](docs/ONBOARD-OPERATIONS.md). Use **Ctrl+Alt+O** or OPERATIONS;
+engineering uses **Ctrl+Alt+E**. The combined build incorporates upstream 0.3.0
+crew needs/interior sources. Compilation and model tests pass; flight checks are
+pending. Published release ZIPs do not yet contain these candidate addons.

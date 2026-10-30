@@ -46,7 +46,7 @@ namespace MegaCrew
             if (!visible) return;
             window.x = Mathf.Clamp(window.x, 0, Math.Max(0, Screen.width - window.width));
             window.y = Mathf.Clamp(window.y, 0, Math.Max(0, Screen.height - 100));
-            window = GUILayout.Window(719305, window, Draw, "ONBOARD ENGINEERING", GUILayout.Width(560));
+            window = GUILayout.Window(719315, window, Draw, "ONBOARD ENGINEERING", GUILayout.Width(560));
             var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
             if (window.Contains(mouse)) InputLockManager.SetControlLock(ControlTypes.ALL_SHIP_CONTROLS, LockName);
             else InputLockManager.RemoveControlLock(LockName);
