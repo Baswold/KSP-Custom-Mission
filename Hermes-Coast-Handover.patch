@@ -1,0 +1,80 @@
+--- a/Source/CampaignCoast.cs
++++ b/Source/CampaignCoast.cs
+@@ -6,7 +6,7 @@
+     public struct CoastObservation
+     {
+         public double EpochUT, CurrentUT, ObservedUT, NextStopUT, ResourcesVerifiedThroughUT;
+-        public bool CampaignVessel, HumanPairAwake, HumanPairFrozen, ReliefPairAwake;
++        public bool CampaignVessel, HumanPairAwake, HumanPairFrozen, ReliefPairAwake, ReliefPairFrozen;
+         public bool CryoStateVerified, BackgroundAccountingVerified, HaltRequested;
+     }
+     public struct CoastDecision
+@@ -30,8 +30,10 @@
+             if(watch==6)return Hold(now,"Campaign complete");
+             if(!s.CryoStateVerified||!s.BackgroundAccountingVerified)return Hold(now,"Cryo/resource accounting unverified");
+             bool human=CampaignTiming.HumanWatch(watch);
+-            if(human&&(!s.HumanPairAwake||s.HumanPairFrozen))return Hold(now,"Human watch requires both human crew awake");
+-            if(!human&&(!s.HumanPairFrozen||s.HumanPairAwake||!s.ReliefPairAwake))return Hold(now,"NPC watch requires frozen human crew and awake relief crew");
++            // Pair flags require verified cryopod state for both members. Both
++            // pairs must be observed: unknown/mixed/transition states grant no coast.
++            if(human&&(!s.HumanPairAwake||s.HumanPairFrozen||!s.ReliefPairFrozen||s.ReliefPairAwake))return Hold(now,"Human watch requires awake human crew and frozen relief crew");
++            if(!human&&(!s.HumanPairFrozen||s.HumanPairAwake||!s.ReliefPairAwake||s.ReliefPairFrozen))return Hold(now,"NPC watch requires frozen human crew and awake relief crew");
+             // NextStopUT includes alignment, work, handover, and operational limits,
+             // not merely ignition. Unknown next event refuses accelerated coast.
+             if(!CampaignTiming.Finite(s.NextStopUT)||s.NextStopUT<=now)return Hold(now,"Next operational stop missing or due");
+--- a/tests/CampaignTimingTests.cs
++++ b/tests/CampaignTimingTests.cs
+@@ -42,19 +42,35 @@
+         Equal(battery,CryoPowerModel.StoredAfter(1000,2000,1,0.5,60));
+         Reject(()=>CryoPowerModel.PodLoad(10,-1));Reject(()=>CryoPowerModel.StoredAfter(201,200,1,0,1));Reject(()=>CryoPowerModel.TimeToReserve(double.NaN,0,1,0));
+         Console.WriteLine("PASS: cryopod EC/min conversion, reserve horizon, depletion/recharge bounds and finite-input rejection. Forecast only; does not certify generation or authorize warp.");
+-        var state=new CoastObservation {EpochUT=epoch,CurrentUT=epoch,ObservedUT=epoch,NextStopUT=epoch+w+100,ResourcesVerifiedThroughUT=epoch+w,CampaignVessel=true,HumanPairAwake=true,CryoStateVerified=true,BackgroundAccountingVerified=true};
++        var state=new CoastObservation {EpochUT=epoch,CurrentUT=epoch,ObservedUT=epoch,NextStopUT=epoch+w+100,ResourcesVerifiedThroughUT=epoch+w,CampaignVessel=true,HumanPairAwake=true,ReliefPairFrozen=true,CryoStateVerified=true,BackgroundAccountingVerified=true};
+         var coast=CampaignCoast.Decide(state);Yes(coast.CanAccelerate);Equal(coast.TargetRate,540);Equal(coast.StopUT,epoch+w);
+         state.ObservedUT--;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.ObservedUT=state.CurrentUT;
+         state.ResourcesVerifiedThroughUT--;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.ResourcesVerifiedThroughUT=epoch+2*w;
+         state.BackgroundAccountingVerified=false;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.BackgroundAccountingVerified=true;
+         state.CurrentUT=state.ObservedUT=epoch+w;state.NextStopUT=epoch+2*w;
+         Yes(!CampaignCoast.Decide(state).CanAccelerate);state.HumanPairAwake=false;state.HumanPairFrozen=true;
+-        Yes(!CampaignCoast.Decide(state).CanAccelerate);state.ReliefPairAwake=true;
++        Yes(!CampaignCoast.Decide(state).CanAccelerate);state.ReliefPairAwake=true;state.ReliefPairFrozen=false;
+         Equal(CampaignCoast.Decide(state).TargetRate,172800);
+         state.NextStopUT=state.CurrentUT;Yes(!CampaignCoast.Decide(state).CanAccelerate);
+         state.NextStopUT=epoch+2*w;state.HaltRequested=true;Yes(!CampaignCoast.Decide(state).CanAccelerate);state.HaltRequested=false;
+         state.CurrentUT=state.ObservedUT=epoch+CampaignTiming.MissionSeconds;Yes(!CampaignCoast.Decide(state).CanAccelerate);
+         state.CurrentUT=double.NaN;Yes(!CampaignCoast.Decide(state).CanAccelerate);
++        // All pair flags at every watch: only the exact completed handover
++        // may grant a candidate rate. Contradictory and unobserved pairs refuse.
++        for(int watch=0;watch<6;watch++)for(int flags=0;flags<16;flags++)
++        {
++            var handover=new CoastObservation {
++                EpochUT=epoch,CurrentUT=epoch+watch*w,ObservedUT=epoch+watch*w,
++                NextStopUT=epoch+(watch+1)*w,ResourcesVerifiedThroughUT=epoch+(watch+1)*w,
++                CampaignVessel=true,CryoStateVerified=true,BackgroundAccountingVerified=true,
++                HumanPairAwake=(flags&1)!=0,HumanPairFrozen=(flags&2)!=0,
++                ReliefPairAwake=(flags&4)!=0,ReliefPairFrozen=(flags&8)!=0
++            };
++            bool expected=flags==(CampaignTiming.HumanWatch(watch)?9:6);
++            Yes(CampaignCoast.Decide(handover).CanAccelerate==expected);
++            handover.CryoStateVerified=false;Yes(!CampaignCoast.Decide(handover).CanAccelerate);
++        }
++        Console.WriteLine("PASS: 96 handover flag/watch combinations and refusal when cryo verification is missing; pure decision only.");
+         Console.WriteLine("PASS: coast preconditions, fresh observations, resource horizon, awake/frozen watch handovers, stop boundaries and fail-closed invalid state.");
+         Console.WriteLine("PASS: campaign rates, six watch boundaries, completion, full burn windows, non-paused UT, added burn time and invalid inputs.");
+     }
+--- a/docs/CAMPAIGN-SHIFTS.md
++++ b/docs/CAMPAIGN-SHIFTS.md
+@@ -64,7 +64,12 @@
+ 
+ `Source/CampaignCoast.cs` is a pure fail-closed gate. It requires observations
+ sampled at the current UT, the campaign vessel, verified cryo and background
+-accounting, and the appropriate awake/frozen pair. It caps the next stop at the
++accounting, and both completed pair states: human awake/relief frozen on human
++watches, human frozen/relief awake on NPC watches. Pair flags represent BOTH
++members, not one; a mixed, unknown or transferring pair must not be marked ready.
++Contradictory awake-and-frozen flags refuse coast. This preserves handover time
++at 1x instead of accelerating while four crew are awake or transition is incomplete.
++It caps the next stop at the
+ watch boundary and requires a verified resource horizon through that stop.
+ Unknown/due next stops, incomplete handovers, stale samples and completion return
+ 1x. A future adapter must include alignment, maintenance and handover stops,
