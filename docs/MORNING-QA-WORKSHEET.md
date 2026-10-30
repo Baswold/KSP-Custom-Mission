@@ -91,3 +91,27 @@ operations ref `2a2a91f` are excluded from this stable cryo candidate; they need
 a separately identified candidate and stock-port runtime checks after the
 earlier gates. No personal save, normal-play installation or server data was
 modified.
+
+### Follow-up: capture restored, save-dialog input still inconclusive
+
+A fresh disposable clone with a unique macOS app identifier produced the same
+icon-sized capture, so identity alone did not resolve it. Selecting the
+observed **KSP** item in the native **Window** menu (`makeKeyAndOrderFront`)
+restored the real game window and screenshot capture. `getApp`, AX Raise and
+window zoom had not accomplished that. Always obtain fresh menu indices before
+selecting the window. KSP's F1 key also produced a valid game image in its own
+Screenshots folder; this helped distinguish game rendering from window capture.
+
+Native mouse input moved the pointer but did not activate tested game buttons.
+Source-confirmed keyboard navigation (Up/Down then Return on the highlighted
+item) successfully opened Start Game, Resume Saved and the sole disposable QA
+save selector. The save dialog did not reach an observable Load activation;
+do not claim that a highlighted row was a loaded flight. No flight, manual
+refusal, freeze or thaw was observed. The process was closed using Cmd+Q and
+the pristine save remained SHA-256
+`6fd1a826062dafcdf02fa485c89ca818819ea5352bcfc5eca5f1bfde2c1bb4b9`.
+
+The scope of the unresolved limitation is now game-button/save-dialog input,
+not absent rendering. Preserve this evidence and retain the manual-first gate.
+The animation catalog tooling on PR #5 `76497fe` has not been staged or run;
+its compile and recording-boundary tests are separate evidence.
