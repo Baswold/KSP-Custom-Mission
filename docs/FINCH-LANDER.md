@@ -196,3 +196,21 @@ Nine structural/setup tests pass and the probe compiles. This addresses a
 concrete serialization defect, but the corrected order has not been tested in
 KSP; earlier loader/mass measurements in Finch-Design.json describe the prior
 candidate. Nighttime runtime restrictions remain respected.
+
+
+### Read-only saved-vessel audit
+
+`python3 tools/validate_vessel_snapshots.py /path/to/persistent.sfs --vessel "Finch Orbit QA"`
+checks direct serialized VESSEL/PART snapshots without writing to the save. It
+checks numeric unique IDs, root and parent bounds, parent-first order, connected
+parent graphs, stack/surface attachment targets and known symmetry index fields.
+It accepts the root's -1 parent sentinel. This is a narrow structural diagnostic;
+it does not validate docking modules, flight behavior or every ConfigNode field.
+
+The earlier saved 35-part fixture reports exactly one error: cabin index 18
+references parent index 21 before that parent appears. Its attachment and surface
+links are valid; an earlier audit suggesting missing surface links was incorrect.
+The reordered generator is still awaiting runtime qualification. Eleven portable
+validator tests include the old forward-parent shape and a reordered passing
+shape, malformed inputs and ID/index failures. No personal save or server data
+is included in those tests.
