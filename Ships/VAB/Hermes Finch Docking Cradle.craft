@@ -2732,7 +2732,7 @@ PART
 }
 PART
 {
-	part = mk2LanderCabin_v2_970000000
+	part = mk2LanderCabin.v2_970000000
 	partName = Part
 	persistentId = 970001000
 	attPos = 0,0,0
@@ -2750,13 +2750,13 @@ PART
 	link = Rockomax8BW_970000001
 	attN = bottom,Rockomax8BW_970000001_0|0|0
 	attN = top,dockingPort2_970000003_0|0|0
-	link = RCSBlock_v2_970000005
+	link = RCSBlock.v2_970000005
 	link = solarPanels5_970000006
-	link = RCSBlock_v2_970000008
+	link = RCSBlock.v2_970000008
 	link = solarPanels5_970000009
-	link = RCSBlock_v2_970000011
+	link = RCSBlock.v2_970000011
 	link = solarPanels5_970000012
-	link = RCSBlock_v2_970000014
+	link = RCSBlock.v2_970000014
 	link = solarPanels5_970000015
 	link = batteryBankMini_970000016
 	pos = 3.2176954,17.2,0
@@ -2798,9 +2798,9 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 0
-	attN = top,mk2LanderCabin_v2_970000000_0|0|0
-	link = liquidEngine3_v2_970000002
-	attN = bottom,liquidEngine3_v2_970000002_0|0|0
+	attN = top,mk2LanderCabin.v2_970000000_0|0|0
+	link = liquidEngine3.v2_970000002
+	attN = bottom,liquidEngine3.v2_970000002_0|0|0
 	link = landingLeg1-2_970000004
 	link = landingLeg1-2_970000007
 	link = landingLeg1-2_970000010
@@ -2824,7 +2824,7 @@ PART
 }
 PART
 {
-	part = liquidEngine3_v2_970000002
+	part = liquidEngine3.v2_970000002
 	partName = Part
 	persistentId = 970001002
 	attPos = 0,0,0
@@ -2862,12 +2862,12 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 0
-	attN = bottom,mk2LanderCabin_v2_970000000_0|0|0
+	attN = bottom,mk2LanderCabin.v2_970000000_0|0|0
 	pos = 2.4657664,17.2,0
 	attPos0 = 2.4657664,17.2,0
 	rot = 0,0,0.707106781,0.707106781
 	attRot0 = 0,0,0.707106781,0.707106781
-	link = mk2LanderCabin_v2_970000000
+	link = mk2LanderCabin.v2_970000000
 	attN = top,dockingPort2_979000000_0|0|0
 }
 PART
@@ -2895,7 +2895,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000005
+	part = RCSBlock.v2_970000005
 	partName = Part
 	persistentId = 970001005
 	attPos = 0,0,0
@@ -2910,7 +2910,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 3.1176954,17.2,1.25
 	attPos0 = 3.1176954,17.2,1.25
 	rot = 0,0,0.707106781,0.707106781
@@ -2933,7 +2933,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 2.8676954,17.2,1.27
 	attPos0 = 2.8676954,17.2,1.27
 	rot = 0,0,0.707106781,0.707106781
@@ -2964,7 +2964,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000008
+	part = RCSBlock.v2_970000008
 	partName = Part
 	persistentId = 970001008
 	attPos = 0,0,0
@@ -2979,7 +2979,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 3.1176954,18.45,7.65404249e-17
 	attPos0 = 3.1176954,18.45,7.65404249e-17
 	rot = -0.5,0.5,0.5,0.5
@@ -3002,7 +3002,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 2.8676954,18.47,7.77650717e-17
 	attPos0 = 2.8676954,18.47,7.77650717e-17
 	rot = -0.5,0.5,0.5,0.5
@@ -3033,7 +3033,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000011
+	part = RCSBlock.v2_970000011
 	partName = Part
 	persistentId = 970001011
 	attPos = 0,0,0
@@ -3048,7 +3048,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 3.1176954,17.2,-1.25
 	attPos0 = 3.1176954,17.2,-1.25
 	rot = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
@@ -3071,7 +3071,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 2.8676954,17.2,-1.27
 	attPos0 = 2.8676954,17.2,-1.27
 	rot = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
@@ -3102,7 +3102,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000014
+	part = RCSBlock.v2_970000014
 	partName = Part
 	persistentId = 970001014
 	attPos = 0,0,0
@@ -3117,7 +3117,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 3.1176954,15.95,-2.29621275e-16
 	attPos0 = 3.1176954,15.95,-2.29621275e-16
 	rot = -0.5,0.5,-0.5,-0.5
@@ -3140,7 +3140,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 2.8676954,15.93,-2.33295215e-16
 	attPos0 = 2.8676954,15.93,-2.33295215e-16
 	rot = -0.5,0.5,-0.5,-0.5
@@ -3163,7 +3163,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	pos = 3.2176954,17.2,-1.38
 	attPos0 = 3.2176954,17.2,-1.38
 	rot = 0,0,0.707106781,0.707106781

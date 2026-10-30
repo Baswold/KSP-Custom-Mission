@@ -19,6 +19,9 @@ class LanderCraftTests(unittest.TestCase):
         for name in ('Hermes Finch Vacuum Lander.craft','Hermes Finch Docking Cradle.craft'):
             root=craft(name);p=parts(root)
             self.assertEqual(len(p),len(root.nodes('PART')))
+            for key in p:
+                name_part, ident = key.split('_')
+                self.assertTrue(name_part and ident.isdigit(), key)
             self.assertEqual(len(set(n.get('persistentId') for n in p.values())),len(p))
             children={k:[v for key,v in n.values if key=='link'] for k,n in p.items()}
             parents={k:[] for k in p}
@@ -52,7 +55,7 @@ class LanderCraftTests(unittest.TestCase):
     def test_lander_has_return_fuel_and_no_separation_explosives(self):
         p=parts(craft('Hermes Finch Vacuum Lander.craft'))
         self.assertEqual(len([k for k in p if k.startswith('landingLeg1-2_')]),4)
-        self.assertEqual(len([k for k in p if k.startswith('RCSBlock_v2_')]),4)
+        self.assertEqual(len([k for k in p if k.startswith('RCSBlock.v2_')]),4)
         self.assertFalse(any('decoupler' in k.lower() for k in p))
         fuel={}
         for n in p.values():

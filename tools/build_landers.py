@@ -44,7 +44,7 @@ def generate(game,repo):
     base=970000000
     parts=[]
     def part(name,pos,rot=(0,0,0,1),parent=None,parentnode=None,childnode=None,surface=False):
-        prefab=catalog[name];i=len(parts);key=name+'_'+str(base+i);n=Node('PART')
+        prefab=catalog[name];i=len(parts);key=name.replace('_','.')+'_'+str(base+i);n=Node('PART')
         for k,v in [('part',key),('partName','Part'),('persistentId',base+i+1000),('pos',fmt(pos)),('attPos','0,0,0'),('attPos0',fmt(pos)),('rot',fmt(rot)),('attRot','0,0,0,1'),('attRot0',fmt(rot)),('mir','1,1,1'),('symMethod','Radial'),('autostrutMode','Off'),('rigidAttachment','False'),('istg',0 if name=='liquidEngine3_v2' else -1),('dstg',0),('sidx',0),('sqor',-1),('sepI',-1),('attm',1 if surface else 0)]:n.add(k,v)
         # Prefab modules supply default fields; serialize resources explicitly.
         n.children=copy.deepcopy(prefab.nodes('RESOURCE'))
@@ -98,7 +98,7 @@ def generate(game,repo):
     carrier.children.extend(stored)
     (out/'Hermes Finch Docking Cradle.craft').write_text(output(carrier))
     # Conservative ideal budget includes two crew at 0.09375 t each and full monoprop.
-    dry=sum(float(catalog[n.get('part').rsplit('_',1)[0]].get('mass','0')) for n in parts)+2*.09375
+    dry=sum(float(catalog[n.get('part').rsplit('_',1)[0].replace('.','_')].get('mass','0')) for n in parts)+2*.09375
     prop=4.0;mono=.16;wet=dry+prop+mono
     dv=345*9.80665*math.log(wet/(dry+mono))
     report={'parts':len(parts),'crew_capacity':2,'dry_with_crew_t':dry,'wet_with_crew_t':wet,'lf_ox_propellant_t':prop,'vacuum_isp_s':345,'ideal_delta_v_m_s':dv,'mun_surface_twr':60/(wet*1.63),'minmus_surface_twr':60/(wet*.491),'scope':'Mun/Minmus low-orbit vacuum sortie candidate; no atmospheric capability or flight qualification','runtime_verified':False}

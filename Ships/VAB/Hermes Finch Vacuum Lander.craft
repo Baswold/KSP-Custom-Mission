@@ -9,7 +9,7 @@ missionFlag = Squad/Flags/default
 vesselType = Lander
 PART
 {
-	part = mk2LanderCabin_v2_970000000
+	part = mk2LanderCabin.v2_970000000
 	partName = Part
 	persistentId = 970001000
 	pos = 0,4,0
@@ -32,13 +32,13 @@ PART
 	attN = bottom,Rockomax8BW_970000001_0|0|0
 	link = dockingPort2_970000003
 	attN = top,dockingPort2_970000003_0|0|0
-	link = RCSBlock_v2_970000005
+	link = RCSBlock.v2_970000005
 	link = solarPanels5_970000006
-	link = RCSBlock_v2_970000008
+	link = RCSBlock.v2_970000008
 	link = solarPanels5_970000009
-	link = RCSBlock_v2_970000011
+	link = RCSBlock.v2_970000011
 	link = solarPanels5_970000012
-	link = RCSBlock_v2_970000014
+	link = RCSBlock.v2_970000014
 	link = solarPanels5_970000015
 	link = batteryBankMini_970000016
 	RESOURCE
@@ -80,9 +80,9 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 0
-	attN = top,mk2LanderCabin_v2_970000000_0|0|0
-	link = liquidEngine3_v2_970000002
-	attN = bottom,liquidEngine3_v2_970000002_0|0|0
+	attN = top,mk2LanderCabin.v2_970000000_0|0|0
+	link = liquidEngine3.v2_970000002
+	attN = bottom,liquidEngine3.v2_970000002_0|0|0
 	link = landingLeg1-2_970000004
 	link = landingLeg1-2_970000007
 	link = landingLeg1-2_970000010
@@ -102,7 +102,7 @@ PART
 }
 PART
 {
-	part = liquidEngine3_v2_970000002
+	part = liquidEngine3.v2_970000002
 	partName = Part
 	persistentId = 970001002
 	pos = 0,2.686426,0
@@ -144,7 +144,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 0
-	attN = bottom,mk2LanderCabin_v2_970000000_0|0|0
+	attN = bottom,mk2LanderCabin.v2_970000000_0|0|0
 }
 PART
 {
@@ -171,7 +171,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000005
+	part = RCSBlock.v2_970000005
 	partName = Part
 	persistentId = 970001005
 	pos = 0,4.1,1.25
@@ -190,7 +190,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -213,7 +213,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -240,7 +240,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000008
+	part = RCSBlock.v2_970000008
 	partName = Part
 	persistentId = 970001008
 	pos = 1.25,4.1,7.65404249e-17
@@ -259,7 +259,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -282,7 +282,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -309,7 +309,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000011
+	part = RCSBlock.v2_970000011
 	partName = Part
 	persistentId = 970001011
 	pos = 1.5308085e-16,4.1,-1.25
@@ -328,7 +328,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -351,7 +351,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -378,7 +378,7 @@ PART
 }
 PART
 {
-	part = RCSBlock_v2_970000014
+	part = RCSBlock.v2_970000014
 	partName = Part
 	persistentId = 970001014
 	pos = -1.25,4.1,-2.29621275e-16
@@ -397,7 +397,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -420,7 +420,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 }
 PART
 {
@@ -443,7 +443,7 @@ PART
 	sqor = -1
 	sepI = -1
 	attm = 1
-	srfN = srfAttach,mk2LanderCabin_v2_970000000
+	srfN = srfAttach,mk2LanderCabin.v2_970000000
 	RESOURCE
 	{
 		name = ElectricCharge
