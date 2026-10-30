@@ -1,0 +1,168 @@
+diff --git a/Source/Campaign.cs b/Source/Campaign.cs
+--- a/Source/Campaign.cs
++++ b/Source/Campaign.cs
+@@ -20,11 +20,17 @@
+         public int PreviousUnfrozen;
+         public string SupplyError="";
+         public double LastTakenFood,LastTakenWater; // transient transaction results
++        ConfigNode preservedLoadNode;
++        void RejectLoad(ConfigNode node,string reason)
++        {Started=false;LoadError=reason;preservedLoadNode=node.CreateCopy();}
+         static bool ReadAmount(ConfigNode n,string key,out double value)
+         {return double.TryParse(n.GetValue(key),NumberStyles.Float,CultureInfo.InvariantCulture,out value)&&CampaignTiming.Finite(value)&&value>=0;}
+         public override void OnSave(ConfigNode node)
+         {
+             base.OnSave(node);
++            // Keep invalid/future data intact. A later save must not normalize
++            // rejected flags or discard unknown fields and repeated crew nodes.
++            if(preservedLoadNode!=null){node.ClearData();preservedLoadNode.CopyTo(node);return;}
+             node.AddValue("schema",1);node.AddValue("started",Started);
+             node.AddValue("epochUT",EpochUT.ToString("R",CultureInfo.InvariantCulture));
+             node.AddValue("vesselID",VesselId.ToString());
+@@ -41,38 +47,61 @@
+         }
+         public override void OnLoad(ConfigNode node)
+         {
+-            base.OnLoad(node);CrewSnapshot=null;Started=false;LoadError="";RationsEnabled=false;DailyRoutineEnabled=false;UnfrozenMask=15;SupplyError="";SupplyDepleted=false;
++            base.OnLoad(node);
++            CrewSnapshot=null;Started=false;LoadError="";RationsEnabled=false;DailyRoutineEnabled=false;
++            UnfrozenMask=15;SupplyError="";SupplyDepleted=false;preservedLoadNode=null;
++            EpochUT=0;VesselId=Guid.Empty;SupplyUT=0;FoodUsed=0;WaterUsed=0;FoodMissing=0;WaterMissing=0;
++            PreviousUnfrozen=0;LastTakenFood=0;LastTakenWater=0;
+             bool requested;
+-            if(!bool.TryParse(node.GetValue("started"),out requested)||!requested)return;
+-            int schema;double epoch;Guid vessel;
+-            if(!int.TryParse(node.GetValue("schema"),out schema)||schema!=1||
+-                !double.TryParse(node.GetValue("epochUT"),NumberStyles.Float,CultureInfo.InvariantCulture,out epoch)||
++            if(!node.HasValue("started"))
++            {
++                if(node.HasValue("schema")||node.HasValue("epochUT")||node.HasValue("rationsEnabled")||node.HasValue("dailyRoutineEnabled")||node.HasValue("supplyUT")||node.HasNode("CAMPAIGN_CREW"))
++                    RejectLoad(node,"Missing campaign start flag; original data preserved.");
++                return;
++            }
++            if(!bool.TryParse(node.GetValue("started"),out requested))
++            {RejectLoad(node,"Invalid campaign start flag; original data preserved.");return;}
++            int schema;
++            if(!int.TryParse(node.GetValue("schema"),out schema)||schema!=1)
++            {RejectLoad(node,"Unsupported campaign schema; original data preserved.");return;}
++            if(!requested)return;
++            double epoch;Guid vessel;
++            if(!double.TryParse(node.GetValue("epochUT"),NumberStyles.Float,CultureInfo.InvariantCulture,out epoch)||
+                 !CampaignTiming.Finite(epoch)||epoch<0||!Guid.TryParse(node.GetValue("vesselID"),out vessel)||vessel==Guid.Empty)
+-            {LoadError="Invalid campaign save data; campaign disabled.";return;}
++            {RejectLoad(node,"Invalid campaign save data; original data preserved.");return;}
+             EpochUT=epoch;VesselId=vessel;Started=true;
+             if(node.HasNode("CAMPAIGN_CREW"))
+             {
+                 try{CrewSnapshot=CrewStateCodec.Load(node);}
+-                catch(FormatException){Started=false;LoadError="Invalid campaign crew snapshot; campaign disabled.";return;}
++                catch(FormatException){RejectLoad(node,"Invalid campaign crew snapshot; original data preserved.");return;}
+             }
+-            bool.TryParse(node.GetValue("rationsEnabled"),out RationsEnabled);
++            if(node.HasValue("rationsEnabled"))
++            {
++                if(!bool.TryParse(node.GetValue("rationsEnabled"),out RationsEnabled))
++                {RejectLoad(node,"Invalid ration plan flag; original data preserved.");return;}
++            }
++            else if(node.HasValue("supplyUT")||node.HasValue("foodUsed")||node.HasValue("waterUsed"))
++            {RejectLoad(node,"Missing ration plan flag for saved ledger; original data preserved.");return;}
++            if(node.HasValue("dailyRoutineEnabled")&&!bool.TryParse(node.GetValue("dailyRoutineEnabled"),out DailyRoutineEnabled))
++            {RejectLoad(node,"Invalid daily routine flag; original data preserved.");return;}
++            if(DailyRoutineEnabled&&!RationsEnabled)
++            {RejectLoad(node,"Daily routine requires its finite ration plan; original data preserved.");return;}
+             if(RationsEnabled)
+             {
+-                bool.TryParse(node.GetValue("dailyRoutineEnabled"),out DailyRoutineEnabled);
+                 if(node.HasValue("unfrozenMask")&&(!int.TryParse(node.GetValue("unfrozenMask"),out UnfrozenMask)||UnfrozenMask<0||UnfrozenMask>15))
+-                    SupplyError="Invalid saved crew history; coast blocked.";
+-                if(SupplyError.Length==0)SupplyError=node.GetValue("supplyError")??"";
++                {RejectLoad(node,"Invalid saved crew history; original data preserved.");return;}
++                SupplyError=node.GetValue("supplyError")??"";
+                 // Old candidates used depletion as a permanent error. Preserve
+                 // their recorded shortfall, but resume only observed intervals.
+                 if(SupplyError=="Routine rations depleted. Unmet supply demand recorded; coast blocked.")
+                 {SupplyError="";SupplyDepleted=true;}
+                 if(node.HasValue("supplyDepleted")&&!bool.TryParse(node.GetValue("supplyDepleted"),out SupplyDepleted))
+-                    SupplyError="Invalid saved depletion state; coast blocked.";
++                {RejectLoad(node,"Invalid saved depletion state; original data preserved.");return;}
+                 if(!ReadAmount(node,"supplyUT",out SupplyUT)||SupplyUT<EpochUT||
+                    !ReadAmount(node,"foodUsed",out FoodUsed)||!ReadAmount(node,"waterUsed",out WaterUsed)||
+                    !ReadAmount(node,"foodMissing",out FoodMissing)||!ReadAmount(node,"waterMissing",out WaterMissing)||
+                    !int.TryParse(node.GetValue("previousUnfrozen"),out PreviousUnfrozen)||PreviousUnfrozen<0||PreviousUnfrozen>4)
+-                    SupplyError="Invalid saved supply ledger; coast blocked.";
++                {RejectLoad(node,"Invalid saved supply ledger; original data preserved.");return;}
+             }
+         }
+     }
+diff --git a/tests/CampaignPersistenceTests.cs b/tests/CampaignPersistenceTests.cs
+--- a/tests/CampaignPersistenceTests.cs
++++ b/tests/CampaignPersistenceTests.cs
+@@ -10,6 +10,9 @@
+  public bool HasNode(string key){return GetNodes(key).Length>0;}
+  public ConfigNode AddNode(string key){var n=new ConfigNode{name=key};nodes.Add(n);return n;}
+  public ConfigNode[] GetNodes(string key){return nodes.FindAll(n=>n.name==key).ToArray();}
++ public void ClearData(){Values.Clear();nodes.Clear();}
++ public ConfigNode CreateCopy(){var n=new ConfigNode();CopyTo(n);return n;}
++ public void CopyTo(ConfigNode target){foreach(var pair in Values)target.AddValue(pair.Key,pair.Value);foreach(var child in nodes)child.CopyTo(target.AddNode(child.name));}
+ }
+ class CampaignPersistenceTests {
+  static void Yes(bool x){if(!x)throw new Exception("Persistence assertion failed");}
+@@ -20,10 +23,23 @@
+   // A KSP reload restores recorded shortages without treating them as a new meal.
+   n.Values.Remove("supplyDepleted");n.Values["supplyError"]="Routine rations depleted. Unmet supply demand recorded; coast blocked.";c=Load(n);Yes(c.SupplyDepleted&&c.SupplyError==""&&c.FoodMissing==0.5);
+   n.Values["supplyError"]="Unobserved supply interval";c=Load(n);Yes(c.SupplyError=="Unobserved supply interval");
+-  n=Save();n.Values["supplyDepleted"]="garbled";Yes(Load(n).SupplyError.Length>0);
+-  n=Save();n.Values["foodMissing"]="NaN";Yes(Load(n).SupplyError.Length>0);
+-  n=Save();n.Values["supplyUT"]="99";Yes(Load(n).SupplyError.Length>0);
++  n=Save();n.Values["supplyDepleted"]="garbled";Yes(!Load(n).Started&&Load(n).LoadError.Length>0);
++  n=Save();n.Values["foodMissing"]="NaN";Yes(!Load(n).Started&&Load(n).LoadError.Length>0);
++  n=Save();n.Values["supplyUT"]="99";Yes(!Load(n).Started&&Load(n).LoadError.Length>0);
+   n=Save();n.Values["schema"]="99";c=Load(n);Yes(!c.Started&&c.LoadError.Length>0);
+-  Console.WriteLine("PASS: production scenario save/load depletion round-trip, legacy migration, retained unmet totals and malformed history rejection (ConfigNode/ScenarioModule doubles).");
++  foreach(var key in new[]{"started","rationsEnabled","dailyRoutineEnabled","supplyDepleted"}) {
++   n=Save();n.Values[key]="garbled";n.AddValue("unknownFutureValue","keep");n.AddNode("UNKNOWN").AddValue("data","one");n.AddNode("UNKNOWN").AddValue("data","two");
++   c=Load(n);Yes(!c.Started&&c.LoadError.Length>0);n.Values[key]="changed-after-load";
++   var preserved=new ConfigNode();c.OnSave(preserved);Yes(preserved.GetValue(key)=="garbled");Yes(preserved.GetValue("unknownFutureValue")=="keep");Yes(preserved.GetNodes("UNKNOWN").Length==2);Yes(preserved.GetNodes("UNKNOWN")[1].GetValue("data")=="two");
++   Yes(Load(preserved).LoadError.Length>0); // save/reload cannot normalize rejected data into a fresh campaign
++  }
++  n=Save();n.Values["rationsEnabled"]="False";Yes(Load(n).LoadError.Length>0); // routine without finite food plan
++  n=Save();n.Values.Remove("rationsEnabled");Yes(Load(n).LoadError.Length>0); // ledger cannot silently become opted out
++  n=Save();n.Values["started"]="False";n.Values["schema"]="99";c=Load(n);Yes(c.LoadError.Length>0);var future=new ConfigNode();c.OnSave(future);Yes(future.GetValue("schema")=="99");
++  n=Save();n.Values.Remove("started");Yes(Load(n).LoadError.Length>0);
++  var empty=new ConfigNode();empty.AddValue("name","HermesCampaign");empty.AddValue("scene","7,5,6");Yes(Load(empty).LoadError=="");var partial=new ConfigNode();partial.AddValue("rationsEnabled",false);Yes(Load(partial).LoadError.Length>0);
++  c=Load(Save());var stopped=new ConfigNode();stopped.AddValue("schema",1);stopped.AddValue("started",false);c.OnLoad(stopped);Yes(!c.Started&&c.FoodUsed==0&&c.FoodMissing==0&&c.EpochUT==0&&c.VesselId==Guid.Empty);
++  n=Save();foreach(var key in new[]{"rationsEnabled","dailyRoutineEnabled","supplyUT","foodUsed","waterUsed","foodMissing","waterMissing","supplyDepleted"})n.Values.Remove(key);c=Load(n);Yes(c.Started&&!c.RationsEnabled&&c.LoadError==""); // actual older pre-ration schema remains compatible
++  Console.WriteLine("PASS: production scenario save/load depletion round-trip, legacy migration, retained unmet totals and malformed flags/history rejection and lossless rejected-node preservation (ConfigNode/ScenarioModule doubles).");
+  }
+ }
+diff --git a/docs/CAMPAIGN-STATE-GUARDS.md b/docs/CAMPAIGN-STATE-GUARDS.md
+new file mode 100644
+--- /dev/null
++++ b/docs/CAMPAIGN-STATE-GUARDS.md
+@@ -0,0 +1,26 @@
++# Campaign state validation and rejected-data preservation
++
++Apply Hermes-Campaign-State-Guards.patch after cumulative 0.3.5. It is independent
++of the additive epoch planner. No DLL, save or third-party code is included.
++
++Previously malformed ration/routine booleans became false on load, silently
++disabling finite needs. The loader now rejects malformed/missing required flags,
++incompatible daily-routine/ration combinations, unsupported schemas and invalid
++ledger/history values. A newly created empty scenario remains valid, and actual
++older pre-ration saves without ledger fields still load. State is reset before
++every load to prevent values leaking from an earlier load of the same module.
++
++Rejected nodes are copied into memory using the actual ConfigNode.CreateCopy
++API. OnSave emits that original node via ClearData/CopyTo, preserving invalid
++flags, future schema values, unknown fields and repeated child nodes. The next
++load must reject the same data again; it cannot become a silently reset campaign.
++No auto-repair, epoch reset or resource replenishment is offered. Restore a
++consistent earlier KSP save to recover. Existing files are not edited by this
++source patch. ConfigNode API signatures/copy behavior were inspected in the
++installed KSP assembly; third-party implementation code is not redistributed.
++
++Production ScenarioModule tests with boundary doubles cover malformed flags,
++missing flags beside a ledger, future schemas even when not started, repeated
++unknown children, copied-state isolation, legacy compatibility, and load-state
++reset. Campaign tests and full KSP compile pass. Actual KSP scenario persistence
++still needs disposable save/load verification; boundary tests do not prove it.
