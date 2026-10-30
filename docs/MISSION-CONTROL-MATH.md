@@ -90,3 +90,18 @@ node, observe every mutation and include any additional mission-specific
 constraints. IDs and identity canonicalization remain the trusted adapter's
 responsibility; the current guard is in-memory and is not a replay-proof
 persistent protocol across process restarts.
+
+## Finite burn and watch coverage candidates
+
+Luna agents supplied the C#7.3 constant-thrust burn estimator and fixed-window
+watch predicate. The estimator uses SI units, the rocket equation and mass flow,
+rejects insufficient propellant and handles tiny delta-v without cancellation.
+It excludes staging, throttle/pressure variation, spool-up and trajectory losses.
+It cannot certify an actual KSP burn until usable propellant and engine data are
+read from the correct active stages and independently checked.
+
+The watch predicate checks the entire fixed ignition/preparation/burn/verification
+window against the watch and both reviewers' awake/fit windows. It never shifts
+UT or pauses a watch. Half-open windows permit an operation to end exactly at the
+watch boundary but reject any positive extension beyond it. These are pure
+models: no shift, daily routine, coast or flight-control adapter is connected yet.

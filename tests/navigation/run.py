@@ -15,3 +15,8 @@ with tempfile.TemporaryDirectory() as t:
     args[-1]=f'"{root}/tests/navigation/LambertRandomizedTests.cs"'
     (out/'args.rsp').write_text('\n'.join(args));subprocess.run(['dotnet',str(csc),'@'+str(out/'args.rsp')],check=True)
     subprocess.run(['dotnet',str(out/'Tests.dll')],check=True)
+
+    for source, tests in [('BurnDurationEstimator.cs','BurnDurationTests.cs'),('WatchCoverage.cs','WatchCoverageTests.cs')]:
+        case=['-nologo','-nostdlib+','-langversion:7.3','-target:exe',f'-out:"{out}/Tests.dll"']+[f'-reference:"{runtime/r}"' for r in refs]+[f'"{root}/Source/Navigation/{source}"',f'"{root}/tests/navigation/{tests}"']
+        (out/'args.rsp').write_text('\n'.join(case));subprocess.run(['dotnet',str(csc),'@'+str(out/'args.rsp')],check=True)
+        subprocess.run(['dotnet',str(out/'Tests.dll')],check=True)
