@@ -233,3 +233,34 @@ steps are recorded in `docs/NAVIGATION-INTEGRATION-AUDIT.md` on #8. No campaign
 source ownership changed, no provider was installed and no game was launched.
 The Burn Brief gains a short routine planning dialogue; it assumes no automatic
 maneuver, animated handoff or extra emergency.
+
+
+### Reproducible candidates and morning QA preparation
+
+- **Gate 0 / #8 `9737865`:** `tools/build_navigation_candidate.py` reconstructs
+  the pinned 0.3.0 archive plus one cumulative 0.3.4 patch and an explicit tracked
+  navigation ref into a new directory outside the checkout. It rejects input
+  hash mismatches and unsafe archive paths, supports prepare-only, and records
+  source, builder, compiler, reference-assembly and output hashes. Thirteen
+  focused safety tests pass. A full promoted-tool build succeeds; generated-tree
+  campaign and needs model tests pass. This is a review artifact, not an installer.
+- **Gate 3 / #8 `25e24c1`:** the disposable circular node probe now requires
+  exact save/marker authorization and a process-local one-use arm; it waits for
+  a loaded/unpacked idle-engine fixture, compares detached and independently
+  reconstructed apsides with stock nextPatch body/Pe/Ap, then verifies cleanup
+  of only its own temporary node. It compiles against the combined candidate.
+  No runtime pass is claimed. NodeFrame/GetBurnVector comparison remains a
+  separate open frame-conversion gate; this prograde-only probe cannot prove it.
+- **Gate 4 / #6 `3c1b8a9`:** design regeneration no longer erases historical
+  loader observations. Those observations have a separate file and explicitly
+  unknown exact runtime-artifact hashes. Current craft hashes accompany current
+  design calculations. Temporary regeneration matches checked-in outputs; all
+  22 Python checks pass. The reordered cradle still awaits native flight loading.
+- **Gate 10 / #8 `418229a`:** Match the Ledger is a proposed routine handover
+  comparing unlike mass records honestly before planning a standardized repeat
+  measurement. It claims no missing part, repair or flight qualification.
+
+Morning order remains: review and build the current combined source artifact;
+use only disposable install/save copies; first establish full loaded cradle
+state and stock-versus-detached prediction evidence. Then qualify UI/input and
+actual flight behavior. Source tests do not advance those runtime gates.
