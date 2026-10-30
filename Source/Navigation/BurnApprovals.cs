@@ -26,6 +26,7 @@ namespace MegaCrew.Navigation
         }
         public bool Approve(string principal,string role,string requestId,int revision,string fingerprint,double now)
         {
+            if(plan!=null && fingerprint!=plan){Clear();return false;}
             if(!connected||request==null||!Finite(now)||now<readyAt||now>expires||now>=burn||requestId!=request||revision!=Revision||fingerprint!=plan||string.IsNullOrWhiteSpace(principal)||(role!="Hamish"&&role!="Basil"))return false;
             try{if(!authenticate(principal,role))return false;}catch{return false;}
             foreach(var item in approvals)if(item.Key!=role&&item.Value==principal)return false;
@@ -34,6 +35,7 @@ namespace MegaCrew.Navigation
         public bool Ready(string liveFingerprint,double now)
         {
             string h,b;
+            if(plan!=null && liveFingerprint!=plan){Clear();return false;}
             if(!connected||request==null||!Finite(now)||now<readyAt||now>expires||now>=burn||liveFingerprint!=plan||!approvals.TryGetValue("Hamish",out h)||!approvals.TryGetValue("Basil",out b)||h==b)return false;
             try{return authenticate(h,"Hamish")&&authenticate(b,"Basil");}catch{return false;}
         }

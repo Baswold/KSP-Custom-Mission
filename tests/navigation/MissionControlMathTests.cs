@@ -60,7 +60,7 @@ class MissionControlMathTests
         Yes(approvals.Approve("h","Hamish","req",1,"plan-A",102));
         Yes(!approvals.Approve("h","Basil","req",1,"plan-A",102));
         Yes(approvals.Approve("b","Basil","req",1,"plan-A",103));Yes(approvals.Ready("plan-A",104));
-        Yes(!approvals.Ready("changed",104));Yes(!approvals.Ready("plan-A",131));
+        Yes(!approvals.Ready("changed",104));Yes(!approvals.Ready("plan-A",104));Yes(!approvals.Ready("plan-A",131));
         approvals.Revise("plan-B",1001);Yes(!approvals.Ready("plan-B",104));
         approvals.Request("req2",105,0,30);Yes(approvals.Approve("h","Hamish","req2",2,"plan-B",106));
         approvals.Connection(false);approvals.Connection(true);Yes(!approvals.Approve("b","Basil","req2",2,"plan-B",106));
