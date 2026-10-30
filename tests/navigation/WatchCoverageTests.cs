@@ -47,6 +47,18 @@ internal static class WatchCoverageTests
         True(Covers(new BurnWindow(190, 10, 0, 0), watch, hamish, basil), "end exactly at boundary is covered");
         True(!Covers(new BurnWindow(190, 10, 0, 0.0001), watch, hamish, basil), "end beyond boundary rejected");
         True(Covers(new BurnWindow(110, 10, 10, 0), watch, hamish, basil), "start exactly at boundary is covered");
+        True(Covers(new BurnWindow(150, 10, 5, 5), watch,
+            new TimeInterval(100, 165), basil), "Hamish fit end boundary is covered");
+        True(Covers(new BurnWindow(150, 10, 5, 5), watch, hamish,
+            new TimeInterval(145, 165)), "Basil fit end boundary is covered");
+
+        // Coverage is a snapshot calculation. Recompute after observed fitness
+        // changes rather than reusing an earlier successful result.
+        BurnWindow planned = new BurnWindow(150, 10, 5, 5);
+        True(Covers(planned, watch, hamish, basil), "fresh reviewer intervals cover burn");
+        TimeInterval basilAfterFatigueChange = new TimeInterval(100, 164);
+        True(!Covers(planned, watch, hamish, basilAfterFatigueChange),
+            "recomputed coverage rejects newly shortened reviewer window");
 
         Throws<ArgumentOutOfRangeException>(() => new TimeInterval(double.NaN, 1), "NaN endpoint");
         Throws<ArgumentOutOfRangeException>(() => new TimeInterval(0, double.PositiveInfinity), "infinite endpoint");
@@ -59,6 +71,8 @@ internal static class WatchCoverageTests
         Throws<ArgumentOutOfRangeException>(() => new BurnWindow(double.MaxValue, double.MaxValue, 0, 0), "overflowed end");
         Throws<ArgumentOutOfRangeException>(() => new BurnWindow(1, 1, 2, 0), "negative computed start");
         Throws<ArgumentNullException>(() => WatchCoverage.Covers(null, watch, hamish, basil), "null burn");
+        Throws<ArgumentException>(() => default(TimeInterval).Contains(watch), "default containing interval");
+        Throws<ArgumentException>(() => watch.Contains(default(TimeInterval)), "default contained interval");
 
         Console.WriteLine("PASS: " + passed + " watch coverage cases");
         return 0;

@@ -36,6 +36,34 @@ propagation, not a circular two-body shortcut. Docking rendezvous needs relative
 position and velocity at encounter, collision constraints and approach staging.
 Those remain open work. No automatic burns or time warp are introduced here.
 
+## KSP detached lower-periapsis preview candidate
+
+`CircularLowerPeriapsisPreview.Create` previews a retrograde impulse from a
+near-circular active-vessel orbit. It samples the future orbit state, computes a
+circular-apoapsis estimate, applies Δv only to detached vectors, and checks the
+result with `Orbit.UpdateFromStateVectors`. It returns a proposal only when the
+result is a finite bound ellipse above the body and its PeA matches the requested
+target within the supplied tolerance. The proposal's scalar values are read-only
+after construction; its `StartingOrbit` and `Body` are live KSP references and
+must be revalidated before any later action.
+
+The adapter requires the active vessel to be orbiting on an active patch with no
+existing maneuver nodes, rejects negative or excessive starting eccentricity,
+checks finite orbit/body values and a surface-clear target, and requires the burn
+UT to be future-dated. For patches whose `patchEndTransition` is not `FINAL`,
+`EndUT` must be finite and the burn must precede it. KSP describes `FINAL` as
+meaning there is no following patch, without documenting an `EndUT` sentinel; for
+that case the adapter validates the requested time by propagating and checking
+the future state vectors. This path has only been compiled against local KSP
+managed assemblies; it has not been loaded or runtime-tested in KSP.
+
+This is still a two-body detached prediction, not stock patched-conic solver
+verification. It does not model SOI changes, atmospheric drag, terrain, finite
+burn duration or target encounters, and it does not create a node or control a
+burn. These API semantics are documented in the [KSP Orbit reference](https://anatid.github.io/XML-Documentation-for-the-KSP-API/class_orbit.html),
+including Y/Z-flipped state vectors, `UpdateFromStateVectors`, `activePatch`,
+and `FINAL` transition meaning. The solver node list comes from the [PatchedConicSolver API](https://kspmoddinglibs.github.io/KSPDocsSite/class_patched_conic_solver.html).
+
 ## Two-body Lambert prototype
 
 `Lambert.SolveShortWay` computes a zero-revolution, short-way transfer between

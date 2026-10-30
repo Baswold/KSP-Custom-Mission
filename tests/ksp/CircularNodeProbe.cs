@@ -40,6 +40,10 @@ public sealed class CircularNodeProbeFlight:MonoBehaviour
             double target=80000, ut=Planetarium.GetUniversalTime()+120;
             if(Math.Abs(vessel.orbit.eccentricity)>1e-5)throw new Exception("Fixture orbit not circular");
             double dv=MissionControlMath.CircularApoapsisBurn(mu,body,radius,target);
+            var preview=CircularLowerPeriapsisPreview.Create(vessel,ut,target,1e-5,1.0);
+            if(Math.Abs(preview.SignedProgradeDeltaV-dv)>1e-6)
+                throw new Exception("Detached preview disagrees with circular model");
+            Debug.Log("[CircularNodeQA] Detached predictedPe="+preview.PredictedPeriapsisAltitude);
             node=solver.AddManeuverNode(ut);
             if(node==null)throw new Exception("Node creation failed");
             node.DeltaV=new global::Vector3d(0,0,dv);solver.UpdateFlightPlan();
@@ -47,6 +51,7 @@ public sealed class CircularNodeProbeFlight:MonoBehaviour
         }catch(Exception e){Debug.LogError("[CircularNodeQA] Setup failed: "+e);if(node!=null)node.RemoveSelf();yield break;}
         yield return new WaitForSecondsRealtime(3);
         try {
+            if(FlightGlobals.ActiveVessel!=vessel)throw new Exception("Active vessel changed during QA");
             if(node.nextPatch==null||!node.nextPatch.activePatch)throw new Exception("No active next patch");
             double actual=node.nextPatch.PeA,error=actual-80000;
             Debug.Log("[CircularNodeQA] RESULT predictedPe="+actual+" error="+error+" reference="+node.nextPatch.referenceBody.bodyName);

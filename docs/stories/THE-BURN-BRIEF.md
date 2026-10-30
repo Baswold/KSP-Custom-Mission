@@ -34,3 +34,23 @@ must verify those facts instead of granting success from the dialogue alone.
 measured engine performance, fit/watch adapter, two authenticated clients,
 actual burn/post-burn observation and saved dialogue outcomes. No automatic burn,
 animated handoff or completed multiplayer feature is implied by this draft.
+
+
+**Routine coda: Orbit and log**
+
+Hamish reads the observed periapsis, apoapsis and orbital period from the live
+flight display. Basil compares remaining propellant with their pre-burn reading.
+They record the prediction and the observation side by side in the handover.
+
+“Do we write that it worked?” Hamish asks.
+
+“We write what happened,” Basil says. “Then Ada gets to check us.”
+
+If the vessel, node or observed result differs from the agreed plan, they hold
+further maneuver planning and record the discrepancy for Mission Control. The
+scene assumes no successful correction or repair. Ada and Vikram receive the
+measurements at the next handover.
+
+This coda uses existing KSP readouts and a player-written log. Automatic
+post-burn verification, persistent shared logs and animated handoffs remain
+implementation work; the dialogue alone never establishes success.

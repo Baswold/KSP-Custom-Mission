@@ -25,8 +25,17 @@ namespace MegaCrew.WatchCoverage
             return !double.IsNaN(value) && !double.IsInfinity(value);
         }
 
+        public bool IsValid
+        {
+            get { return IsFinite(Start) && IsFinite(End) && Start >= 0 && End > Start; }
+        }
+
         public bool Contains(TimeInterval other)
         {
+            // Struct default values bypass the validating constructor, so
+            // validate both operands at this public entry point as well.
+            if (!IsValid) throw new ArgumentException("Containing interval is invalid.", "interval");
+            if (!other.IsValid) throw new ArgumentException("Contained interval is invalid.", "other");
             // Equal end boundaries are valid because both intervals exclude End.
             return other.Start >= Start && other.End <= End;
         }
@@ -82,7 +91,10 @@ namespace MegaCrew.WatchCoverage
         // Returns true only when the complete fixed burn window is covered by
         // the specified awake watch and by each reviewer's awake/fit window.
         // The method never adjusts ignitionUT, changes watch time, or pauses a
-        // shift. Callers must replan if coverage is false.
+        // shift. These intervals are snapshots: callers must rebuild and
+        // recheck them at each approval and dispatch after refreshing crew
+        // awake/fit state. A prior true result is not durable authorization.
+        // Callers must replan if coverage is false.
         public static bool Covers(BurnWindow burn, TimeInterval awakeWatch,
                                   TimeInterval hamishAwakeAndFit,
                                   TimeInterval basilAwakeAndFit)

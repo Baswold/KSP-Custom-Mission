@@ -66,6 +66,8 @@ internal static class Program
         Near(boundary.ConsumedPropellantKg, prop, 1e-9, "exact propellant boundary consumed");
         Near(boundary.ResidualPropellantKg, 0, 1e-9, "exact propellant boundary residual");
         Reject(() => BurnDurationEstimator.Estimate(wet, prop, thrust, isp, dvAtBoundary * (1 + 1e-8)), "insufficient propellant");
+        Reject(() => BurnDurationEstimator.Estimate(wet, prop, thrust, isp, dvAtBoundary * (1 + 1e-13)),
+            "sub-tolerance but physically insufficient propellant");
 
         Reject(() => BurnDurationEstimator.Estimate(0, 1, 1, 1, 1), "zero wet mass");
         Reject(() => BurnDurationEstimator.Estimate(100, -1, 1, 1, 1), "negative propellant");
@@ -86,6 +88,12 @@ internal static class Program
         Reject(() => BurnDurationEstimator.Estimate(100, 1, 1000, 300, double.Epsilon), "delta-v below representable exhaust-velocity ratio");
         Assert(!double.IsNaN(tiny.DurationSeconds) && !double.IsInfinity(tiny.DurationSeconds), "tiny dv duration finite");
         Assert(!double.IsNaN(tiny.ConsumedPropellantKg) && !double.IsInfinity(tiny.ConsumedPropellantKg), "tiny dv mass finite");
+
+        // Finite inputs can still underflow required propellant to zero even
+        // while exponent and mass flow remain positive. Never report this as
+        // a successful zero-duration positive-delta-v burn.
+        Reject(() => BurnDurationEstimator.Estimate(1e-300, 1e-301, 1e-300, 1e12, 1e-100),
+            "positive dv whose propellant consumption underflows to zero");
 
         Console.WriteLine("PASS: " + assertions + " assertions; constant-thrust single-engine-set estimator only.");
     }

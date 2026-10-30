@@ -60,23 +60,23 @@ namespace MegaCrew.Navigation
             // Rocket equation: mf = m0 * exp(-dv / ve). This stable form also
             // preserves useful precision when dv/ve is very small.
             double consumed = wetMassKg * OneMinusExpNegative(exponent);
-            if (!IsFinite(consumed) || consumed < 0.0)
+            if (!IsFinite(consumed) || consumed <= 0.0)
                 throw new ArgumentOutOfRangeException("requiredDeltaVMetresPerSecond", "Calculated propellant use is outside the finite numeric range.");
 
-            double comparisonTolerance = usablePropellantKg * 1e-12;
-            if (consumed > usablePropellantKg + comparisonTolerance)
+            // Do not accept and clamp a real propellant shortfall: doing so
+            // would report a successful estimate for a delta-v the available
+            // propellant cannot produce. The exact boundary is accepted when
+            // the computed required mass is equal to the available amount.
+            if (consumed > usablePropellantKg)
                 throw new InvalidOperationException("Insufficient usable propellant for the requested delta-v.");
 
-            // Clamp only a tolerance-sized floating point overshoot; never report
-            // negative residual propellant.
-            if (consumed > usablePropellantKg) consumed = usablePropellantKg;
             double finalMass = wetMassKg - consumed;
             double residual = usablePropellantKg - consumed;
             double massFlowKgPerSecond = thrustNewtons / exhaustVelocity;
             double duration = consumed / massFlowKgPerSecond;
 
             if (!IsFinite(finalMass) || finalMass <= 0.0 || !IsFinite(residual) || residual < 0.0 ||
-                !IsFinite(massFlowKgPerSecond) || massFlowKgPerSecond <= 0.0 || !IsFinite(duration) || duration < 0.0)
+                !IsFinite(massFlowKgPerSecond) || massFlowKgPerSecond <= 0.0 || !IsFinite(duration) || duration <= 0.0)
                 throw new ArgumentOutOfRangeException("requiredDeltaVMetresPerSecond", "Calculated burn result is outside the finite numeric range.");
 
             return new Result(duration, consumed, residual, finalMass);
