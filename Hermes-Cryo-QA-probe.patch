@@ -1,0 +1,275 @@
+diff --git a/tools/prepare_cryo_qa.py b/tools/prepare_cryo_qa.py
+new file mode 100644
+--- /dev/null
++++ b/tools/prepare_cryo_qa.py
+@@ -0,0 +1,29 @@
++"""Prepare a fresh disposable KSP copy; never copies the user's saves or server."""
++import argparse,hashlib,json,pathlib,shutil,subprocess,sys,zipfile
++p=argparse.ArgumentParser();p.add_argument('--source-root',type=pathlib.Path,required=True);p.add_argument('--qa-root',type=pathlib.Path,required=True);p.add_argument('--pristine-archive',type=pathlib.Path,required=True);p.add_argument('--provider-candidate',type=pathlib.Path);a=p.parse_args()
++src=a.source_root.resolve();dst=a.qa_root.resolve()
++if dst.name!='KSP-Hermes-QA' or dst.exists() or src==dst or src in dst.parents or dst in src.parents:p.error('Use a new directory named KSP-Hermes-QA; never overwrite an existing copy')
++if not (src/'KSP.app').is_dir() or not (src/'GameData/MegaCrew').is_dir():p.error('Source must be the separate MegaCrew KSP copy')
++if (src/'GameData/LunaMultiplayer').exists():p.error('QA source must not contain multiplayer/server configuration')
++provider=pathlib.Path('GameData/REPOSoftTech/BackgroundResources/BackgroundResources.dll')
++original_hash=hashlib.sha256((src/provider).read_bytes()).hexdigest()
++if original_hash!='ed956b9ec2cc5f414586a52a9086423e4c9125fa72097bce2721ea41eb075bc9':p.error('Unsupported original provider')
++if a.provider_candidate and hashlib.sha256(a.provider_candidate.read_bytes()).hexdigest()!='d2c1ab678a0891246dc7b16e66e180ced7e8ad55db8bb9971cc742224dfee45a':p.error('Unrecognized staged provider')
++if hashlib.sha256(a.pristine_archive.read_bytes()).hexdigest()!='0071eacf3a1b38a63c611fe2a65877ea2f62f6076b7e97d22e9cdf58b412cf40':p.error('Use the exact published pristine 0.3.0 archive')
++with zipfile.ZipFile(a.pristine_archive) as archive:pristine=archive.read('saves/MegaCrew Practice/persistent.sfs')
++dst.mkdir(parents=True)
++for name in ['KSP.app','GameData']:
++ if sys.platform=='darwin':subprocess.run(['/bin/cp','-cR',str(src/name),str(dst/name)],check=True)
++ else:shutil.copytree(src/name,dst/name)
++for name in ['buildID64.txt','buildID.txt']:
++ if (src/name).is_file():shutil.copy2(src/name,dst/name)
++# Fresh QA save only; no original saves, logs or personal game state are copied.
++save=dst/'saves/MegaCrew Background QA';save.mkdir(parents=True);(save/'persistent.sfs').write_bytes(pristine)
++(dst/'HermesCryoQA.scope').write_text('MEGACREW_DISPOSABLE_CRYO_QA_V1\n')
++variant='original'
++if a.provider_candidate:
++ backup=dst/'QA-Backups';backup.mkdir();shutil.copy2(dst/provider,backup/'BackgroundResources.original.dll');shutil.copy2(a.provider_candidate,dst/provider);variant='patched'
++(dst/'HermesCryoQA.variant').write_text(variant+'\n')
++(dst/'HermesCryoQA.enable').write_text('one-shot\n')
++(dst/'HermesCryoQA-preparation.json').write_text(json.dumps({'variant':variant,'source_provider_sha256':original_hash,'qa_provider_sha256':hashlib.sha256((dst/provider).read_bytes()).hexdigest(),'personal_saves_copied':False,'server_data_copied':False,'runtime_started':False},indent=2)+'\n')
++print('Prepared disposable QA copy with a pristine save and one-shot marker. Install the QA probe DLL before launching. No game was started.')
+diff --git a/tools/build_cryo_qa.py b/tools/build_cryo_qa.py
+new file mode 100644
+--- /dev/null
++++ b/tools/build_cryo_qa.py
+@@ -0,0 +1,11 @@
++"""Compile the one-shot probe only into a marked disposable QA game."""
++import argparse,pathlib,subprocess,tempfile
++p=argparse.ArgumentParser();p.add_argument('--ksp-root',required=True,type=pathlib.Path);p.add_argument('--csc',required=True,type=pathlib.Path);a=p.parse_args();k=a.ksp_root.resolve();root=pathlib.Path(__file__).resolve().parents[1]
++if k.name!='KSP-Hermes-QA' or not (k/'HermesCryoQA.scope').is_file() or (k/'HermesCryoQA.scope').read_text().strip()!='MEGACREW_DISPOSABLE_CRYO_QA_V1':p.error('Refusing to install a test addon into an unmarked/non-QA game')
++managed=k/'KSP.app/Contents/Resources/Data/Managed';refs=list(managed.glob('*.dll'))+[k/'GameData/MegaCrew/Plugins/MegaCrew.dll',k/'GameData/REPOSoftTech/DeepFreeze/Plugins/DeepFreeze.dll',k/'GameData/REPOSoftTech/BackgroundResources/BackgroundResources.dll']
++if not refs or any(not r.is_file() for r in refs):p.error('QA dependency assembly missing')
++out=k/'GameData/HermesQA/HermesCryoQA.dll';out.parent.mkdir(parents=True,exist_ok=True)
++args=['-nologo','-target:library','-nostdlib+','-langversion:7.3',f'-out:"{out}"']+[f'-reference:"{r}"' for r in refs]+[f'"{root}/tests/ksp/HermesCryoProbe.cs"']
++with tempfile.TemporaryDirectory() as d:
++ rsp=pathlib.Path(d)/'qa.rsp';rsp.write_text('\n'.join(args)+'\n');subprocess.run(['dotnet',str(a.csc),'@'+str(rsp)],check=True)
++print('Built QA-only probe into marked disposable copy. It is not part of the normal MegaCrew DLL.')
+diff --git a/tests/ksp/HermesCryoProbe.cs b/tests/ksp/HermesCryoProbe.cs
+new file mode 100644
+--- /dev/null
++++ b/tests/ksp/HermesCryoProbe.cs
+@@ -0,0 +1,143 @@
++// QA-only assembly. NEVER include in the normal MegaCrew plugin.
++using System;
++using System.Collections;
++using System.IO;
++using System.Globalization;
++using System.Security.Cryptography;
++using UnityEngine;
++using MegaCrew;
++
++[KSPAddon(KSPAddon.Startup.MainMenu,false)]
++public sealed class HermesCryoProbe : MonoBehaviour
++{
++    const string SaveName="MegaCrew Background QA";
++    string root;ConfigNode report=new ConfigNode("HERMES_CRYO_QA");bool scoped;
++    IEnumerator Start()
++    {
++        root=KSPUtil.ApplicationRootPath;
++        var scope=Path.Combine(root,"HermesCryoQA.scope");var marker=Path.Combine(root,"HermesCryoQA.enable");
++        if(new DirectoryInfo(root).Name!="KSP-Hermes-QA"||!File.Exists(scope)||File.ReadAllText(scope).Trim()!="MEGACREW_DISPOSABLE_CRYO_QA_V1"||!File.Exists(marker))yield break;
++        scoped=true;DontDestroyOnLoad(this);
++        File.Move(marker,Path.Combine(root,"HermesCryoQA.running"));
++        var steps=Run();
++        while(true)
++        {
++            object next=null;bool more=false;Exception failure=null;
++            try{more=steps.MoveNext();if(more)next=steps.Current;}catch(Exception e){failure=e;}
++            if(failure!=null){Record("failure",failure.GetType().Name+": "+failure.Message);Finish(false);yield break;}
++            if(!more){Finish(true);yield break;}
++            yield return next;
++        }
++    }
++    void Record(string key,object value)
++    {
++        string text=value is IFormattable?((IFormattable)value).ToString(null,CultureInfo.InvariantCulture):value.ToString();
++        report.SetValue(key,text,true);report.Save(Path.Combine(root,"HermesCryoQA-result.cfg"));
++        Debug.Log("[HermesCryoQA] "+key+"="+value);
++    }
++    void Finish(bool complete)
++    {
++        Record("probe_completed",complete);Record("flight_qualification",false);
++        var marker=Path.Combine(root,"HermesCryoQA.running");
++        if(File.Exists(marker))File.Move(marker,Path.Combine(root,"HermesCryoQA.done"));
++        // Only this explicitly scoped disposable app is ever closed by the probe.
++        if(scoped)Application.Quit();
++    }
++    static double Charge(Vessel v)
++    {double amount=0;foreach(var p in v.parts)foreach(PartResource r in p.Resources)if(r.resourceName=="ElectricCharge"&&r.flowState)amount+=r.amount;return amount;}
++    static bool Frozen(Guid vessel)
++    {DF.KerbalInfo info;return DF.DeepFreeze.Instance!=null&&DF.DeepFreeze.Instance.FrozenKerbals.TryGetValue("Ada Kerman",out info)&&info.vesselID==vessel;}
++    IEnumerator Run()
++    {
++        yield return new WaitForSecondsRealtime(5);
++        var variant=File.ReadAllText(Path.Combine(root,"HermesCryoQA.variant")).Trim();Record("variant",variant);if(variant!="original"&&variant!="patched")throw new Exception("Unknown QA variant");
++        var path=Path.Combine(root,"GameData/REPOSoftTech/BackgroundResources/BackgroundResources.dll");
++        string hash;using(var sha=SHA256.Create())hash=BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(path))).Replace("-","").ToLowerInvariant();
++        Record("provider_sha256",hash);
++        string expected=variant=="patched"?"d2c1ab678a0891246dc7b16e66e180ced7e8ad55db8bb9971cc742224dfee45a":"ed956b9ec2cc5f414586a52a9086423e4c9125fa72097bce2721ea41eb075bc9";
++        if(hash!=expected)throw new Exception("Provider hash mismatch");
++        var game=GamePersistence.LoadGame("persistent",SaveName,true,false);
++        if(game==null||game.flightState.protoVessels.Count!=1)throw new Exception("Expected one pristine QA vessel");
++        HighLogic.SaveFolder=SaveName;HighLogic.CurrentGame=game;
++        FlightDriver.StartAndFocusVessel(game,0);
++        double deadline=Time.realtimeSinceStartup+180;
++        while(!HighLogic.LoadedSceneIsFlight||!FlightGlobals.ready||FlightGlobals.ActiveVessel==null)
++        {if(Time.realtimeSinceStartup>deadline)throw new Exception("Flight initialization timeout");yield return new WaitForSecondsRealtime(1);}
++        yield return new WaitForSecondsRealtime(12);
++        var v=FlightGlobals.ActiveVessel;Guid vesselId=v.id;
++        if(v.parts.Count!=17||v.GetCrewCount()!=4)throw new Exception("Pristine vessel/crew mismatch");
++        if(TimeWarp.CurrentRateIndex!=0)throw new Exception("Expected actual 1x progression");
++        Record("initial_parts",v.parts.Count);Record("initial_awake_crew",v.GetCrewCount());Record("initial_ec",Charge(v));
++        Part freezer=null,origin=null;ProtoCrewMember ada=null;
++        foreach(var part in v.parts)
++        {
++            foreach(PartModule m in part.Modules)
++                if(m.moduleName=="DeepFreezer")freezer=part;
++            foreach(var person in part.protoModuleCrew)if(person.name=="Ada Kerman"){ada=person;origin=part;}
++        }
++        if(freezer==null||origin==null||ada==null||Charge(v)<3300)throw new Exception("Missing pod/crew or insufficient freeze reserve");
++        uint podId=freezer.flightID;
++        // Actual stock part crew transfer, followed by the real DeepFreeze API.
++        origin.RemoveCrewmember(ada);freezer.AddCrewmember(ada);
++        GameEvents.onCrewTransferred.Fire(new GameEvents.HostedFromToAction<ProtoCrewMember,Part>(ada,origin,freezer));
++        Vessel.CrewWasModified(origin.vessel,freezer.vessel);v.DespawnCrew();
++        yield return new WaitForSecondsRealtime(1);v.SpawnCrew();
++        DF.DeepFreezer actualPod=null;foreach(PartModule m in freezer.Modules)if(m is DF.DeepFreezer)actualPod=(DF.DeepFreezer)m;
++        if(actualPod==null)throw new Exception("Actual pod module unavailable");
++        deadline=Time.realtimeSinceStartup+90;
++        while(!DF.DeepFreeze.APIReady||actualPod.DFIcrewXferTOActive||actualPod.DFIcrewXferFROMActive)
++        {if(Time.realtimeSinceStartup>deadline)throw new Exception("Stock transfer/pod readiness timeout");yield return new WaitForSecondsRealtime(1);}
++        yield return new WaitForSecondsRealtime(2);
++        if(!freezer.protoModuleCrew.Contains(ada)||!CryoBridge.Freeze("Ada Kerman"))throw new Exception("Real freeze request rejected");
++        deadline=Time.realtimeSinceStartup+240;
++        while(!Frozen(vesselId)){if(Time.realtimeSinceStartup>deadline)throw new Exception("Actual freeze timeout");yield return new WaitForSecondsRealtime(1);}
++        foreach(var part in v.parts)foreach(PartModule m in part.Modules)
++        {
++            var panel=m as ModuleDeployableSolarPanel;
++            if(panel!=null&&panel.deployState.ToString()!="RETRACTED")throw new Exception("Expected stowed solar panels for unloaded power observation");
++            var generator=m as ModuleGenerator;
++            if(generator!=null&&generator.generatorIsActive)throw new Exception("Unexpected active generator in power fixture");
++        }
++        Record("actual_frozen_before_unload",true);Record("ec_after_freeze",Charge(v));
++        GamePersistence.SaveGame("persistent",SaveName,SaveMode.OVERWRITE);
++        HighLogic.LoadScene(GameScenes.TRACKSTATION);
++        yield return new WaitForSecondsRealtime(12);
++        v=FlightGlobals.Vessels.Find(x=>x.id==vesselId);
++        if(v==null||v.loaded)throw new Exception("Expected the QA vessel to be genuinely unloaded");
++        if(!BackgroundResources.UnloadedResources.InterestedVessels.Contains(v.protoVessel))throw new Exception("Provider did not register unloaded vessel");
++        DF.PartInfo pod;
++        if(!DF.DeepFreeze.Instance.KnownFreezerParts.TryGetValue(podId,out pod))throw new Exception("Missing real pod ledger");
++        double before,capacity;BackgroundResources.UnloadedResourceProcessing.GetResourceTotals(v.protoVessel,"ElectricCharge",out before,out capacity);
++        double startUT=Planetarium.GetUniversalTime(),last=pod.timeLastElectricity;
++        Record("unloaded_before_ec",before);Record("unloaded_before_ut",startUT);Record("unloaded_before_pod_stamp",last);
++        yield return new WaitForSecondsRealtime(45);
++        double after;BackgroundResources.UnloadedResourceProcessing.GetResourceTotals(v.protoVessel,"ElectricCharge",out after,out capacity);
++        Record("unloaded_after_ec",after);Record("unloaded_elapsed_ut",Planetarium.GetUniversalTime()-startUT);
++        Record("pod_accounted_seconds",pod.timeLastElectricity-last);Record("pod_expected_ec",(pod.timeLastElectricity-last)*pod.frznChargeRequired/60*pod.numFrznCrew);
++        Record("observed_ec_delta",after-before);
++        if(variant=="patched"&&after>=before)throw new Exception("Corrected provider did not produce net EC draw; investigate actual load/generation");
++        Record("actual_frozen_after_unload",Frozen(vesselId));
++        if(!Frozen(vesselId))throw new Exception("Frozen crew lost during unloaded interval");
++        GamePersistence.SaveGame("persistent",SaveName,SaveMode.OVERWRITE);
++        var restored=GamePersistence.LoadGame("persistent",SaveName,true,false);
++        HighLogic.CurrentGame=restored;HighLogic.SaveFolder=SaveName;FlightDriver.StartAndFocusVessel(restored,0);
++        deadline=Time.realtimeSinceStartup+180;
++        while(!HighLogic.LoadedSceneIsFlight||FlightGlobals.ActiveVessel==null||!FlightGlobals.ready)
++        {if(Time.realtimeSinceStartup>deadline)throw new Exception("Reload flight timeout");yield return new WaitForSecondsRealtime(1);}
++        yield return new WaitForSecondsRealtime(12);v=FlightGlobals.ActiveVessel;
++        Record("frozen_after_reload",Frozen(vesselId));Record("awake_after_reload",v.GetCrewCount());
++        if(!Frozen(vesselId)||v.GetCrewCount()!=3)throw new Exception("Freeze persistence failed");
++        // Refill through actual solar generation; never inject EC or skip UT.
++        foreach(var part in v.parts)foreach(PartModule m in part.Modules)
++            if(m.moduleName=="ModuleDeployableSolarPanel"&&m.Events["Extend"]!=null&&m.Events["Extend"].active)m.Events["Extend"].Invoke();
++        deadline=Time.realtimeSinceStartup+2400;
++        while(Charge(v)<3300){if(Time.realtimeSinceStartup>deadline)throw new Exception("Solar recharge timeout");yield return new WaitForSecondsRealtime(5);}
++        if(!CryoBridge.Thaw("Ada Kerman"))throw new Exception("Real thaw request rejected");
++        deadline=Time.realtimeSinceStartup+240;
++        while(Frozen(vesselId)){if(Time.realtimeSinceStartup>deadline)throw new Exception("Actual thaw timeout");yield return new WaitForSecondsRealtime(1);}
++        Record("actual_thaw_complete",true);Record("final_awake_crew",v.GetCrewCount());
++        if(v.GetCrewCount()!=4)throw new Exception("Crew count did not recover after thaw");
++        GamePersistence.SaveGame("persistent",SaveName,SaveMode.OVERWRITE);
++        Record("note","Single-pod 1x probe only; multiple pods, depletion/settings, high warp and thermal behavior still unqualified.");
++    }
++}
+diff --git a/tests/test_cryo_qa_tools.py b/tests/test_cryo_qa_tools.py
+new file mode 100644
+--- /dev/null
++++ b/tests/test_cryo_qa_tools.py
+@@ -0,0 +1,23 @@
++import pathlib,subprocess,sys,tempfile,unittest
++ROOT=pathlib.Path(__file__).resolve().parents[1]
++class CryoQaGuards(unittest.TestCase):
++ @classmethod
++ def setUpClass(cls):
++  for name in ['prepare_cryo_qa.py','build_cryo_qa.py']:
++   if not (ROOT/'tools'/name).is_file():raise AssertionError('Missing actual QA tool: '+name)
++ def prepare(self,src,dst):
++  return subprocess.run([sys.executable,str(ROOT/'tools/prepare_cryo_qa.py'),'--source-root',str(src),'--qa-root',str(dst),'--pristine-archive',str(src/'unused.zip')],capture_output=True,text=True)
++ def test_existing_qa_destination_is_never_overwritten(self):
++  with tempfile.TemporaryDirectory() as d:
++   root=pathlib.Path(d);src=root/'source';src.mkdir();dst=root/'KSP-Hermes-QA';dst.mkdir();sentinel=dst/'keep.sfs';sentinel.write_text('existing test state')
++   result=self.prepare(src,dst);self.assertNotEqual(result.returncode,0);self.assertIn("never overwrite",result.stderr);self.assertEqual(sentinel.read_text(),'existing test state');self.assertEqual(len(list(dst.iterdir())),1)
++ def test_nested_destination_is_rejected_before_copy(self):
++  with tempfile.TemporaryDirectory() as d:
++   src=pathlib.Path(d)/'source';src.mkdir();dst=src/'KSP-Hermes-QA'
++   result=self.prepare(src,dst);self.assertNotEqual(result.returncode,0);self.assertIn("never overwrite",result.stderr);self.assertFalse(dst.exists())
++ def test_probe_builder_rejects_unmarked_game(self):
++  with tempfile.TemporaryDirectory() as d:
++   k=pathlib.Path(d)/'KSP-Hermes-QA';k.mkdir()
++   result=subprocess.run([sys.executable,str(ROOT/'tools/build_cryo_qa.py'),'--ksp-root',str(k),'--csc',str(k/'must-not-run.dll')],capture_output=True,text=True)
++   self.assertNotEqual(result.returncode,0);self.assertIn("Refusing to install a test addon",result.stderr);self.assertFalse((k/'GameData').exists())
++if __name__=='__main__':unittest.main()
+diff --git a/docs/CRYO-QA.md b/docs/CRYO-QA.md
+new file mode 100644
+--- /dev/null
++++ b/docs/CRYO-QA.md
+@@ -0,0 +1,44 @@
++# One-shot real-KSP cryopod QA — pending runtime execution
++
++This probe belongs only in a fresh, marked `KSP-Hermes-QA` copy. Never put its
++DLL in the play copy. The helper refuses existing/nested destinations and does
++not copy personal saves, logs or server configuration. On macOS it uses APFS
++copy-on-write cloning for KSP.app and GameData. Only the exact published 0.3.0
++archive provides the pristine test save; original saves are never read/copied.
++
++1. Stage the hash-pinned provider using `tools/fix_background_cryo.py`, retaining
++   its original. No runtime pass is implied by this staged candidate.
++2. Prepare a fresh directory named KSP-Hermes-QA:
++
++```
++python3 tools/prepare_cryo_qa.py --source-root /path/to/separate/MegaCrew --qa-root /path/to/KSP-Hermes-QA --pristine-archive Hermes-Practice-v0.3.0.zip --provider-candidate /path/to/staged/BackgroundResources.dll
++python3 tools/build_cryo_qa.py --ksp-root /path/to/KSP-Hermes-QA --csc /path/to/sdk/Roslyn/bincore/csc.dll
++```
++
++3. With no other KSP running and when desktop testing is permitted, launch the
++   QA copy's KSP.app. The marked test starts once at the main menu. The probe
++   validates root/save/hash boundaries and uses actual KSP crew transfer and
++   DeepFreeze freeze/thaw calls. It never fabricates frozen dictionary entries,
++   sets UT, or injects EC. The source save starts with the original trainer,
++   actual battery/Glykerol supplies and stowed solar arrays.
++4. It observes the genuinely unloaded vessel in the tracking station for 45 real
++   seconds at 1x, recording actual UT, battery delta and pod ledger timestamps.
++   It then saves/reloads, verifies frozen persistence, deploys real solar arrays
++   and waits for real recharge before thawing Ada. Eclipse/recharge can extend
++   the run to about 40 minutes. Timeout/failure is recorded, never treated as a
++   pass. The addon closes only the explicitly marked disposable KSP app.
++5. Read `HermesCryoQA-result.cfg` in the QA root and focused `[HermesCryoQA]` log
++   lines. The one-shot marker moves enable -> running -> done. An incomplete
++   marker/result needs inspection; do not blindly rerun or replace the copy.
++
++The probe is compiled as GameData/HermesQA/HermesCryoQA.dll, separate from the
++normal plugin. `probe_completed=true` means the single-pod procedure finished;
++`flight_qualification=false` remains explicit. Corrected net EC draw, genuine
++freeze/reload/thaw and all recorded amounts still require review. No multiple-pod,
++settings-off, depletion/recharge failure-policy, high-warp or thermal pass is
++claimed. Compare original/patched providers only in separately fresh QA copies.
++
++Current host evidence: probe compiles against the actual KSP 1.12.5, DeepFreeze,
++BackgroundResources and MegaCrew APIs; preparation/guard tests pass. The marked
++QA copy and patched provider are prepared. Launch was blocked by the locked Mac;
++no runtime report exists yet. Play-copy provider and original saves are unchanged.
