@@ -8,6 +8,10 @@ public sealed class LanderLoaderProbe : MonoBehaviour
     IEnumerator Start()
     {
         Debug.Log("[FinchQA] probe started"); yield return new WaitForSecondsRealtime(5);
+        foreach (var m in typeof(FlightDriver).GetMethods(System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Static))
+            if (m.Name.Contains("Start") || m.Name.Contains("Focus")) Debug.Log("[FinchQA] API " + m);
+        foreach (var m in typeof(GamePersistence).GetMethods(System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Static))
+            if (m.Name.Contains("Load")) Debug.Log("[FinchQA] API " + m);
         foreach (var name in new[] { "Hermes Finch Vacuum Lander", "Hermes Finch Docking Cradle" })
         {
             ShipConstruct craft = null;
