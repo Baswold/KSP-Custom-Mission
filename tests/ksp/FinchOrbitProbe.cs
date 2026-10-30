@@ -10,11 +10,11 @@ public sealed class FinchOrbitStart : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(5);
         string root=KSPUtil.ApplicationRootPath;
-        string marker=Path.Combine(root,"FinchSpawn2QA.enable");
+        string marker=Path.Combine(root,"FinchSpawn3QA.enable");
         if(!File.Exists(marker)) yield break;
-        File.Move(marker,Path.Combine(root,"FinchSpawn2QA.consumed"));
+        File.Move(marker,Path.Combine(root,"FinchSpawn3QA.consumed"));
         try {
-            const string folder="MegaCrew Finch Spawn2 QA";
+            const string folder="MegaCrew Finch Spawn3 QA";
             var game=GamePersistence.LoadGame("persistent",folder,true,false);
             if(game==null)throw new Exception("Disposable save could not load");
             HighLogic.SaveFolder=folder;HighLogic.CurrentGame=game;
@@ -26,9 +26,12 @@ public sealed class FinchOrbitStart : MonoBehaviour
 [KSPAddon(KSPAddon.Startup.Flight, false)]
 public sealed class FinchOrbitCheck : MonoBehaviour
 {
+    static bool attempted;
     IEnumerator Start()
     {
-        if(HighLogic.SaveFolder!="MegaCrew Finch Spawn2 QA")yield break;
+        if(HighLogic.SaveFolder!="MegaCrew Finch Spawn3 QA")yield break;
+        if(attempted){yield return StartCoroutine(Observe());yield break;}
+        attempted=true;
         yield return new WaitForSecondsRealtime(12);
         if(FlightGlobals.ActiveVessel==null){Debug.LogError("[FinchOrbitQA] Practice vessel failed to load");yield break;}
         Debug.Log("[FinchOrbitQA] Practice vessel loaded: "+FlightGlobals.ActiveVessel.vesselName);
@@ -49,11 +52,16 @@ public sealed class FinchOrbitCheck : MonoBehaviour
             var proto=game.AddVessel(node);Destroy(dummyObject);
             if(proto==null||proto.vesselRef==null)throw new Exception("AddVessel returned no vessel");
             Debug.Log("[FinchOrbitQA] Spawned disposable vessel id="+proto.vesselRef.id);
-            FlightGlobals.SetActiveVessel(proto.vesselRef);
+            bool switched=FlightGlobals.SetActiveVessel(proto.vesselRef);
+            Debug.Log("[FinchOrbitQA] Switch accepted="+switched);
         } catch(Exception e){Debug.LogError("[FinchOrbitQA] Spawn failed: "+e);yield break;}
+        yield break;
+    }
+    IEnumerator Observe()
+    {
         yield return new WaitForSecondsRealtime(12);
         var v=FlightGlobals.ActiveVessel;
-        if(v==null){Debug.LogError("[FinchOrbitQA] No active vessel");yield break;}
+        if(v==null||v.vesselName!="Finch Orbit QA"){Debug.LogError("[FinchOrbitQA] Target not active");yield break;}
         Debug.Log("[FinchOrbitQA] Vessel="+v.vesselName+" parts="+v.parts.Count+" situation="+v.situation+" Pe="+v.orbit.PeA+" Ap="+v.orbit.ApA);
         foreach(var p in v.parts)foreach(PartModule m in p.Modules)if(m.moduleName=="ModuleDockingNode"){
             var node=m as ModuleDockingNode;var decouple=m.Events["Decouple"];var undock=m.Events["Undock"];

@@ -155,3 +155,9 @@ invalid orbit and threw while loading the vessel. The probe now supplies the
 semimajor axis in the correct third argument and uses another new disposable
 save; this is a fixture correction, not evidence of a defective craft. The
 separate part-snapshot loading exception also needs to be retested.
+
+The corrected-orbit probe switched to Finch, but its flight-scene addon then
+incorrectly spawned another copy on the new scene. The disposable run was stopped.
+The probe now guards that spawn once per process and logs whether KSP accepted
+the switch; the next run uses a fresh QA save. Until that run completes, there
+is still no valid stability or docking-event result.
