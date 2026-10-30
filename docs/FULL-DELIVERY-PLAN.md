@@ -391,3 +391,29 @@ Read-only scientific review remains available to the human pilot/engineer pair.
 One Interval (`d83734c`) is a proposed routine power-review dialogue. A flat full
 or empty store is recorded without declaring balance or future endurance. The
 scene grants no mission achievement, physical repair or extra emergency.
+
+
+### Full combined reconstruction and morning worksheet
+
+- **#8 `c170bfc`:** `--operations-ref` now reconstructs the full plugin from
+  explicit Git objects: canonical host core17, allowlisted operations10 and
+  navigation9. It also supplies the corresponding focused model tests/runners.
+  Empty/missing operations refs fail before output; collisions never overwrite
+  core files. Navigation-only mode remains available without that argument.
+  Sixteen builder tests and 22 total Python checks pass. The combined 36-source
+  build and all 13 focused suite groups pass.
+- **#8 `7145244`:** independent audit verifies every host source unchanged,
+  every addon/test blob against its pin, complete manifest/tree digest, expected
+  MegaCrew assembly identity and no packaged KSP dependency DLLs. The candidate
+  remains a local review artifact; no installation or live qualification occurred.
+- `docs/MORNING-QA-WORKSHEET.md` orders the permitted runtime gates: actual
+  time/desktop check, fresh separate cryopod refusal/automated profiles, duty
+  refusal/recovery, inputs/persistence, exact-GUID full Finch, stock-node
+  comparison and telemetry. It identifies unavailable prerequisites and exact
+  marker/report schemas. Quarantine old QA plugins only in fresh copies; use
+  one intended probe at a time. Never reuse consumed profiles or interpret a
+  model/compiler pass as gameplay evidence.
+
+Verify the Build is a proposed ordinary handover of source/probe identities.
+Its test results remain blank until observed; it adds no campaign achievement,
+animated interaction or emergency.
