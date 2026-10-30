@@ -46,6 +46,12 @@ class MissionControlMathTests
             Yes((Propagate(departure,eccentric.DepartureVelocity,duration,mu)-target).Magnitude<0.1);
         }
         Reject(()=>Lambert.SolveShortWay(new Vector3d(radius,0,0),new Vector3d(radius,0,0),0,mu));
+        var rvec=new Vector3d(700000,0,0);var vvec=new Vector3d(0,2300,0);var impulse=new Vector3d(1,2,3);
+        var components=NodeFrame.Decompose(rvec,vvec,impulse);
+        Near(components.RadialPlus,1,1e-12);Near(components.NormalMinus,-3,1e-12);Near(components.Prograde,2,1e-12);
+        var er=new Vector3d(4,0,0);var ev=new Vector3d(3,4,2);var edv=new Vector3d(-8.2,.75,5.4);
+        Yes((NodeFrame.Reconstruct(er,ev,NodeFrame.Decompose(er,ev,edv))-edv).Magnitude<1e-12);
+        try { NodeFrame.Decompose(new Vector3d(1,0,0),new Vector3d(2,0,0),impulse); throw new Exception("parallel vectors accepted"); } catch(ArgumentException) {}
         Console.WriteLine("PASS: light time, periapsis reconstruction, circular Lambert and independent RK4 propagation.");
     }
 }

@@ -58,3 +58,12 @@ times from about 0.2 to 10 characteristic periods. Independent fixed-step RK4
 propagation reported no position or velocity relative error above 1e-5; the
 worst observed was about 1.2e-10. This does not cover SOI transitions,
 near-collinear cases or extreme radius ratios and does not validate KSP frames.
+
+The `NodeFrame` helper converts a world delta-v into radial-plus, normal-minus
+and prograde components using an orthonormal velocity-based basis. A Luna
+subagent checked the signs against [MechJeb's source](https://github.com/MuMech/MechJeb2/blob/dev/MechJeb2/OrbitExtensions.cs)
+and tested circular and eccentric vector round-trips. The radial-plus vector
+is perpendicular to prograde and is not generally the direct radial vector in
+an eccentric orbit. The inputs must share a right-handed inertial frame; KSP's
+Orbit coordinate conversions and `ManeuverNode.GetBurnVector` still require
+runtime verification before this can safely write nodes.
