@@ -1,0 +1,1303 @@
+diff --git a/GameData/MegaCrew/CrewSystems.cfg b/GameData/MegaCrew/CrewSystems.cfg
+new file mode 100644
+index 0000000..b3c5652
+--- /dev/null
++++ b/GameData/MegaCrew/CrewSystems.cfg
+@@ -0,0 +1,20 @@
++// Only the MegaCrew save prefix is provisioned by the module. No other saves are changed.
++@PART[sspx-habitation-375-1]:NEEDS[StationPartsExpansionRedux,CommunityResourcePack]:FINAL
++{
++    RESOURCE
++    {
++        name = Food
++        amount = 84
++        maxAmount = 84
++    }
++    RESOURCE
++    {
++        name = Water
++        amount = 42
++        maxAmount = 42
++    }
++    MODULE
++    {
++        name = MegaCrewPantry
++    }
++}
+diff --git a/GameData/MegaCrew/Plugins/MegaCrew.dll b/GameData/MegaCrew/Plugins/MegaCrew.dll
+index 9bc3535d0ff1364cfe83421e77dc84b91065900f..158898f742a5d4bce9c725a25c221b4c2b359088 100644
+GIT binary patch
+literal 62976
+zcmbq+3w&Hvo&T9T@5ytLHffta(w3HKlk^EREl`psX&dN^CZ#O}VVX?a&@>b7BrPQk
+zrYHz5qWAzo)CF|K7b~t0RCa~+i3+%iF0KON>aOVSs_SFb)%yQ_f4_U?-bn(wpMN#?
+zp7;5k-~0T|xx@C$-(<qZm<ay<^e1B;!JGfu<oU{v2~<}u_;jWDSn|n*kA${8xv=-h
+zK%sHi%^!BN#~S;xLqqwI#)G*=cXX(6V5qTkXHVm?e1C35MMdf?Z|GfJ#%v3P&DPEz
+zUSntbzFE{*7FuP@f1xC%rOV4h#xx?`h_^A-l6Dks77%{<cQxu!&VOOkb`zWO|Nh&{
+zvIzg4Een~QOkmsxy?)FV|Fwloc`@^UNHiLg2sBS1zcr9wF_OD(1o>6}fd}ejt&`?Q
+z@zpEbg4>5`fekRqLVu2ez`r(-YlWK|%%h>e3YY~4zX~)$674pXmY_ZHihqR7F;VmL
+zyfHt1hcQ|zRsW|)?W%}bj?Vah+Bo4%+?bTP0hmZNFV7_TTAWGYwWKAs)J3CV7u+}8
+zkS}9Z!WlzRq$yONiZw@Df5e$*y`c%CEva*7qTT&V>fHr=m(`WGegd`e#61<p$zau~
+zd<7oKd?lW>(R393??8i0m6U=5QZvqkYGdhG^9<u+$l+urjlxU~9;RvB#kz+JwaC;)
+z(h>JG8{}uO4!OT#P5{UNid0Kv!SW_&L2tg!tH1k|>J_?lBwvr#OHHDFUwI;a`@lu*
+zfBMs(oceJtc=;kHGmB#_H?^z6W-;IfE2JfXw6Tf(ZBAx3+GXb8k!mtAwvQMh0$5C&
+z2++3LICbNzF{tB=wcr)zX!y6k?Q%^uKH7F*e+KPi<E(GG0S#A9*KpRi+79f~hO9@k
+zRns+V{93UY>+Q787=dUhTRitm*W&-DE^118$=g1Axi>85Uv97l$7}(JvIeL5La*z&
+z3YS7Xaar3rXDI}JL9H&aSa1fcQ>S=o0ABtDV?r;aJ^nk#A>Lv$G7Z39%TkLNV^+_x
+z=^1USDl>Cg9nZ|e%W~pdh(TuzMUnh`l$SMKSQE;C6I10*Vhl@&uve_5(&o@IhRzkq
+z<{61_urLFFVg{WXIm@S?uc`^1sROYa@(WR5zL!~qmotWv$Qg&M*gOaP-ONso)S-U3
+zecw16fL%-oob8w%bMZS3I344Fe{RJ)%5?`pPBp!%#t6t|ChUF~qvV0NRCz*pJuZt-
+zhEKSkLTy}_A`d;CG70xfQbPLLl5a@~X`EleHU^{1n(oG$Ov#!6rUz%GIeJpzB%l8S
+z%Awu?rw7nd43w%XYkfB=3Oi6)o`}Wo89$F}RqQ9u#CD>*a5h@zGk8=atynuvhZAFL
+zD&Xgrp|U2D!Q82(UO5+`<xwq9rXxOoC(}{QaFt#UE>e0VPjRIg=naT)ynbI<JO&Zo
+z2NA{u<h8$t9LKqqAd{6Rn&Wj9tq-71c@*nPc`e33(^MW30EN@k4@g%q88zvsD6%|6
+zE>#<AT9c0D0Z^(oo{m$ZQeja+&B=5;zXn+_d~G6~XimjYzZM1iQs{9G5-neNz5?1V
+zfvmC?<~Wz-ZvlZKXX?Nqmg!=PH{7=B2e+T>+PE)rCQ_SBC!6OR$A$hK4!iXsGn@fl
+zQ{!N;2$u5<RuL(ix{OpS^q{Fp=}O8>x-77g@}|S-a$QM9x}tO?6~&cQrYoB-GI2EE
+zQbgC)R;4SJNH$%yf1Jf}B+BANkk5qcpxCR^)y<Lmisv^NOe4#G6P90&<(J##r)2pX
+z4uELDK&k`-brnq}DSV2)4m^U3ZZ{QJ4btbDYyU=h)-kg~BX0<K<$o|AdN3q1M_#@O
+zZDHloCft0s6IPW#CD1ZEtcoygOQ|RTv8ooQX}2SW#p93fUqmArD~mU8FyXL>pjXq`
+z<|%D3M#LM-y@a%Z{3vZaJwde~cI5vDCR$l<=C7B+MDdsm6U!`2Z+uypsGH6JHms0%
+znj6GObEVCBs#83GZ=$v04;U+pufGL(Q&%3;YZXl$HDS?f)Ry5D%bj$@*T~Hc$We4#
+zYKrBYKnPGLenNy68ACJzjV&JoXM{_XSAyI{x1kae@i^8dV$gH}$-{wBt>#vV?om7L
+z);eamDeA7rYYK%xAl2I!n_c%<y&W}IL8+&R8}}~ug4Srtw6e&3yfhzNf2#FS;KZu-
+z1xe3cQiV=`X?cWx)2#R@GLGAZTxLB6y?@DUce7N@iJv0<f>jOftE6gf{1h})N!2{}
+zI;ooP=oGY*v6dyGoFXlC@eK4ztR?Q=h*ntt{rdWVzCO*anGKjeusY9hY-m-%EVUh0
+zot}?A<%#txfs~hV2`lPqBdt-?L#y8dMe6Y=L?PxU<5SgEqG_Nep*kyR(#e3%N;R!Z
+zr&MQ^rOQNT!A8&ntSyIXnPbv16pPXYhs2S-0CoFn;|ASC2R#NI1h*DhPX#Ab1>X)f
+zOOz;}29Iv(C~5X(;%UjOnwa|(Qbl?_BgJ!S;(_AH*o41YzmKAjgn|0SnLqu>{T_$#
+znQ6HR!Eiceg?ajqR<GR}>U`4bwS4IKk9@u6pko<%QhoRZnG3N*&xNXy%-BYh%svwm
+zk)p?wm;pk36?D1*#yv74a}g0nkG#tLa2%ktAwR*YKz&QCWZW0fV8N_>JDN0wW~AV(
+zZ9=l8DmG(Az5}Vz84w-Rl*MOc$P&%9@v%<4l}*I6qeY~=M&mH7TO4ix;754P8xmt(
+z(oNrEn~~9~mhg<GnSs*$7F3OG#RJ0tsgPOf`CG9r>^9OSfC#KPiZwS~yWpJE*MW^t
+zrW@Vd|G`>f`HPVxw3l!sVqr#Hy5_f`U=&_|2tC(L?v^122(>J~HledA3fKoID1s$$
+z?E+jdOz8rKjipR10A5Q%k$^tqZ~!8)F+M#S&Q`xFb|$tR9euxwIBqiW<y`YyFgCVT
+z9uI)dFi+9e36w4v$e>%QIVIk*a6lcLo+@kt!kB})k#8r1?lDqRXm(+2GR>NoJDF-U
+zX<p=v!9GUZ#R=eU3@%`5Y$qO~LGxH6{T-k??wLC7f0CvZJPIn)_X2KW%{9uaWkn!h
+zYX#&QH1uF`PQek6G~R=f%%vE2!HoTx-FP3(^x$c{YHUnQrkB+jTfN7x)<&7jP_hWf
+zF!GSmj(SylQMEs_56{egJ}$?@8{2Df040IWoXd8;0_kAqE2VSe6Tia{V}#y06RRcB
+zUWE$xTwrY08-QQzl>@V9u0kbLidV!jGgq@Hlf`qK!z^!D6*Eu6c?AVvd$Jfv)x|-y
+z5N9xsEv3-W8H09@Xl)<+Gixy_6fCp*t5_V4IS^l)f(Be<+|lB&t>|bn{qoH5*}4al
+zd(=LJ0(T<G{Rbp2B93Q3dCjxYfLqW6%bIG{W_ea^_Ef7j$Fph;Q?1%u_w5{TvNCn=
+zMQLDq_l}g!3vyr<5VVNVCdBLt$gkK{{WDtT4<p@Dk#PUhX1FIzxZyIdt~Qcz%Ziz3
+z!fmjb$-Qc033rLDtc@pWf!1@MWZab~4#4PH;&jkHt7K-55ZmtdVtZKw+;OZS&Ztbx
+zxF<_1>5#J$CLm_&bpUUIxchFjg^7Q%v`baGO1eNxLdmN?&^!$^+_nHN@!YH3KNSZN
+z_DIKS)9Lj3PKc**BNZhJOeYkMsiwT9^}o=*rbexKtx4DB2e9P)HF(s{X#E%~XJn2t
+zH#0qRY!C^zje~=Jsg_z>blet^ee2S7%{O2qRYt;|528L@d+HcEWrq0R?kGS3P3BQ(
+z+=q&=3$p9e_01_KJ+nRoLk4s|T3S6TJxi+Vv^q1)F$nXuNNi|R2WiHcx`e-X!)l?<
+zQyXGhSySRwcoc*As-2ylz5cHSonI@?DX0!QleKf2hHK`iH{FnK;2t&N{+#Vy%+cJ5
+zB5XP%E$2H(iF`s^$C{gqS#bvExxYsj+aisgiV<Rf)_HDvZgUb{GG`G7n6D8PEw6)5
+zG^fP%wuE*Qm6ibniSyF));|ea0&+1HSEE{t!&0ZHA5NhR`XN)m(6#ex<_EpoS?=FR
+z?QHcL@*`-IAH`!a2Q_VPY&#%bKFVp;SDxcOB3&ASU5>wEm$~j&*hN%|>>1piDl_bi
+z!BRyu^mqdO!Nfo^1f@u-XzhaZg7psxsg9yYfU(?<m*z`I*VuXm`qVTk^%fc@z0lu=
+z)-FmfYCdG#*H?ouUU?~DY8R&$H*ds<klTpYB!3+sq>P@GKC2nQwqVss0lt15{0R%7
+zYcQ?Pk}7rr;f;CjdtP=<GQ*PelJ)l!?RB+FOV)FCQ(Mj1x|ocU&IH)4p_mnRD@WyO
+zK%q*mc3FB^b1c0SPViFnZv>bvp9E{2UBX&Udg-h+b1k6o^0;OB1OSCTo0FE;4R{IN
+zimL-|IoyV~!>h)KjU^+Rbi8(XdU^9Q<35I-0jfEf3@PkBTUu<A&^VEns&uraERE^Y
+zac==l>89pt_dreQAj&tOu(u~v1G<Qq^B!$;HzV~}d*ONjnHeK}mYeod^!1JTE*@XP
+z`+nGQaG?BS`9I(h!l<8}RL;QZIO^#k1l#`=SQRdxc^2<r`Dfq><T1{2m~vZAzv9zq
+z3r55L!+C&`iU7}4dcZSP<AND8Zoo9D8TlLVq=)!wyy2{IxBUm8Kq&D1^|A1b`~+&2
+zI(DPvo~jiI=YVfU5(7RcC9~W|<vlx`2fwC#y?y_ZIqnx(<%^_wz7fF$_g5%Q<WHk@
+z{zg3f{knPH##n(R^Y*(<BX~Mgi*@C&)*7xW^BVN<oau7O<bl#A_|IHT11jMV!!>o6
+z&+t~$+Kj%j{7szhW<0#)>yTUo?b9}MR^}F@%i=ej1Fl}uQor<uwMd+aU4m|fTT!)S
+zf;Eg*Ho?Nm#`kl;Gd8{t%qM(NQxnbn6&mJ2y(aF4JOJk+7|40UV{c%sfN(of!g=+K
+zF*Z9*qdtx=2h7l->DbsC(F!|KcUVehWBfOvq&88La79htA@y_I>sjw3*wfIzM`?IE
+zcYdiSTuq46_}kXCuw{;0J<~(j^4-vqZ^i`1{VK{bqBmiEcy0g$>$!m*E>+y{7POn?
+z?MA(`0PbPX+&f>$;2b8_-0-reP*6&Ggn;oQW&!%a$p)R@ih<qZb(kM2FXi6I)Z38K
+z#<i<L+$WnE()P|`Ib*}+AQU`|v}s%j%FB)kdl+t#lB%}G`PR(~wJoFm(bn&Pjby4+
+z%o(dBy=jAG3%LmR0HJXt5F2NWlWCEhSi5nsWkk2@EeS!#{Iw}L)Tle-P~&oQoUE&_
+z&)kLajPxmsJ7es&zubvSe<zWFfb+}&l8aY@K2FRe7GsI>Z}ohe#+iw~;i5GNFjKS@
+zVK9S*0)>&pzHz=vlzgJ~F${<J3-FA+25d*tSM-e8d08rYPd#!!5p9JSAXp>bNOLU`
+zFhBuMh0COGo<o}=$Y`~KVC<LUvvH=qqGA&upOKvwbQ8B{oWrJ*b>nOBw!pX_AnAb@
+zjk+rQjmT~|M}06vcCcz2TzAGmdmAw|=DbSank8qV-h$|W&oWLCh;i0B#0W^BMmPU<
+z3}3gp$~zsZV0WP<{PXqDTWDtwhyJ>4-#F{Nj&~EURZhA};&kLLM#{lJV$AdRpn554
+z-QSe1scA)KGv;qeqT?1Mh)_7>&Gn9Zc|BZ+D)&ab#PJmkZDjgEXAJz$gR7c!O>+Z)
+z62G7b8xF1p$Jqi$#Mo>)W=80n|E{s72FUWeu#P&)i4FQudm;`T$C1!$b&+!bi+^%b
+z-n6^M5of=`B*)%?*7<w6-bhm;4m;k-BqA<(jO!hn2=7Pg%bssV{ku`z^3O2jI1GWM
+zu=K)+=d$L#sBucX={kvsK*7QYI5<jg$*ZYzpk1!IRnyc17)*6dIMW4qML{t3{Y#WX
+z`EY$JQ4Shlph*6&F`K2weUh#l2X{rV>83aZ7=z-2Qs|jrsj!QNaq9B-V*rt$abU7U
+z)>2JZ*(kAz`^*N-5eZ}gSTMVaSv^k<G@|IleE~rO%17}8@a@1{X%rVRN1^u#Gx)EH
+zC+fvd0w1#kAIglfcwhp;uE(sYrsWpo;BFQMwMO~ZJGK;G)C(iGJUL}{=pT?IqC&JP
+z?tT%h+qB3%Ig9Riv8DoN01p6r?l)2HbGAC{i(r`B>oV^_y){{OO>@k;OD*k_=5A>C
+z*<6#vpjzgM0&Z9_Q{Hn|Otw$F<}iRRnfGGk%-`TaZ?3IfgHBiNKZ@Lv4m=W@#I18L
+zoekjLhj#Fhrdkl_aI%$WR)D8yYZ*p&PQfdSH2&7XM3<uPlwg-szn;~-tZtbU>|(W!
+z@iM_KHpuKn*I>Nra^$_Kz0L<vg0<L48RtT<OFCaMsq>Z6x$(;q?2`G<#1>+88tl3j
+zSnz{g#o7H}S8>eD)fmVNcCm0dX0KfpHA6rPlnLxQ5>1&rr*r>~$d!Dn<mb&X!}VTF
+z4RGJMNhio0L@o6aWRa-WZ92FNJPy4J%j|{79z?rwDRjmX#nL{OGF!Cxpk=kY43h;W
+z*U_M`LB*tK&={_%XlebK5F7}ULX1&*SWDsci0gpzB~rdq%MqIwuL0%Dq<o#0&q2BP
+z0#0U~lrPZo29(niM0*$#jE`t5&=&JJ^Zi7Pw~h62^%rhOfcvmH4~z!Yj#wjJ!8N;W
+zrTHLjel*uMCH9*U+@+3Gmj<+`r<cK!`u(ary)CIT20IF(u<D)wdfi`_jyFS_X!F|#
+z>i5fC5)j58cwfoDN_1R9f|;R&aRSvJ(RpSVMufUV)JTQu`DFeBD5>?Rt|6>6AZzsD
+zOL!1|kPV|=L?9hWN5!8NV!<_u3U#XNsJqa3X;X2M4>4QZvdV3vk~wZ4zzIJ>ZyUD4
+zS#gtqHGmawtLnwk<D$c0`W0AbjOGa2trhcSyETZH_9aCmP`sE_U@P#g7a1s^PF>2<
+zK!<xLx~pRdF6O@-2)m?eQo5g5k8bWiat1h_!QdJ=k^9Q~!p6XQf`?icSTIy*Z)z;f
+ze{CV>p*3`4i>8iOVsBch1Fgw1nGa*?{6oe0{}w3|G(;_PZ4RI?g78gDfQ{%M^)+v?
+z87{Z`RsTSi(QO{cjx_-$9>Z$EoWzvyv+e7y#z+$FrnN2&W$l!z*>UlJvBiyRgf1?Z
+z>zbO~0o2FE@%7ORQy0MUX|xb5PnqB2g9X7=P8Z5m{&4?}1BpryhTt}4mBp91BaZtV
+zns~%Wp5;wj5@d1jWU)U8{I~TW1H(hKY(>|gHr}+ZCa&9tgp&?j!h&yLvuJI14ZPC=
+zWrsax4BZ+*$(G09D8x%#^>l0&go7K53dem0fCy+!EA9HXDwR(!0hMREtCreR3ik>m
+zeV4%~F#>^8kcS>pOWM7cEsM*u`xJ)Q&!UR;WIpo|vYK_MHeB;Z2{@JdRMQKo`{R-c
+zWIMAA4kyJ>8Q`%Su|p7_(QP~1TcXt$?n@}~!K>xg1lnJ=A|7aNZ3ay`0j#@>sY&AL
+z{+xxrU4Xcn_H*bj8}oY<qodh~Ocmbz$MPNcdnXb<4U}^~@CeF5!nCQQ!6}lytmzVa
+z`7RM&ah|<hM-gn!*c?gUGAAK{!IqjtV1J0Ed#8vIutUmT#rqJrq4X*qSw{>iV^LQv
+zx7?5k*NeOB-5Gq$ZIi8}<Nmj8;$hR<<5Zh{N34GsH4CvuI0(>NFEo`P%5l$chHRX|
+z1|gDJN?vf>tdzh-wk2b%g?>7lYi)MMScL^hcAkID;k>l(tQWVLlqA@0s84%__G%0d
+ztrCl8F2HyYjF|gb6nP=<S?(94es*l}?nma|^wUe9y@-d(+AeS{VUC+@u`!<j;oX@i
+zT|BF$v-f`&&Tflc9`~-FikjzC#Ub1lw4BUGrm5QfEz5mYS|pCKxF7DTSCmva?k`Z_
+zoPy_VQRP;wWC?t{V##VLf#+dM#@HUFTJX2g8DnGY0wlZA8DmTA6D8Yd!yVYc&qxQh
+z^KnGobT3YyX|=l_lO%YtaHGXl8}DC;J$no4CNI>TyQ*|48ZD;W)UJw~OGq*PQ$&cL
+z8V>lRTRS|TRE%FFvTH$gp!Vn1V|^G*f2q1GdS`eghJ*>lUbOLj9Q~tc5YGG^p3O7E
+zJ2M|cqNN;(k0Sv&fTGekR|9-!#*Cp7?46Lx;C7t{oXO@o<JPY(Syt<9=%fu(b1ehr
+z(S{5-_6f|w=%QM}*|Gd5Q7{JiN9i1|v>|rtQz$r7cLY1|{HIwbamE0L6i<I%Z3q4g
+znyK28Qyq}gH+-D%Ez%GZK8l95(VA#!H1mT}-4M(FJ*&aB;?>>1WUl)-YbMVhlcS^=
+zXTtQ*);|cm79o1tgJ{~rrYT_kvjuAe^X8Ag;v(j_KebS@_1HfYTZ^bo8hfrAUo#El
+zo^OD=KE+gdFw#<+Xgcz;x1`RSd`rqrV-EkKR2^<~diSKt684r<dGV6e<1ceb>W$FI
+z(_fNuS8@$Y>T5!!zL4IJnqA`ri|4pIr&}=uOyf9lr{iJ=8y(uB{|t>Dbi_1qpK>j9
+zPowDS$GIL~6TOV-ePpd|br3YbrUVhNdX3h&zeQcCqqFYZU~61%e2u^$b`Cc?&WHN&
+zuj617xWJk=F?4C0qoGp)h1{*fRqeN6T!~vIG%VvQF3(PVjt#I#>_nQ;8Qb47$L&4O
+zD}<#jLtS&)eFR0iXfB7Y3O%}JeqX>AUTFWUb;ZM1w+-o%kv*S5hopau2Jnx6jaLAj
+z?%Ay+dDVT6xfcit3;t8<OB%TUTAKIhk&^w2BExe@tIxL`J(9qif!kelwA^co4Mc&u
+z(F<({&9`nW%^$d^B#*l@VbcK4SV%aH972qJmeeotSXyt#QmoTrV(P8tA45AT3!>F&
+z8j98BA4f?=(yRVQWR`jv_bY9fm#$088m)GJSS)GuN=&<L6L;&72BsJ3>pa$c4!upX
+zF8_JH?I#Eu4r$D~)b(-Pt>{rg%ID9=v6AEd56Tfzy%A&hA#gd_PDhutM3&BIii&QQ
+zO8vM-4$)NB=9v3FV_m<HdHw}+KA1T~9L{wlD#Y06EYODmzDh8e9DvBd2Mh}&D%$!R
+zARBi=7H;xB*C~s;Ymu(kk8$E|2Qs>sw<SBJgd0Hpz9H@&kP;xl`*tDj9+eWtSM~db
+zxO<b7&`-7{Z;=wRzW2q0N<jV#z(sk}O!yIBM5+S!V$jh0cnF1GLSf4fpvw?UhMKWq
+z<{*C{V0{XX25c&9kcqn=!~pVj2Dkk3eMUMeL0#{Qq?r40v_KiRg9;wneL>40)80Z+
+z_DwD0=0kx-*}rPpieg`bxf?O}hU=6U5Dy160)R@4^vi@U-c*n6(-TZ4;_k0GQbK`3
+z@mEmX@_pS^fp~TR>}?=R@Mq)v8Z2fYg7CXy`LCk+QuBNU$3AXZ2S!TzY^9vzxZNlh
+zHY5|Z_v?P)5ir0a{QV35L|NkvfX)Bl?>79s1}qXR=e3u!Q2zNqIkE;`ws{g|zr<e#
+zY30R;`ELvcGYENBNHbppq);n}27y1_cUzdA`x+X0O`b#(9QaDOF8bWxp&}+cntuuv
+z(9Gpt_Gz}mjWPIxz(_2U;2Uj;%KX<+SsTH%^rrp-!a8uZal;tlpL@pFfmpf)O5>{L
+zrKnTe@K5N0Lm7!;<CK=o?4=DVY`UcO-iB9u5<L(@!bTVyf^_8efi-W9iO|S*E?yk#
+z8)&rDsq>>@Dp7JnGV@JTYA7t`QnsYyl9rmK3gF~3h?t0*H#%ibzoLnW%z4EWJpCjm
+zCW7Y`Q~GQ%rOzv-2zsC5#6;K>af!OxB+ii&>Eu1N_=F17jKDFG@K`#D^&$k2PGG&y
+z0o@{Dpns~itgg1a74DrW>?X#s<4u>P%kLQn%i80Ubj6uiPZ8zdlvFLw-T2)R@47in
+zr|`WBn~PKmjOj|bH?Od#D{Va`RO;pHN8YQ_14geqh1GVa#OfMtXNs+@rR?h9_}m3c
+z!=Yum4EMcxh2C*@by5XF0weA%NCpBE&(Eu^1_$4U(sZ>iZAA&gUL9!TKZu0+Cb;++
+z{K3T#*;oo@hjxkaFr8=bJK2!`;1MjuY<Mlw7o;cRNCavef)_ljLS#Ca1qp&#Y_$-f
+z=h(ofw?FYd+JirYZ%1_paq1al&eRRsjes-8S;RcrjS6kbV;BP!_|^pQ=)b-G&TVgS
+z+ajjrEo`Hu{uyIgQx1k32v3!pg#U3sMbrAEei{JlEuRJioL)#4z77b7ccN-7dhXjB
+zi7<VEq)k#k4*2ZzWw^<lw4Vlq^w{yu8i$Db`g6J3&ON5<9=T!wUANJ=AF(k7$6$Xj
+z4X(1f5`Qb@ex1xfAELR-tK){DxiydpT!Y*8$F}q41*`mR$nT=<fln<Fk9Ew|fC03n
+z&h#TSsisvnm}*04V6RxqG`B(F;Nsh|=jYo~ye|O_rSY!%3Vx!c=ZKZ&!b^1hr1MLd
+z8;ry_k;1FDU7)Vxh|fbaPo-)_>)TL@y*>$B8^Hz1z)jI;Qx^AIj<N;{SgwicS9hXM
+zyYShETxD{f2R`%PVl%|k^@cybH{u6(+fbPKHXiP8(54~(&qz`qGYTnDCtlFG7KJT$
+zVx7^_3!P!T(0P>_V|<Mi;DuOulSx4QyuC}e8TzE+!7<I|!Dlr68{^D%#wd~X`$T1{
+zbQXnRT!c_X*-dnrVMy&nn|Hd2!Fe{zJwBun_HK+a-Mrq(tODtpSL@yS<-SO*o^R8<
+z38G)m;&g_ZUR-f?+pfiUI2)jVhxd*1r4Y7MI~nLYe5dGSAS%3Q0J@dS8GOvNZeTZE
+z%G!n4)<I=v&Ox(TYib==?&&gDe@3U`w+F?pe}W3rt~eO0Na`g+rzQf-uSOr#5e-G8
+zc!yz#B}c}omD15-)#}+ir|}BMW<0dz#p~aC(dBYNq<5xf25)b0)Ycn0xz2#)3ciEW
+z?P!y*oP4<ncj#QgV_LTtA?DE>cxC+$$h&p5C7X#_etcY}&LZ@_y#iAn2ywa|yD@y5
+z_V#J}KxZ|E=-f!w<HyHklU+UNdOdrut!!FcQ>oLy%uO0yZjpp>xgSkruxBt>WyxT{
+zc|U;pn&W9Nk|Z}tipy@=uT<i(Bd?8I3<D)Q8SZRrYtyxeK-Z6h7@z^4&2s|vEeO<0
+zW9k)3*o^cHMywU1;APdFZw+1iyxuc$%>RZ~HTiq|`@vwa=!nPO3<L!?rO%h<OOM88
+zsu&bQU$jn`-X4@K0-Ol;=eF1(4{ANk%r01%mBN4ZYAsb|O*Uz2H|_P>0=nxVntLC{
+zEZLY9_t>0Nz0_#yQ)DHPSd>625RhxzYJq`m#YYz(L=*P|C{(HRxE+UZrKdv-7fp^?
+zA`;NFnKH2uQ?8k1Q!C=`S1=y7o&Tb*pUCJyFKpyJx+BD--UU{B;m;Xk138w2-E4WV
+zD6?|jx!nCd2RTI%@}oNL((b8HO&^uf;dlm4XLyBi+b=G`gL~u>n<tS<MN&I^(ugzq
+zM~ZC)hgwa><(W~n`}8(DRG@k;s(Baf>{3OCXvo1Gf~@c36<|Dj&hpcpCB@)n#-xrw
+zAuJ=mhTV%Vg+zmF*mt;BAg!8Ow|OylP)bN3-3Q0q<5EITNq1~9_q9?&WvrXXnEO^K
+zp_u77`2H(m-j6vkeQ{3N!*H(yO&yich5{hosdI{aXnlM_;T02<%r^ioHWr?F3hXCX
+z>nM!UzWDnfA_xkqHxS{qy8^=N6%%Nk7O(<W33F)}3H);wnTf7WfOXp@Jf7rrn(|J$
+zP9xtxq1ybs9giDXy%7y37J1ciLRGKVGYiiG_VIF-sAo$D+i@QR1S*ei<8CAwXK>sL
+zn5>uNCMIV|avPJ_`=UWFlRR&5+$)%DV6yNXP61VhBsRCHB{HPjj|PQ{pfmE{MWI<D
+z!65g|lS`=w-H%Q#{UO3c?ypKq$EoH0ZzbmUNHo=5A@5o4E_u&(kH~wDdrIC7?(OoP
+z>%NEYab9zA=G##IN2IRa{eiq^xwCpXCO$Ei_Z;`Qyc^uVk@sBp>++uGruJ|wL_RoH
+z6?~5+b#v^P7qAXr!@eNzS?;};>6l%6@kT|l;U8FlhPUqH8<X$Xh7a(Kf?~tjmutfh
+z$$OT&^ME!qS4hLz#fDF?03#l{lJ8k=!>hF6m-)t-M6u!cRod`p@}A|s`D$%gpOuCU
+z#fBeZ0Y+SUkndUU!}6Z(uI!VBbBhh%!U8mG>(_?K9N)9u2l>8#$-H92+#zlFg1l$B
+zw;$GqKjHiS@kZh_um>w1Mc_D6CisNBXSsy|?f0C#=eT!X!+e9=eU$IH?oaq0r;>Iu
+z-y;JqzgWL@*Mof7Q9w^Pyo}C2?zi;ZFKK^s#%ydmkc!1FcP?KXec;U-LhoGMc0eyv
+zvLE)8jNh=It-ahika-SsL8$p}BL=cV9*~15>OzQ*_H+Dx;mCo^^XPcFw0gbc-%@lk
+zFA#YADA70+M8t`V16J=onEw6@;K2SR^L;eSzlaBZilixnA0WZT&+Q$AqWJ*|@q;6o
+zf5ls(w$UVFHPyu*1X=Tq8OS5LqI+2AX@dwI?wGYfc=<U1gc#qM#oS?z#+}0q*(%tN
+zZPA|V!k&bG=+`d&n&*2PjvLwShv*jbzJ>--<ZEbtsY}1zp=~g5FSw3P+Bq3>@;~Cd
+z_`o@i^uHlp_IzxqnNjw<bd$T87zo$XO)QB7X#%*td+%)+#)EvO0Ms0J-vvNm=D)13
+z%423&PX`IVW3ED9Y!(>H?H~-9J2@pTo#QiT=s7q_JR^+Ki)i&$wgE#3Lio+|C1}$;
+zJE7aC_YMN0_!xKmnSYng>?a>&bDuIRgx~KGTyYZn$pyE5_2sR91R%jvtcupJpy1_p
+zeXVa|<)n?DyA6;Di;Mp-Y&U<k3IAsZ`q6|Edn4bqN%-qc7a`V^x~CRDf`S7tSr}t9
+z-qNZOt??FzFd)xX<)THTzWn(eI2A)Y2kt}~-|w&al-(z8=-1ug^jpQ{(`^;&WUHwD
+zZ-;r{-|Rkdsd+AJ?_9^sM&J+oFYt>amzA62a`77^g4c*2uX%0(8hCW{XmzipmA8g%
+zSVNf+BKu(z`~<*zh)(;vHV9T91A*de>ydf~Qu!a_f%HpwNiad&y#jy#W`Nb#;DK=S
+zR>YN$GKnp=ez55iguCesFs!@r4-l-MplLc${|2%#zJtC$KY@a!_+6L-80T7~TmBXs
+z72Nts`0*9Mi0wjZ!!E^Q=}+Srgv@X=^eY$~!NeQUuJmNX{%}k?umBxq?!w<5{QU?1
+zV9w+p%Xj1NllV&lowl5n$eKBL@C*r7*^5EP%qHZqAEq2{1`oGX2!4z5gN+1k#XmQn
+z-6vtby!A^c#K8kY8<XzEx4w~8ldi@)%H9ZdG#3z?3Sz(e&tQL95&OTHiv4udqQC6<
+z>n!>onhyQ%Ci-(l^p^){qnGhFv}k4NeSD8LbB11yHfmywJvSJ~;xEJBH}Pj_K-%oU
+z-~IUe`J{5-U(OgRfMwerMM5)To}yuCwxVz`$TWd2@@sBlYL=rd^&$K~gD^$9DkL9G
+zrD{x-BdN?!vGC=twWi?0i2OW-e6gT*wODx`D&;6h++D3K+TnGmoYWpWkSXl}$EKc(
+z!CGV+{jI>`=d4(@V(qH6tD%Ybt6_t9-cp0}j~k5n72Zd{fs1=a+<~FP1-7^X`-g2q
+zDBIIx9(=R@mg3?qd%8PO_XzU%IR>+M(_sD}8{;4F8`?YX{$w(R%<n^M`GE&##}M+J
+z1i-|vmkE9hupxD2UY@k6@cxK@_JiC4N~{fk#=I(_D~XwNWA81GnLYAc80#pnGT#In
+zrOZ(@#P9oIsCx77=$JC=u`7s~C6#w2Qsz29+hi&+VWr8GUmUG8jg@@P4qY6LnX%|y
+zi5eU{-5aXIH<I^;Vx|nwOH8$lJRcy%@J+|Pp%kvpF#X2V=dsL(uxW^ytree7;wwRv
+z#7thED^hpiJLc;#@*Hynv!u)uz)8wnh$W@WS%4vB-iPNF8NWlG_)!5_(Z89y5;1ds
+zHAj22`tFL9c{3KCGEZW4F*85T+E$F8GM53Wl=*TspFhItD$VLR*Rl?6DzR$L`)!%`
+zvzQBGhFQKk$~NDSSw4Z1nE7#n&rtc@74uDfinWF6yAt!wcoj#OK;Qp0OR;MFI9w&4
+zn*`6llePanMp$HChnAJ5KFszr0ac~>d4eTpVi!l}o4vrp*`aR(!jw5In5+pA{_hDk
+zUXL+j=42Vy`!;#r7bR}#&Q_X7g+`y3(H06m&j;=1m=7iS>?|X+KL!l=xDD)+GM8Y?
+zn7J~Z1*L{j5;L_j*H49x$7B`n0sQmL9*i*Gyd%O9u20>C*&8bOyu6H~y$)D?jkz5o
+zyv`g0FTKt@E2I4^oCR+zb%?Qxs`y-=yo-!#T7*3*Zy^M(|EKz~s+mli)5y(EJXW;?
+z@)4H0GvUXoRwEaay5BggTV^hhx)YLHZZ49#*P!JR*oHO}URZ5z#|+GMn=r;4z?@6)
+zi)Gs+w^4HELBFw%QntjbGrJ`Bu;f}{mty7zp=E&Sk=PI7A@e^8rq8PW5z^NsUW%v9
+zWzqjcdaaba4kaP;P?&8ZaXz1p@mYxd0_8^&9O1*UTSFl;7UuJG=p88eP?XQ#RNRJ=
+z{|fQ>#TcK>Q9i4x*z$`Nd_I=o^JghOS61@*y=p%9RQwhrlvV#JzR;Xk9#1SZi3&ci
+zsVIX6xHrY|!;V0nl&6gIrgDydP8FXMNG~*3px0#+A#)q(RS~@v&tCyfNLiZCHvp=b
+z`F=H@x0msG9DSiHu+kXfhRe)(W?85@Q3vfa15|!nd>)>;>V<gLIvj!NU5!Ak`J!pA
+zS`5tGypXw@XEi`OIp$50yVHCw<-{HHn3sE9d`Ti~Ub~1b?==0DEg0`v$(=S=m#<C4
+z&DR&R?z9;!Z%ri3b!TbrGUSq`bBX3YSiKQE+IhC-{#enOC^ye~xjW*Wi3&5A(Yi~k
+zIw7>TEYsX^KvreuHcKw?uEa*<@C79Pole{pzc^84KJVpzT(uLq#ueJ{Yh~>Bn3wyh
+z<RYuI?jca6%3ML^4yZp~-J7U3=ZJ+lZN6J}09y6E8(4R<d0QB`GmlE{bmEhdr;z)h
+zmz(1-H}`xQC2>J~SGd+}^>Xh|WfQgLYRTPfz6E)$HMfxAF<-yajodD5wwOCR*^RGq
+zk9fK7q2)|-U7ObZGREAtcIIw2dqBaN=2x4v?wwU3<c2#ncN$ut&U_5M7{_#~nS1-i
+znwweK37#0dM04eF+%7WrZr5CO_2ERl`IY4EFn=Fi7Mg8V?a;cHFiL}&b*bh~O788u
+zHTTOD>)I%^nD0ZC%)Pc(b6)|}4W@dp<~|Ro8%*=%%-wA6k(RBJJ8d3!Soc=VB|e&Z
+z3b|*!y4%A;i3ao70UhP$%BSGVbY7vk-&Ha9n3sDpbUZQ7JaeViy$xf|H#1(Px%WD2
+zVHN&xwdS5i-2(HWKFxj1X-zCJjs2Rt1-VA^tmIT47MgR9Xx-Un4AQ(+a(9}Yp<8gj
+zW5UZlnz#k0xQ}?bqoLCYTpE!aM>z^D8KK%UcO(u*Z%H(neO~S*=MBic$;*AG>JH?-
+zra5yLY-N*~aSi+3nRv2d4Pp?xG-n!;+hfh<QLnBd{SfxTe>f^F&D*QC$6Cx=k7@1)
+zvF))HW^10gJ7z5`UlCqudL^gpTWPMA+-qR7?oE`|tv0Xm>h8hXSC{l#WB%H!dp+vb
+zl+>*?fA7`38g*++>drA=_v*fcI(VGWKTuqF?oaXgabz9yPFOv}7?QRGdKlK$w$YY6
+za&!!Y-Rq@&?K9)B{NEC6vqjRML^@>H%RaTu$7JMR!Ygph`vj6-RX9lBS>>Q*0#C;*
+zhKCt4Z;kLd6_OlmF0BJccuZ!|^tl+5mV)IgF-sVhf+Y(1?_kp{BtfV&{c6F(ZFt%h
+z^$85bPssG8lcoW`ik-$YhHp6=%2S9iFnuYW)vy3eFBARV9okj7%yftTG183ZHDzne
+z{?Ms7tb|!ywb9&XzEIv_20}MgbmK1ROU@2F|B&oOn^5He*v8+MWf8M&C_jYf+hRvi
+z-kiQx(kIaOj5CgLIM=PAbCb8=xw-lla|hb|HNG;vxcUR;zR>5Q55bGBDE|~R+;=OV
+z!1E1|-1mn*3N80==#QyyV6@fYf0Z#`lIPFx{6TpbVS$G7nozmf;miuPn|H;|3OyeB
+zG_=zbc&-YCLZ7PW3!Nn+H_ONap^Ea8p>rhtu=z&h*3iS|zoSo?he5^LLjM%vyv;H@
+zSNF!yi=j)?Pla9z{b&5U7<q2|tPsn87`h|W3iuy3XDV+C{Q@}oEuIU)XF?}Ub2{vt
+zG}lGT@Z6hDJD)<yY&_o;Tj<<pIujY^adS>ti<1mBRIYK7PCT*BNjqm(U5NHihj-w4
+zj&qswPo_2fDm>p6JLD{McBQUI-<wmXoz+eq?EMAiiO_A%dgn;|1A^7JI|IgzzY8TB
+zDn9`4sjKo`DA`c`0G>zU55T5xu701>?tCuwVU)C0v-YsmZm49NV<@@QAtql69gKg>
+zc`3BElF#Pq&*0geniGC0^pUE?c-~*NBHZoFu3iyd?Nk7J`-LmIoo|QMgzqy|73;$L
+zor>}c!<~ZRW#%VnbD!B9+8)k2b7A>j3OyI^#q;U-3bY}%_XCsHngORFdPO)CdQ;`q
+z;cK1qLWl6&i0A20OFRod@TQ8}96V#g;Q>(mxWI5jxEpxBEqv0ft+)fv9_P;RcYy5&
+z!?!x`2rqPAG-szi5`NKK8QvAX!+FX1a`<j1l6(r!rxM=@-{+)KFW`C9c_I9;)06m7
+zxL0`T#n6_jGvQyD?PWEQyPYpqK81CaCFVu$b6$!qiu?}Swp&BLFyC_?aGt=5&H^WV
+zGPEqx9Xc<%D)JrYVw^L+=xmCvkGuqnvL$kN=*j3nWSjZ-%3(Zji$8(2jK`jUTs%>A
+zTjUDi%znXDGE@`Y748?DTwvzI57{Qqa&vp)BavSS_I~FKgg=M5u1r1?>2~tTf5Edm
+z^<v~D+&1_no;NyYA{Pj*UJAV!PDd{=-;LeobUTO8J{`WQx;6Sz=<)bQJU<TnzZAOA
+zIT&3SzAZW!rPR219tgb}&&}yqM?;}sgLa|N+p6!6t`8@%>QLwn$p@p|hI9;tdc*KX
+zLm#SmzzKzZfz@5>T<P2vx-|5$vadwbq1zKr<N09x+tFm`g-EwahYFQ1ApN6?e+N_*
+z<(08PS@oc-cN<C;#73lKL`vGtS7O~}fB3T%+hgsx@wgk$PSCsEY!f}Ov0`7W+<dm;
+zRk2?<pN<a1$l-4XBpGKoMhSX2HV~d0|72``=!S~(fJy3~3*=euJ)Z~-hqIEtHMFhD
+ziQfuNbK>1na&5RHSs%YP{QL5G@%5qWqG!cVLLMpCd(-RU?cn)NJa11Na<bv(bZ`6$
+zq3?aBF8vO)>~Y=|f5JJC`f9wwyvKY8zW!oUnOuQOPtPV+z@vK+&jy6hUV}aR;$%3q
+z)+CdQ<=G+6K6$=Io>#|NTW?-#ZZ~f>-!{KC>q2*i-Vyp>=qI6e@UH8;+4-vT+VIE2
+z=SJEi+an{9_eMSuc`EYbNI2RM?T+q^zBc;d=qIB86<rk@jlDj0SM1T)_hUbc{VMjy
+zSUkQwzAAoUygUA?_(c3Y@h`<Aup4m$lWOiyya!h59r5?$`5#pe;rW@!-{Cpm;j=AH
+zOZg9}&*1rq6iW_8AII}QoiF0~T-8_b{8`1<@l2<mNjUHu!mw{uh<G^obw>PnEj&y7
+zND6*60l&Wu+l2r20Zu`x@La`kyJ<7Ec(%iD<?mDA(`D0%R*u;WynWRCqe+F1hTPDN
+zp_`q};cLRb3BN7!&d99Tve@rqkqH1_^6xQNe;DQBzpuw{f_<F)?*&-k$^V+9TWMe2
+z50{orz+agB@6uosuM+pOru;iDWeGr-#9s=3W%w({U*3Exlngx+o*Al$%nr?ByDh8C
+z1sm62b=8`+S0U9sR2a_njdTx<<lKS0yYZl{=ybCux{l@C!?~fplPq2*?Kk#abyep;
+zVR$fmvSTn?C`?<pZXJi7+;nv-OSk2-{T$9q?#Si(3ts+kZsaNpNQav{;T2CF2cxg{
+z$60N5xw-y<zU)Zu>ec4b(cCEC9r<I!S$Ck2A3~<PYiJZJ$&Tb*<hEuDM|yH2NNpP^
+z@U;hXu3cj;0~+$KeXk{w%mv%?{iB1qjfSA@%C*b8eYo8m8XP!$WCVe}p5cL^EoSEs
+zqJE~kup_&}^qee=<c_WA-f22>gCp6?j4Wv=JJ^vW5N0HM&>SoD<=w%7gG7?qilMgU
+z4-fR&t{wToK>#z5A1bWak{beH`b=kjXrwb&7;*C_cMcJU2;}yguIol}L;bmaQviIq
+zq3ppyr177eIX+N8Z<Ze!I5g5Vm>n)4)9dDdB{s-n^uAorNY-WkS|Y7q*ETqqKY{d?
+z(Sd$*Nzbm$1Gz!uawD4P#eb(oQ%GQDvv~jyRBz9X9LZy3G7&&Kn9sU8;Gw*Gf@#uo
+zcMhxW2g<U2Im0#V@&LhFj%SDZa>e|f;eJ3`%=ToD`<dN2EVfuhHZ5jIrG5~VW65&B
+z-J0p?8vq~Yh&1%ikGe?j!s?5eOL8YW@L%IGeWR|M8yZnsf%?*A2j3m}p+f_QB?%Ui
+zHx@4M?BK}2$SB$nfbF?LA$u6Z=L;h}eQqu{WJ`{DH68BB{3dsxAB{SWWFcXu{Y3U?
+z4vca<&llw@Um!6J3CVY7ew44>qeCMD$8x<VhjUxAL;WZL2+VDE^T)iB-u&UisOUkE
+z8n4X*?3TyF<zxFmft-Q06qp6rc<vb*7&+NBba-GWx1xJHI9a*Aq`V{V=DcFd&(pNp
+zb>w7Wps(Q75W&+l>K+;%9od#Uob5a5)gBWmGnlz&<RkzpL7Ns4v)w~mAVPxV4keT1
+zU5}tUSP6s<9nMKoN0sDpU_Lh}Nl3@ABo5~LPfCJA53w(B2~-@<xrOXtFVJkVgIV{O
+zq{ywg{+>QaBX!F`pel$Sa|m?qKAt5h1isEglDs769>iEI^$6w5xNBMTI22VDEH^qh
+zGKxYKrA^rat~eawQ`sR0@jVHQqJRMJ%8nuhJ+>QyVpLv?hz6t@B_i9JWb;E1Yt0p;
+zn)(r(;fi{pQfME+vBtqs^z6(X96fxP+~=2R^DI@;?%ZJZI!P7$dXFzf>y8W@92f*c
+z`L$$jQOp=ybdBj6()VTzba+%`?6T}262Ousj!Sk>(GKx9L(n*4ET{}5Cy9P{U~sS<
+z>I{XubI0;{Z3Zo_hZq$)jtmU;?>uDoVt#-<fIA}Fvm;0F%b%k|Ll6%mHct2+dJFm9
+zydLflks~aCT2_2WM?t(`aTkV>T>J3wAZ-s3lh2Px`QCwkul9tbsGBu~zV1k2?*OWM
+z2l|ehUAf#*05LFhR0g|jAP3#6JVQ+E$er*qT|@ns<y`3O?4a3{gP<03sM(r#2d;;C
+zuyuj_w(P;&pc#~BKx|P)rWl~nhhc&gqC}9Z$ze|~UnXLs3l$W51u9Oo4|_%i2F>p5
+z$-Zo1q<wG@%zHRXRllMi8Ip{+-vxVSWHNXdkZooQ`XU(JFqfWK$W)$e1E0r)LXvQq
+z+dX{DxcKXJvqJ?~mSfU>q?p?^m>tRi#{;9s%%(gPTz1IQCB^A?4(Eo5Te2!F<Pba`
+zVG}5Qa17Mw^+*)5C%n`lE!aLVWI*c9{IM)j1lj}AE1~8(>eUnz1(uNbk^r(`eDXuG
+zBu@>S0?dXmk5vm>a9Eff9JpQ!AvEsEUU%T|;hZbvqus_3o{O<NcgXV-%wE{x{E5w@
+zL)su{+B$QG2B6^C59<!(xD41CuWC>Cw(QCL=*Z4t+mtG(>$<+27N}&1go|HgHjR#q
+z=$Npbo%s_(p3{{>)K7eb?x90@Pn${7Q*e?Vh9F2{7t}F0`=pi@9h2O!V7ceWfF`Vo
+zmjXDR$A*h;6-R(L9n0;_y2GX&ivHNa!ILc=Jut1q2BuUn4ox|#L%|7xxjvSIf%IG;
+zRP=&d4rX1`0iJQ;QRYYTWaI4^E9cUqD#_D98|X&`QP^iQ-J8LYS-2)}zicIS)aLvk
+zvztI7ygbh$JCp@c&DK#^D@>The<LslX@vX@92!803jS{R5bQ(eNt2t!@r2HRnex=W
+za0Vm`7%B1PW!=R}sIo5CWh>tsCPM^rE9d~56@BvBo*&9@${oobAAq++r?p@_>u%Yv
+zb0B+o2vEV`i#I0<#DhuGT)n2KX*FeaOAnmEq5cA{shr5UHdF8lErYAOvqH@eo4Lo~
+zw-yBN)^#g*77O~C+N;1t(JL#Ix)D<DamN5E#r4sV&<#$0!R#0%wZ-2+YY;^2eZh1c
+z8y-1HBQ9fzeJTh!G3DmLEbapI9m(|_#acZ6?adaD8<D3HOywFwT|1f`EYO!6fhGZn
+zRskTX`-Xt?&z1D%q1U%#qh%;E7~neiw*}*7`v*o9dKx4ol|Q@;wT>$c;}u}5HnL~L
+zbY(|4Hw;!$e0s1a(47Hv6_Rk$N6gNH*YMRpVou~n%+?$?JA(8hn&kLiGT<3Oe+qX(
+z{4tIig{??J_PVa))_^WJbT^B#hjKgJgGf<?@{-y)6tJe3j&h7#pUd|!)FD*0C>T-N
+z#7sbgLws1xp*+2;={)#HnnHd$By%i#UHdUfW%UIw2){znempw>D><0MNIDL&jcuJ+
+zY>!82yoo(X9u|=2<61oEE0pXdxUG}|<txeJzXj@|6m~+jEYJ@p*ldTtvIABUU#;~X
+z$(|62g>wW)lSY#MfSUV2-db2yN;(DggREGsRxxXZUkWxujwL}^ltdr92_U=kGWTIM
+zBSmBBWlxB4kqNF7gLWO<q3eR^rW4u?^`?af@zpJ9aZ(zeH0`dNJt=D|1{6$34iYyq
+zkR99vH(XlNv`WURaI>e7>luZEg}%Ar!Td??jKscW-IJ3re$ZuEKmNGM1ch|IUd#f$
+zikwB;E_m9=b`M=MiWi~WG+H<*8nz>gjVT;g(`OU;;j2VoS%`G^5ZqT-XXLsIFjzFJ
+zCsjL;%V>yb%FOi=puwTZb^~YKWK9Qt+%IQNAX>K>5t+Q{$4`swMfnIyU1K^9;8(;;
+zTV81zQ8r)-_}>8T2OUPf1NRel;mxrM7-bZxKBPCG%%pdlF5GI^iTifD(XtD34Pl03
+zs5cdSv;7ceG_}W2ejVasfwHn4=+TAv7>-ygj!4VH=n2>=M(~vd&IK?d`c~=OBOXj<
+zHNLq+&8Rtq{|x||0rcW5jhLfPpwkr`#9gW!;as}{&mDlKQTh#=Vbq*N?gV-i@a{vM
+zj!D@2dH1)2qY+n)QpdL|B?FRg#5YT;(C%E6Tl_Z48V1m-V3u)=)r}a7y@t$Dv}5}<
+z(!-}iun&4%dI@I49t^G7E03{`AnzjIhbQUTDEK{Q4tnKTS;bN06jEK)2-+VZ3`>-D
+zBY@4th+JJGMkOx#Q8ofRpw*R)z#=hGiffh*q12!ITJ*`Hm2y!5eH%?LS`lyBo0MiR
+zj<y;!$LPz*MO|huN_?6(;+C|w;0WE|Jn+xy!$i%Xpi6;N1T>n-6R#8|$36oSlaxdk
+zmp1Gzfzx;6Pe;MF8mVUFNf3fZg5;6*m&~P5B<#{SW<Qi9M<&ZF!n8L<V-Wq>LQ#4M
+zc^pjv={gU>D5xRwPN1Bt2oi>HkumxJ2chA3!^n>UZOVX_Ve`V~9Gk==DYz06w*{@q
+zD7p$o`3P!N6bgbFWhD}oEKZ1AA$VwJqdA4XTQLS_R~9qT&0tbfzXUa`?Zqrs3?W9d
+zZTV(_fvX)Am`u{vm<2%sw_}7}kadR;cqiT_z8O^Mg;1;NAmMlLKRsKq87#8XTrRCm
+zRMZQgS%V(RDCWkew_sZ3Gjj8ghd4IPp?nx<ISHhY;6x1^Wt1y2g4)IM^m*uaL|B5v
+zvCCWubQ8h;;)vKr+#Y4?^YJ`{vB`E!mA0IWW;@dw=}ST#LW<<-7uYFBWL+zBWWdeH
+z<)O@#b$q$=nS=AHK3^%4uk6|gD5*IReHEE(#~K>VdXST(AyaTBVvQJNoo(L;O+r>C
+zE2=Ie6B3KZ(28&z7HB!TW&V|DVfC(x#tF1{MW|Hc4+w@R9uzp*4xh1mWOUBQwfJIV
+z^)N*vk8(m|#hMi6{7Tb4Sq<B%V6#ps%@V7D*qh=@ShBLpoZv<+0R@-zJL1j5p0p3t
+zWu!3ctSC|txCXW$)%aH1Lr$UXpweo@Z^aSDgI<nSn2^!hWIamjsH9P7HEB((b_<j%
+zg!X=(%Br-5sqYZJW-qRG7e=KfHcbOELWegW6-ztlL)a+tL8wgnI7+!nUEK!s-U^}H
+zE&8_yb5bi)C@HwRF-`|kjphK#aQ&#Z18d29nDEL@C%Xh3)gf6lJ|<Ie5~8LQEoY-M
+zC%6nl2X$kIkjB^k6g$=39FYt`h9pu*G9qBIuBZ5P7a`%?)b4qppO6vp3J>Qe3TaU&
+z_9P};EkP~GOT^L0k)U>7pAm^Znqk%YLDYhz&{fo%rfQO24KFcf;+N!mAB^d^JqRqp
+zQq4qwNk^5TK|$1Jlu=5_+XS?<Cwut3qo_V2bJK8eBqFO5DVha~9L~`w5=K;0OQ?QQ
+z&p^EqB4RozQLlufQ)1cU80IitBnY;VG846q5|8j6G}jbMX{aeHYE<(9qey(2nH=>X
+zMh)W6%%tWalTa&BD^oX^xXQYzvg@ZVg-@9zQRy?8q^=pMd0W7Q+wi|GvmbMl^Ebhl
+z-2sV#PukRlSqZbnk1{h`P4@iEl1_m_-3r@cvae@adO#~mIL)@&6<@<oc5uvU3WNG}
+zhcLS8<EhreH}vLoxV=Q-`lf<%b3&G*QmV4yccl@?iD6NBAY%U#weP!-jd1TQxFj+G
+zCQ0b`SfW!QT90idW~8a05m5KrSNk-x(<yxVJ_?_*<aFxYoKJsai>NSeFLq063q~Ya
+zcEQKkE2WKQDe@i2?*s#QUdXxI0X5e|GEqFJy7SNu)_n9JM+QUm3{RTSLAd#UuGem~
+zrO78d5%VV6$e*{W=z@DpHB8Ty9+8TiY9O<i4sj<S>kuYY_<NA+M)?lByTHmcWrV_1
+z^a^H_Va;BSrEE^0m~&e3p|T(*hEYl_MjgpK;h+;`btN4rssnDcTv0zK@ljBz+3yL~
+zEeqyUkPnMU5(0&5kC+luMwe}uj82bpH8zrs-~-j}_=Fm@X5w{PL_M_=z|-~;3=U+?
+z3IVi>q&g<ssOO@-MJcelWHl?)kCv6JUZXd65OZ)x$ywC)oBHYZ$p*iRwi{YwCp1QT
+zQG2Mh+~X0f6C~=wLh0HvMdwyoj@Fg#?l$U~iEom2<fZ~7P$}Z81qC>dj-(jfJGycH
+z20gf7N>J%IbW(I1O+?aKsq$f~;N~*8iL`Um1O&I4y1yc~`jXuRK3oZD<93>=ic(Jl
+zWoBOrD0A|s^3NGGXb@D)Qqnhd{r;*6DV1eE#w9;07D#F}WlCzoL6Rzr)4<agoYlAg
+zG=-Mbs=;VvRBuu;O1%M{TlE!Xg%DYG#G2dxGW@C@CiJCSd5loMS#;4B?91qMk%2lu
+zH8XK~2SB0gK^1DJ)MZe$kRSw`%7CPpED3+k%cdmJwyI6yHk2xxYJ=#I2*Jd=eJUxA
+zs5O-P$aOTnK4#Q0wQf0iuN$BR9RYIY2>!<@52MDXp6-EP$$^<_F@U>Q_X1?K3k)(@
+zEzVtg9<Xr+E9yDuUD8q=dTX7C1R7zVC)n4w0d_T|&Xy`8%s+GYH2uv?MJ+L;4mn9=
+zY6*dAe(NQhB**0j(X^0!x>u)TqtT6^S4ym_io(3-+HHWcgLSIZKb;PKk-3%D1E;d%
+z$_Sxu5T~`OGfU~GqZ4Mr0hnJ+UM8LQ1hA^qus*bU{uXwt#3$Q+U-szIG4f*BT|M%k
+zqig+nc-}L~M?QZMK5T6!KD7f#)x9oR@}MA-AtDZ=Y($5I>O~bVr?hFy7*vR4mI4@z
+zGJ@kO^d-BI<?ZrR7$!@n-HTeaZ5;`cxYQ$8wayVYQ-Myre|p2?2WZtDRs1nDtNM|y
+z>011)!a%_Ym8t}lHnwaL{l#smE}YU#UL}?pM6n^gptgD$+?N&5OE)Oy?CltXN~%Lf
+zI}r#d6W$e|=ONUaOMG3ST2wiT(onknR!8|7@PZ#K;hI%GL^buXjcO1=OFKjYwF}88
+z&8#c+Z#hCxgHs3jeyVO_s5f*LkmGEUn>I|bG+9qDBtv^)I&@~jLH(xq{y*B0iHG+B
+z_)ElF;Qpi?zQT4fo>X8I5b~Uj5l!A~Tl1~Ti%Nzfr07+aAzv%PlxS3gx~selDcwy`
+z>2xAT^;c>-tr4_>Ok|t=JK*PZpihup$V!yDV*)#8QM7T-MrW9=C}B~wY8}-t9mXO;
+z$0x7Xu8)ZJ4es=7vWV9>h;L%-8u+$O@U&`g0iAH}68#9ay33SOd|cN)wO+%j!HCLE
+z;6`I940kdN+5^~CP|bjDL4qwV6UtAWu?M}mwc&o14m3Gqzl=<1y1^wq;x<?a8GR4L
+z*6|C!Hg;nszO@}4dhkC5s1d_(uVLe{jTn5V_#P~$#Za`X)mbS6(eWTk8!?J{UI&3r
+zPHFW4*@13^+F5%vq_U{HOG@TsjX}ch6vj}^WJgm8r;f6AiU&YGdxH%xni|U5jInq;
+z)gl75Tio?+7@^DT6SCM<lPsar54597of<lpElATqs%m9aU>EAueITEzh^tgt1Ee7(
+zqDHL^6$e4yj&T^RBj-~Qs!OCJs4SF9GLg>HDI$+<xWZsvTvcGDJ#0*YQlT5ZA&lW~
+z{ul(HCgA#%pbUHYK>*fMvsmXMD9!A}daD{OH0r_<6N;ym;#gUk(!&;7SgyBI3_2M`
+zwGU;Mm?2kE0k;67RP#X_s_qG+-}HTnw@}pu=(9^8A#O~SpKiqOvYIdq|LMgYGB}Ay
+z6U@+bkbkTaA+dGf763th(q&ptQC(r$3I(bUQ>**H)?5@-rVY#~dWjl(RNRfJ@5Td1
+zT2}7Fl>52l6XK>%uVk%qr7vvJrPf)MBgw>Y8QDkI74#3=fgXm`D1F?ok&&hb!b2Bs
+zLaoZ7stnG+{XU`pbKXE`8U0S{s|VG-?m~%qwSJ~acMdF3<sRH^`aQ)j9VJ7tAGaWc
+zhB)p;iNeIzxEh5rWg$K7qZy-7(b3s^s#c*H2_7~0S_OLJ^d;?LC2iQ3>`^Kk);lAz
+zrzaVCl=7`0`!-XNU;(D2a}l_vfRX5F5-2(+%J)P(_j!~OD<9TcsjEly(%CBr``9*G
+z=evOn3K1=IN~T6OICrTR;R}R1GGqmAqc{dz>pWyR?Z=dzoA8ifIUAALwHrw;ixEXC
+z8r*I`UM~%7#nM!5asS(dzfCBi6b>RC<P3VGjAs%RY<C&j92GSAU|1)p1%j^tsWb8N
+z{j?>y$yZvwqNOCWj@;A;g~U<0U^+saizlY91i$uRdw=~TIa$M^j1Ur~x@kX*w`CDu
+z7NF+Vmmc;|Q*l(^-dUThKB@ZuB102jrO>EH#)&kjryi98q2feU;!n8}KyrBUFgcR~
+zND?ZaSw%?2NWM_T#NIrt*9Fi%&}sHXpNQ3v3{j$5T$LaZLUdY1ONca}V$n|mft!}?
+zfC2ACOB!f01ka<mdF?`uPdYJOa97NNc7%4V->j`m>T!0Z5xXAopct7m^Y#KlJx*6S
+z;hKxb+QkF!Zop}`AcEq0-v6K^>KP(o<?0P?e5m?T!!mg*!}gR^mCTd4C1MaZ^~tJ?
+z7^DiVBj-SXxG4y$EuG31$^w5y7O;D9-=PWe4AlyWO~qsF2xZQX4A3n5>W1>g?T0-9
+zQ`dr?lpZiq9jI2e4hWe8B)qUo#!+Q7ooXff5HcEnqDZAr)t;I7pzr0An_ez#>2tFB
+zBsO$OMD&WcU^j2RX!=^ObbIKFycJEW>t0!C&BTX$1)srK?(}$}LEt)xQ7(&l8{?eb
+zz*x*#bKu8zr^bue#yVkE1gD9LHf<JsTir(7zwFNTA|kQ_;|@V1(#fSNAv0USrReys
+zu#MD`3%kh$mk={5E?hB{%w#QWy&gMG2FfQG572T5&0Y!(N8pG)ImrU_F*v@}xfF-h
+z5)IMWOQRd5zD8)`eZA;D1jQe$P<fm@uu9$tmZpJYt3_0xf;x~|fJ;-?k3ciZWbdz#
+zcpO^;^FFhv<yEC$8p?rjSVmo-5UD-3hS29|N(yfO&FsK@^kt|!=@zPf_`+1N@F`ED
+zL4fVyvgHfi+W3^6j?04L`Eq<rE(va))MaW1%}7CYjZ{V2_^0K0%OON4U5#T~fj1JH
+zcq2nG@Jp89DktC1v4WtqRX>M9Xf?aC6Iq%!bch6NrKp-XwL0BX?{zS$$9k$#KVVt9
+zl^6zuTpF2}?mr!G-81Qy!a5{Yj1(!Bdj2lWdXf}Ee=g#H3Yzxi2-alh(6a#MDXbI<
+z3X}~sTan<tj&8pyB5tbHCF7wX#mk-n+|iDqi54qqG<sxaAB|jwiUtv>#@}a3O1xFf
+zb|IzQ#onqFiB798e6jFn(qoCA_Q;BYH+DFH?P|S=$*M|2gqzWqj5b-`*_+^7I~}yh
+zlvl;)VWFeF?NhqF(8UuD_0_GhyaXfrH-yMH7Q^amaVEB)5+fx^5gx737YZHVp|74D
+zb|d1m2eBY}K|Cg6AZLqsNO}c@L~1k_;xB_sbolS0VxHv~cNpkjiC@uL1>fUUsA)tg
+z`Q9v{V`~qIRkhOV7!c0q{hwpJ|1)nl))Tyi!5SSEwHI|@j6uL%N)6o?QIyHCHu85E
+z{kSbv?h>tp!{D_Dq4Exju0mrb1<;2W(Zf;dXT5W#5wupcWqW&{jdB|*<C?fuD2e*r
+zn1ej8#{<Nr>cA(cFjk_Ny3qPclTZ8<_^H=o$oXUgqKe!}f~me#RiWEC8+c^SBGYPK
+z^_5fw_$X7gH1*7iz?1j=*?1g*AB^S_CvFP5Sfo4^CUp(93Avc~@IfGVsAzHtv_%@U
+z54I-ubl1yiiD8aQ?MfO_S5V_{9@f(inrnB#!)CN|4?Ju?w8%R(ox-cV=wbO&^)z{@
+z1rRE)b_<P^Cl8C!CU@eaK5#MRg2-NpKgN~lJ%<`>j|1qbGRt)p$g7L@dOZlM9s(S|
+z2zI^F=4@&JdwcH{+O6-FmFt>`S7L-dI3t8ygC2jDu8CY0;zb6Z%Xs61YIszJBdeB*
+z0lAS%oGQSgU4yn<o*ER20&{vRL(P;DGYCphd5Eo?_+2MD(I!$lZP-XP4dLdh7-7@+
+zCO5gdA1k$D)ThKIU3Cp}k@f^a4=??TbUu69tIWhN`Hj~Cj!S>56)8Z}lsph7R;{+y
+z9;LRJ(N|Jh14J|z8fW!QglcWBhqMM??&Sp^-7)f3Bje|c+w%^_e$fTG<seGwHPGVe
+zMQ&<i$`E}Eaz975!9I*z<&P`Z{%YF=v+SV+#*Pp>MTQ`i>wOM0GbzYg>YGPX!FjB4
+zHF58fOl@!s?}AK2uuOOOTrcs#V_Efa%)BnaC;bF6R3998+7!J<YZkmxEylT)n>)Rj
+zsTV9%Wf2qB2U4FY_+>~?F{<2YK+!ksy2(&kx&|=obt`4kUy~^9AlDB0+k&Y&QPK^f
+zQKcxtcA%3gH1fTTga#csiX)YpYGLc@kxf}{4`FFkIX+RtAT{fi7~G$b4T(k)Tv<sM
+z>pO^a1yuJl&Pzyqo4`I~Wr~M>Y{Ezu89-G<FkEOZ>Om`OX@YmucnZS+2j}5hs1vMS
+z@Pq5-^o7*6+ePp4(mfAtR5#mApj9H&Ndzi*xsQfx$m4BV0KH>EPFJ(%BT~`8Wz!gO
+zO!6>Q4JFcs*!5b6l>zbteI%BWAVgKE3iGWIgR->pEa71i!xJPC<-kP^ODIc<^x({t
+zS*kzwB>Y^F=55<j!%i}DF0oq&b_@I*om?8+AJFVt#8WpYD^Wu2e$S7@XhbMTBy3ez
+zZWmazU+HMmwx4+8b^sHMO_DPTKrWRf1)bzj&YkRy|D}GnzadotwWyowHbcqv^<X|O
+zl1fBL#ivzLR$>@jDfRBDe3ewHHiF8NsN`;vB*Gj={i8`W?kbO*ha^(PTq@JbiexUz
+zBb{t37uL1$)oPGIO@l8t9q4Dx9A_~TclgSH1FO^!-PX$ZgIarO503nOfsK_?*eOqa
+z=&f3}U(lvDmrolJ)%}I4AG=3WB8L{Lva|b2_2v8}0C}r}F;U9*E-Y)Z+y~KWCSIJ(
+zV_Yb?i`~h46e5~x`WZG3?o*s}Rt}}=V2qzU$udQijmC3{M1dWFm%e?^g-B%!(oan`
+zRf8WvSKd^EtDzGWKSDG$K&Jwxu}Ex{Ch#9{r{)MMR@yCop0roWl}+rCwLP3BP(%)O
+zNQZz&#?Aml`UX>LdeN3l%<ug)&Zx}JCz+DVS50d5&{UIR?Vm17%^5W-wJK*VJ*sM2
+z<EcdAPTktwNRcu5Jp-{#Jkdd$YQKWpPqLd%k(=~gh1Ck`4k{p2yOc0r`6>_4p?2{f
+zD&%NB!l<(j3Y^?l>XMJZbuT^Z;R<L<h$edvNjJ<~83n2xJe5Vi(z730O7^suPMD+o
+z+w&&oPhj@Y{@q9gF=L7F@)%-k{mhc9wUG!L*|wxGr|(`X%iAPK9|V{_Vzy!c+9@ug
+zMUbYOHxA5p)-x{MUD3?%!leZ29d#S%me}ta)C;E;@%QMZD)1O)RGy|%<i1RG0CTip
+zD%MIa9gRz+zs|PS$JUJmC56z^hV!dY^?Zp0>O_s5^a}GRQ|LZZJvy?3g>eu)C-b|?
+zhb6jo#e7d&Bkb1DC=rNH?LkGOt`e06wJY&VobnWko8i#u)#nIld~VdOg(_pUN>*Qy
+zYbW0`w04BsrI)+@q%i}cfR<2^Kt0CA>Sj6UBK*0-g;zdQ2wrm{VK@&tQzb?7B$lF#
+z3`X|hnELgFZ@qO3FxmZr2|2y+TtOM{G!d(ePU`-a2%^v^)pTlm%1n*N{RBnqs0bi6
+zA$wR8%sO%fN8r|$<Ite{ir+?BtzeOJRqNT?HnxVdsV&@wrBPqo-J_nekrymiS-p7@
+z?P&aoD*Y-c$OI%+aCN>*qWn(xL}iR9I!0>y%00-SLG~{V6;EdVQUv;lvTUx=0GbTa
+zQN!6*pHnn_@QIFYLFLp~5p^k%tT$B{Vxwi|Y+9CsfYMfwFbuEIVNpc+;uut7R3X->
+zA!qpqz*Ym39GpkD4vI8O9?nV`;|@!G#GrRe6#K`dMRd;&S_-vVs@_aPsVyj}o2m9f
+zC59@PjA+Vs$y#YrO>GYtf|i03L~5ce-Gy9mLxf|z%_2a5i3zpFXfiihzE#sm4&-Fy
+zOp>l0IqN|x4>FpfvS;%_OW}`BLIzDQG~Tk^DDll4H6oWsv~xE?jqSxe@#_$!_Zdx<
+zx?YykO&QNA=m5YSM%wQ3_$v&-Q!6vuS8&`QC}Y!#m<sDC@^c?k=KHFq%y-01(%x@0
+zRi)=Nrh;p=XELVB-;{6_CQVhx*{sWGX4?5K1%&#^3EEva{q^Y{;6;5h->;emPkXit
+zb6Bjft>2HclbtD|6bEA3QkzZ-aYrht23vua)ThuP6Mwr?)Em{#E--?1>NT9L-mOpk
+zsfJXymSiHzn+=0&K#V`jL4H<W&bq5C@fR_91_DOTS9Lk{s-0Q)N@yS<h!)PJ`pS-P
+z!dPra2WlpxskF~j=fFoZcOs_3`m1CKQ%@~M70)m7d_q!w_es!W2f`i<eVCn-9d(XI
+zZNPCR<1hFrstuO&mlago3e&Y{5I~RHNG*=<Yq4IzfU*@>Z|_b-tTsVA_d?9KVdm{#
+zL`#1Qp&e$72RRzb=Gk-$PN?}qBD|Bk13?_NBZt_}ulWsN7aW_Lwqfb?<a{QXywK?w
+z%kn0X5LD}ytM%5Jb??>1;O5*ON>B?DKz>r7vCJS@RL!f$N6n@-I%rg^A@IF5N-RA(
+z&PjiPY{BDaJz&=0h7wqBBhiPT@gRfg#>RKk{ZIsFCuIIfI;C(rZ(3JQ&zIf?@u}Nb
+z-9FJ>qYk8oA$0VQ$>a><fw9lugmQarax!CZtrTzHXVOt9nD|t5;+@-Hh6{al8YByW
+z<Fb6c!GXCfyS;SbSWR~C39^kQsxjc1l%kKsoQ~tUt26_<F}CmY`@0{`ICZI3TCKg;
+z_G$`9Y~JEzPpWY0I(tzJGfC(f|3Oy3r3CQTFOpxyt6Y>Ijrf`>UIXLC-R3)y=Vso^
+zH_=}Rh8Tmf2H$Ivu}{xd(c>v75lNk`iiwLSqLdqGt%ybq*wRYbATb>v_E0)g6*uB6
+zbqSt&3PMECUXW+0R!I)3XP%>LD1%Cj8wX2HtC;i~SN2on+6buceEK$&ke0%zwvvuw
+zGwQ5u(p5~3J#oXVyGf?J6aLdnI?z$w2U-PAq4&Xvr2Y7#6F~1#U4FYyC$)Mc=uFfo
+z%d<xhP^d2dO6V|x$EEpgINmTgm_F<YjLbfp@ki0*{Hjw41=SK4V#BU_(8O{j1Q9y<
+zhXW`%KH`XCZp7(6kULdSRRM8y^%jFyfHe+a-Lw|;;0<v&TswQvU!x;hM!xb%NbAgX
+zPCp~%BN%mr#W+3F7w|4ra_JiG)L%N$pcsXdonJXhP0A}*kt_X8@KWTcHHo<3Z4w>Z
+zH(^AYuSI>aoGQkYnxIeUD;Uew+)<GkCf~0hN`0qa6#&V|)v-OH<WBw$dn!+1(2J$I
+z2&IhbmD0O*JcAhqSaizlZh&;KNKsK&`n=K(pJ*t(9mo9*`Q*=|lqB-!)9?!6CdUzG
+zy%IuR_X)KZV;{xRiA1(|xeHx{YZvNmfY)xdC*SV#C4-2aY+T7oiUSLs)#ZdhWr9-5
+zO*1jiF=&a*ID7gkh>~i<J)BX)M{KPWV~XW3Z@wqTMo24#Y#O;cot*3xksLeWIPq&J
+zp6GT-2zxr9tnbhwQlJc^B2NXS0NZ^(OSnn2o{0JamR$bnCyAl{j@=$}L@Jj))Nt{B
+zgkPD$R}xe}$|h8E%JuZrs5oe9sm>T$S7I>kM)#Gvfl!4`U)e5PPF><p$xHvb+t=Lz
+z^^%Vass`V2n!I?{20d&QOX^nw$g68BB^3-L>WD!z=`WC9oNzIgE2ft=pYMpwZjlfw
+z0E-@uH&tufF%=y|x6Y-o*|Q7Zx#U_o5=qF_FwH++YnjYvjO~TelNrraDWo*W#EeNY
+zPXe0?wRfJ2hjyySC=1vQ*OI6wM3-2pHYZevsC6TT^aO<tK@W25`Ij6_5Mvs$Q+r8F
+zDU({Jp#=NkI@7QfqialxR~pofS3WRNy7(r^*y%c45Hs;sxJRq-UhBPe3t(D0z)^m%
+znY2=OYPuMZS+E&A;9sYpXHgPqX}1w1|9T`HCE`Fwr4R*U`;+J92Lk%(X+e0DG&v@C
+zm@-#Y>2B66{BxSz)OSsSS9!+NPBqd797E3X_lSD+RuzpOZ#HE;fRH{mIA`@LY^-#h
+zln%>@zRcJ&F#7?ZId_#@+T$gtZJ5o*?ff3Z7x{;Gx{rfW^!!cBDqO77c`WtFA)HUW
+zpy0O9tXw5OcgH!1Avz4|jQB^HoWYuEw&(7Z?Wf{}-Xt&V`0)v|Y!&!R+wVkq@UWot
+zCtJ+=Rp3Q!N$jdR<(s!QxOPeo$JcEfZI!Nwm}MxNFzrSQe@|mI2S*9I8)o9Z$s{P<
+zEw^B3RYi7}s<*PO64C2<8h)Yn)_9RsGE|Xvq51=noZJ^9RlRhoeNs|Y6ZyP7A^y<B
+zXEp-}4eU+b2-A{MJMjnYsF$t5^W8q**6W6Z9LJW#1+|vmC@a0LVXviHys2bzS>!R|
+zT~iux<f42ZM|~cS4$ooYeH{ReR*h5nwv<9cwQaYk#9i=?hhklKQyR(Cjew6$jj)nM
+z*^|U3-soOUzFf(9^<Jot<<bjyQ2i4hC$EvaZQPu^?(bd|V+u4iIPI&CM}9a(j1W(x
+z6mdS;S0mRFD?V4!f^etgAFu6339)INebod$*u*~L_j-MjVE<LALZJIbV2Cr_;}XN_
+zj@jL%{i;~Q1$KKLbQw4yO%VaK27{O%@{W9o0M0}c&A@~bJ2deI!mpg+>!Bd@)|>Y)
+z*x4;HhoG}VS=MRQ{?qD`sLBv_A4mCTE0SFKO|P^1dpz>qt(yQNT^YuDf<}<U^p6^t
+z`+x17--}&W70374bMHN8CikAsIn%L|_TF};t&q~D_91zQIB0BA3?yl%NuvdaGSr|0
+ziD?pQiBh;137Ut3QG6&8a1fDF#g-yPN}o&rh=Tus2;z$m{`h|OnmzlRJGa)Cf=DO1
+zKh8e;>>q1=*LSV8&%XD@q#**ndAk9J`=nZGeguZV<C4mgxf!L#9Eia|wM<Gwc{$})
+zW=hRe*T~C48N~2$07-(RR?~DXazr?c%0P$!Zl`-7#DvWV9!Vo>Is;WviZN3`C>A5M
+zw{FH8vMG{^BAaFb2HD=c&5(Acoht(~QUMC6Gjc=Q%$PC22fes4LYbzSnX>{C1|ri(
+z8XPz^rk$2vb2Wt_{{CF($QB`^LT4{1Vq74Th%(k}lm4_^%_t4KBpggQUP=5*TSjdb
+zRm7DEo0diAQ9$$#2Yhf!m!)vojD?VhyZ8}TxDLvUv<QY-mNA30vbN_*XqyhV85rUK
+z-^n&$9n6pGRuy=#z)jE@Kh$mH$7p7M(F_y$MKTlA2P(;7xhN%P5EW22iNKX~$&!U-
+z(oyA2aFA*-WsD=z-*gTNEQp_?K4}L>%s7C>J7;uY)I`;0c*-$hJeT4cOa_#i^iSv=
+zZnM3#5ak^mbR2lv=7azY9QejrV6$rtFl_@gXuNq&9Y>{LG{}qNro4~}_f6B<L_}@O
+zB20Pc!ptyc9JUYQlLq!*elx-NowOX1Ork02lvk&3K7puWzziaj#5iN^kXFo+Dp0~I
+znjgoGeI#Vt4goZPY2)5v5G+_+eO4{dejG7`Fulr^pm<og!EZ9obdS`KliHXSP#gDQ
+zB|9h7MSHJaYSfkwW|1M{fH>0zHCrqO-{z_SFD+kEO<E+{VW1J1P5%M7+b$?ZJlM()
+zpWOuta0A63H=wrWK=7<hoo%`#wYL4j#K_I%f1H;EAPnMX=ffdYl4xhC2kL}PFkhqu
+zk6^CA!&s=vFVpP96-h#-iDbA<HEU2e&ZuQ3Z6Bp*N8RQN;uPrJCf=r#CVkGn-w}xj
+zj<od{U~`KYh9&5@c)mYQCQd>a2m+lU6ar$qgJH}Tao%=wv!n4Om=w%uD7(vvG0f#P
+z#`QqY$epOj?r6kgyKw}BP2^ZrDocIAtH#I1h~ybDMU)C&jB+4G#v__|(`FT@G2U>P
+zw)p)!)@T_IX_QKy0ruWJt-;~TXMMfR{yT95L3WQjay6dN#KH%YQ{D^2L0kIP&{^!u
+zjvNMMYMB;rbIk-~e87H2{fMS6pnHqPK#4`7mfa#t`=EXbveARx>54Uz7SKV8WN9-c
+zE;d;PZjL1p2`-2`SnxH8QPi7}61cP|(9$du21Y`ZosI9D*IO#2Bpqu(lF&C(Nc3WZ
+zw`4oI;6&7EB5{$IVUhIMunk%afEGz7PRhNr2jHZR_KT3=y*I5!8#&};!Aq1!n(bj}
+z#Z*ZxLmHmxynGRsfF!{v5;S@@G($rMzvlF5$^09Or3fJ2EhJ`Zh6l8VQ?T4bgTIk{
+zb0oWVTxcJ6Y4dqINsCs=b?M{4?J$fwh}MYDKJ5FuXH}S>WHi*Y594W@c*;*KRyK&l
+z@5cnfux!ddnYdA!?HogwmQEqK1i*v`ORyjni~HNw<n}&R61h7PW}>AiKuipu8Z+Kl
+z)7EOE@D0mhE74^n0U@VwlXX+jhCwuab#pIEoT05Z^Btt*cEBh0VLU-QlmHH?eDi{i
+zZ98%^OKEQkF?aHDiwFcu%_KR>0E&E%$zZG~1@z8}5g<mE`cQ^7X6_vB25U@3KOLqv
+zz^{cimJp;H7)f=}okO80khbW3R%}gv1Qd)15f~%D_%-<Lr{%E{YZ>&6nNoT|>t=n3
+zkCg&ijQbA^=gbMUna3q8;JbX|(m7&!7sIpP#<6>Zk;$6Nh#&_hio1U;Yl6VhU=tUX
+z0U<O*77-Uyk+|q+_hgzWB_v}`5v3)OqB>a9vI?#z$!6ehpV29#oNm(qCRQlWDi@kh
+z0V2jf?J$fkF`{@jNen9IdUCEdn_%uB16<(s;kamScof?Y%-TWhzsWR>Z#%Y?i?lHG
+zpX5a+?exMH#V9uk#{|LhB|Do2W<!Xp0nl)h%n3(`NP!(I!7-&r<`y>5&n(ZCgp?w8
+zoW}{ZW?y<9KRaQ8VGM}W(|sr8%^nXmrxRCKozfT#>~_D=-S?En67O?GW(Kvo3-JiO
+zO}AmbIIY<M6nAoVO=fJp0Uc@*BpBm?Zi7d3lkU;ktwcu`^P143eip^t909~B&DPyB
+z>uP;b!swL7z$|TzK))j_2;z`w!5!r6`QV6OX`dNH0tu}@fU~nZVX<~oTJF)=+gD><
+z(75+yE)S))n&WD<_l4Q*HS4$9bnXW~`sg=L{q5Vwe|heEKUv%Q>wB)Vnq|eDKGNRR
+zo2u%q`m8$a59GNYl|@;vc^^)Ue9w2CtH*E5IalVZ-j~(*?ar#JH@bQn|3U5eGSv8E
+zZ#ApO@9V&qW!Z6AHl&lXtENjzRUF<IRD8Z(o6EC-iU)&%-uXe^^~=?ntX`>Cyq{O~
+zdi<gOtKUKo-&?Lv>146$sI}yJR#`(?a+-%%oqj)`i%ryP8h^cJJq|*@>LMT2Yejvi
+zUKtF$MxmoJU#`a=sbQ)NR}QSI=}@wSh|03ZxEBZZ;vdZ`U1{Uos5h4D=a|X!GfD<N
+zw-Imby)d~A#viUyF&Fz@>3eE^PBJSyx%d7q>A)9p9^OBg5B3hw&A<+u-S-wVH@e?-
+z7o>nc7f$jX=}p(^wbZ2R&3dEW^7V$4iZ1`&=~d%@<cN5^URSkx9o5#GWpy!>Zq}Ou
+z#Bewoc6#-A!qZJXO#~KKPv+-(^+rGMRTt~+def`roF=NtfJU}sBir@1Bsd)Qa$i4O
+zujF}$0r;NFd^K67xr5#1`Xm6!{F3Xc+J?sGi=xnVSzk)+>#*PNOFDYi3)Ac0<+|0;
+zqB>en9tqPtn?I)Mt(0oJ`4?n{kP!QFz0A2iIr>54eM{P2;`5>11?Q_{)iER~Y-Ipi
+zHlg_+-o;?OY#3bjy?G6`loW)hP+Ndg#bYWRXpYCj90ja=wUaRui9D;0=J{NG+1FRG
+zru9y5BoVH5>&uc~Jz3Y$sG1xP>bP8Arq0zmpRZpYRX4mIMRlWo)vG1-bE^A9=I(bL
+zssH8BF}7Jvo?CQX)zlmP?-$i%6Rf|URX57T%x3~jI1Cq7H^PNmwDBssnU{I^da@y*
+zOX?pAF_UeXsV3P0sbx1;@g%@$a$mkAR0iQE3F{D*NOxJ`y(CfG1F&0a8Q&DJd|?(c
+zzNz8K#Cb($<C_clo|c4>C0F$G&Rz$_f}5)+ld@k;Zg%rIbrocBD-3v|7w@a1<wCB`
+z?N9ZKViZ)1F8hQ0fHc1go58$O6XE1AFJmXACe^S+`arL*2^yJRP_}5RQA6E{&LoS0
+z7)&Nzm>uex+kMv&cTRp@PhMXfXaIgN$_El5mHS1KOQe+0(;ei#Q-~TpthkiR5^u%P
+zAv>XmA}LEpWf5Mg$*%>QP@wXxn!NEqzToS%<!bzz7;W!z3T~^QzN)X72qy!pQppN#
+z8_iN_m{<4&oJ0Lsa1nt?pU|i@1kFYSZ*-fD%5p*2*(FgU&VqToeRtm5KhLI4{lR>p
+z*p+zGbn9)rk*GyImBWYfV9e8qi}MQFF7v)#2T}PQp>++0(Hut5>;M%E26yE$yYZbu
+zk9u8f7$77^<|w7hbpc)Fkl3&u?@+W^!f4|iyqg~`<XxSZXoSIMX_orGmX|7<0y`We
+zqsF^#`+M^P!}(Of#1d*;^}T{_E|(7i&@ihg3$vF{WOZeceGQ}N7w>-mn->lq`O~eU
+z`>UURF}w57SA4HO*Q<`|aZG%@-jk7uhj<a??)s*cxt^ra8;wd;S;Y<mJ?LOdkF{L3
+zD_1GQ5*4hdANgxN;aX)Y_Fl!V-r{LRE<;Qk;)dPmU_w#3h;zvn2ZFtZ8t7h?-5iF}
+z5r3_VUWZ72ywh>nklJFm>PF{~q70t4cv_h|Bqx8!m0cakCly>+=t8|2@915rhc7Z$
+zIR5U>T;|UE&wc&c)=Ouve0T3x=+A%W+Lc$XXR4QH)a&qkH<i!%{`U1}E?&E?A79o_
+z{ATl+^Ewx5DYn>sRmr`)U)7r#fBi;1=U#a7%C!@h^yAyx`lZI}FJ8HJ@#5p(x};AI
+z=<i>jR~w5nn)s~f|3(5?Q1FV9=Ju3;n`1lPzH;h)O^<J^X6`ib+x<K3kLcY6Z76&}
+z&;0&C{6?-9l;E6I3iEWR`F`gw|J=iDyjZVa-hD573#e|Kawl|<sZ~})NJL4-NCjEh
+z;O}9_Rp)iq7N}Wji0ikZf_tm;TTMtNr1E&Pdw)wm4t3auX#b8VS(OZw%X?iL>yxOl
+zag28O71-S^V5+yO#}hK|RQH1FrqA{2w9fNmDe>X7A~8^XW@AexmSmsR3|L=q;iF%q
+zm`|!5)*T*K8cI6KpZG@Co>n<EE`_}!FKL;Pk=Zv&*_gf>`gnS`oV1qOaXuV<a$iTn
+zyq-}Tw$Fzobb5AaUd+#FOB}K|E@`o1Wt$3Fk@}?T!sI@C`jjM)xxQL{>`R|g^Pe^Q
+IKP`cO0~M(P>Hq)$
+
+delta 17890
+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
+
+diff --git a/README.md b/README.md
+index 0439dff..0604945 100644
+--- a/README.md
++++ b/README.md
+@@ -4,10 +4,10 @@ Custom cooperative crew gameplay for **Kerbal Space Program 1.12.5 build 03190**
+ 
+ ## Download the custom mission
+ 
+-The complete source, compiled plugin, generated save/craft and tools are in **Hermes-Practice-v0.2.0.zip** in this repository. Extract it into the repository folder before using the paths below. Third-party dependencies download separately from their official releases.
++The complete source, compiled plugin, generated save/craft and tools are in **Hermes-Practice-v0.3.0.zip** in this repository. Extract it into the repository folder before using the paths below. Third-party dependencies download separately from their official releases.
+ 
+ ```sh
+-python3 -m zipfile -e Hermes-Practice-v0.2.0.zip .
++python3 -m zipfile -e Hermes-Practice-v0.3.0.zip .
+ python3 tools/install.py --ksp-root "/path/to/your/separate/clean/KSP" --download-dependencies
+ ```
+ 
+@@ -19,11 +19,11 @@ The installer requires Python 3.9+ and refuses to overwrite an existing practice
+ 2. Make a **separate clean KSP copy**. Do not modify Basil's existing installation, saves, or any Luna server Universe.
+ 3. Install the pinned dependencies below, including SSPX's separate IVA interiors. Add this repository's `GameData/MegaCrew` to the copy's GameData. Never create `GameData/GameData`.
+ 4. Copy `saves/MegaCrew Practice` into the copy's `saves`, only if that save name does not already exist. Copy `Ships/VAB/Hermes Walkthrough v2.craft` into the practice save's `Ships/VAB` if wanted in the editor.
+-5. Launch that separate copy. In KSP.log verify MegaCrew **0.2.0**, FreeIVA, DeepFreeze and EasyVesselSwitch actually loaded. Folder presence is not proof.
++5. Launch that separate copy. In KSP.log verify MegaCrew **0.3.0**, FreeIVA, DeepFreeze and EasyVesselSwitch actually loaded. Folder presence is not proof.
+ 6. Load **MegaCrew Practice**, then fly **Hermes Maintenance Trainer** if the game opens at the space center. Press **F8 → Practice → Begin practice on this vessel**.
+ 7. Report results in the relevant issue. Distinguish source/build checks from actual in-game verification. Do not claim a completed test until observed in game.
+ 
+-**Current validation:** custom DLL compiles against KSP 1.12.5. All 17 ship part identifiers match installed parts. The generated practice save is configured for a circular **150 km Kerbin orbit** with four assigned crew. **Its in-game load and full mission completion are still awaiting verification.** Hami is testing the host copy. The older editor craft loaded successfully; that does not prove the new save is flight-qualified.
++**Current validation:** custom DLL compiles against KSP 1.12.5. All 17 ship part identifiers match installed parts. The generated practice save is configured for a circular **150 km Kerbin orbit** with four assigned crew. **The original 0.2 trainer loaded into flight on Hami’s Mac. Version 0.3 interior interactions, pantry persistence and full mission completion still need in-game verification.** Hami is testing the host copy. The older editor craft loaded successfully; that does not prove the new save is flight-qualified.
+ 
+ ## Required dependencies
+ 
+@@ -38,6 +38,31 @@ Use official release archives, not source-code ZIPs. `dependencies.json` records
+ 
+ No DLC is required. Do not install Luna or Harmony for this single-player test. No Tailscale is required. This repository contains custom code, generated craft/save and setup files; it does not redistribute KSP or the third-party mod assets.
+ 
++## Version 0.3: interior interaction and crew needs
++
++Press **C** to enter IVA, **Y** to unbuckle and **I** to open the station for your current room. F8 closes the large mission console if it covers the view. The station uses FreeIVA's actual current compartment and the currently viewed Kerbal; changing the watch-lead label does not move a Kerbal.
++
++| Room | Available operations |
++| --- | --- |
++| Quarters / centrifuge habitat | Eat a ration, drink water, sleep or wake |
++| Corridor / centrifuge spine | Extend/retract actual solar arrays and radiators |
++| Lab | Treat an injured crew member; record orbital observations |
++| Cryobay | Request actual DeepFreeze freezing and sequential thaw |
++| Command | Orbital, crew and electric-charge readouts |
++| Any supported room | Inspect a nearby prop collider under the IVA camera crosshair |
++
++This is **room-based interaction**, not a claim that every decorative object has a physical animation or function. FreeIVA still handles hatches with F. No fake science points, arbitrary part repairs, docking or autopilot commands are added.
++
++Food and Water are real CRP resources stored aboard the habitation module. On its first loaded flight in a MegaCrew save, the new pantry module provisions **84 Food / 42 Water** units. Resources and its one-time provision flag are saved by KSP. It does not refill existing stores on every reload. The existing save is not replaced. Save your game after provisioning/consumption. The new module and this migration need an in-game persistence check.
++
++A ration consumes **0.5 Food** and reduces hunger by 40 points. A drink consumes **0.25 Water** and reduces thirst by 40 points. Sleep requires another awake watch member. Meters advance only in loaded flight at 1x, including when watch tracking is paused; they do not catch up offline. Ordinary sleep is an abstract crew state, not a new bunk animation.
++
++Game rates: hunger fills in 6 hours, thirst and awake fatigue in 4 hours; ordinary rest removes full fatigue over 2 hours. Frozen crew pause food/water needs and recover fatigue. These fictional Kerbal rates are not human medical predictions. At 90% hunger, thirst or fatigue, the custom engineering/science controls become unavailable until addressed. Stock flight controls, treatment and access to food/water remain available; no deaths are simulated. Oxygen, carbon dioxide, waste/recycling and autonomous NPC work are not implemented.
++
++Planet graphics: **EVE Redux 1.11.7.2 + BoulderCo stock-planet clouds 1.2.2.1** are pinned in dependencies.json. Install only this cloud configuration; do not combine with another EVE cloud pack. They preserve stock planet sizes/orbits. Both are installed in Hami's copy; visual rendering and performance on the Mac remain pending a restart/test. Third-party visuals are downloaded separately, not redistributed in the custom archive.
++
++Lander storage/hangar work has been requested from Basil's Codex through PR #2 / issue #1. No deployed or recoverable lander is claimed in this version.
++
+ ## Practice mission
+ 
+ The fresh save starts Hermes in orbit with **Hamish Kerman** (pilot), **Basil Kerman** (engineer), **Ada Kerman** (relief physician/scientist) and **Vikram Kerman** (relief engineer). All four start awake. Time warp is disabled in saves whose names begin `MegaCrew`. No offline progress is simulated.
+@@ -54,6 +79,7 @@ Allow roughly 10–15 minutes plus learning time. Power/medical incidents are tr
+ 
+ ## Controls and movement
+ 
++- **I in IVA:** current-room station.
+ - **F8:** MegaCrew console. Keep watch tracking running for timers and medical recovery.
+ - **C:** enter IVA; **Y:** unbuckle; **WASD:** move; **Shift/Ctrl:** up/down; **Q/E:** roll; **F:** operate the hatch you are looking at. Walking works in flight, not the editor.
+ - Optional slower interior controls: back up `GameData/FreeIva/settings.cfg`, then replace it with `docs/FreeIVA-slow-movement.cfg` before starting KSP.
+@@ -63,7 +89,7 @@ The centrifuge currently behaves poorly on Hami's copy. Keep it stopped for prac
+ 
+ ## Development and coordination
+ 
+-`Source/MegaCrew.cs` is the main console and DeepFreeze bridge. `Source/Practice.cs` implements maintenance objectives. `GameData/MegaCrew/Plugins/MegaCrew.dll` is the compiled plugin. Save state lives in the selected save's `MegaCrewMission.cfg`; the stock game state remains in `persistent.sfs`.
++`Source/MegaCrew.cs` is the main console and DeepFreeze bridge. `Source/Practice.cs` implements maintenance objectives. `Source/Interior.cs` handles cabin stations; `Source/CrewNeeds.cs` handles needs, resources and pantry provisioning. `GameData/MegaCrew/Plugins/MegaCrew.dll` is the compiled plugin. Save state lives in the selected save's `MegaCrewMission.cfg`; the stock game state remains in `persistent.sfs`.
+ 
+ Keep changes scoped to the separate test copy and use focused GitHub issues/PRs. Avoid simultaneous edits to the same files. Hami's Codex owns the initial practice implementation and host test. Basil's Codex should first verify installation on Basil's Mac and report startup/load evidence, then take an agreed issue.
+ 
+@@ -74,3 +100,9 @@ Known pending checks: generated save load, physical stability, hatch traversal,
+ ## Build from source
+ 
+ With a .NET SDK installed, run `python3 tools/build.py --managed "/path/to/KSP.app/Contents/Resources/Data/Managed" --csc "/path/to/dotnet/sdk/VERSION/Roslyn/bincore/csc.dll"`. On Windows/Linux select the equivalent KSP Data/Managed folder. This uses your own KSP reference assemblies and does not redistribute them. Restart KSP after replacing the DLL.
++
++Tests: `python3 -m unittest discover -s tests -v` runs Basil’s six setup checks. `python3 tests/run_needs_tests.py --runtime "/path/to/dotnet/shared/Microsoft.NETCore.App/VERSION" --csc "/path/to/sdk/Roslyn/bincore/csc.dll"` tests the production need model without Unity. Neither establishes successful in-game interaction.
++
++## Next phase: Luna and authored stories
++
++After the single-player systems, landers and maintenance mission pass testing, integrate Luna with authoritative shared state, then add authored cooperative stories. See [the ordered roadmap](docs/ROADMAP.md). These are future targets; the current package remains single-player with no time warp.
+diff --git a/Source/CrewNeeds.cs b/Source/CrewNeeds.cs
+new file mode 100644
+index 0000000..477bce1
+--- /dev/null
++++ b/Source/CrewNeeds.cs
+@@ -0,0 +1,80 @@
++using System;
++using UnityEngine;
++
++namespace MegaCrew
++{
++    // Resources are serialized by KSP; the one-time flag prevents replenishment on reload.
++    public sealed class MegaCrewPantry : PartModule
++    {
++        [KSPField(isPersistant=true)] public bool provisioned;
++        public override void OnStart(StartState state)
++        {
++            base.OnStart(state);
++            if(!HighLogic.LoadedSceneIsFlight||HighLogic.CurrentGame==null||!(HighLogic.SaveFolder??"").StartsWith("MegaCrew",StringComparison.OrdinalIgnoreCase)||provisioned)return;
++            foreach(string resource in new[]{"Food","Water"})
++            {
++                if(part.Resources.Contains(resource))continue;
++                if(PartResourceLibrary.Instance.GetDefinition(resource)==null){Debug.LogError("[MegaCrew] Missing CRP resource: "+resource);return;}
++                var n=new ConfigNode("RESOURCE");n.AddValue("name",resource);n.AddValue("amount",resource=="Food"?84:42);n.AddValue("maxAmount",resource=="Food"?84:42);part.AddResource(n);
++            }
++            provisioned=true;
++        }
++    }
++
++    public static class NeedsModel
++    {
++        public static double Clamp(double n){return Math.Max(0,Math.Min(100,n));}
++        public static void Tick(CrewRecord c,double seconds,bool frozen)
++        {
++            if(frozen){c.Resting=false;c.Fatigue=Clamp(c.Fatigue-seconds*100/7200);return;}
++            c.Hunger=Clamp(c.Hunger+seconds*100/21600);
++            c.Thirst=Clamp(c.Thirst+seconds*100/14400);
++            c.Fatigue=Clamp(c.Fatigue+seconds*(c.Resting?-100.0/7200:100.0/14400));
++        }
++        public static bool Fit(CrewRecord c){return c!=null&&!c.Resting&&c.Hunger<90&&c.Thirst<90&&c.Fatigue<90;}
++    }
++
++    public sealed partial class MissionConsole
++    {
++        float nextNeedsSave;
++        void UpdateNeeds(double dt)
++        {
++            if(!HighLogic.LoadedSceneIsFlight||Ship==null||dt<=0||dt>5||TimeWarp.CurrentRateIndex!=0||FlightDriver.Pause)return;
++            foreach(var c in crew)if(Aboard(c.Name)||Frozen(c.Name))NeedsModel.Tick(c,dt,Frozen(c.Name));
++            if(Time.realtimeSinceStartup>nextNeedsSave){Save();nextNeedsSave=Time.realtimeSinceStartup+15;}
++        }
++        void SaveNeeds(ConfigNode n)
++        {
++            foreach(var c in crew){var x=n.AddNode("NEEDS");x.AddValue("name",c.Name);x.AddValue("hunger",c.Hunger);x.AddValue("thirst",c.Thirst);x.AddValue("resting",c.Resting);}
++        }
++        void LoadNeeds(ConfigNode n)
++        {
++            foreach(var x in n.GetNodes("NEEDS")){var c=crew.Find(z=>z.Name==x.GetValue("name"));if(c==null)continue;double h,t;double.TryParse(x.GetValue("hunger"),out h);double.TryParse(x.GetValue("thirst"),out t);c.Hunger=NeedsModel.Clamp(h);c.Thirst=NeedsModel.Clamp(t);bool.TryParse(x.GetValue("resting"),out c.Resting);}
++        }
++        bool UseSupply(string name,double amount)
++        {
++            if(Ship==null)return false;
++            double available=0;foreach(var p in Ship.parts)foreach(PartResource r in p.Resources)if(r.resourceName==name&&r.flowState)available+=r.amount;
++            if(available+1e-8<amount){message="Insufficient accessible "+name+". No supply was consumed.";return false;}
++            // Explicit vessel-wide pantry access; do not silently borrow from another vessel.
++            double remaining=amount;foreach(var p in Ship.parts)foreach(PartResource r in p.Resources)if(r.resourceName==name&&r.flowState){double take=Math.Min(remaining,r.amount);r.amount-=take;remaining-=take;if(remaining<=1e-8)return true;}
++            return false;
++        }
++        void Eat(CrewRecord c){if(c==null||Frozen(c.Name)||c.Resting||!Aboard(c.Name))return;if(UseSupply("Food",0.5)){c.Hunger=NeedsModel.Clamp(c.Hunger-40);message=c.Name+" ate one ration (0.5 Food units).";Save();}}
++        void Drink(CrewRecord c){if(c==null||Frozen(c.Name)||c.Resting||!Aboard(c.Name))return;if(UseSupply("Water",0.25)){c.Thirst=NeedsModel.Clamp(c.Thirst-40);message=c.Name+" drank 0.25 Water units.";Save();}}
++        void Rest(CrewRecord c)
++        {
++            if(c==null||!Aboard(c.Name)||Frozen(c.Name))return;
++            if(!c.Resting){int awake=0;foreach(var other in crew)if(other!=c&&Aboard(other.Name)&&!other.Resting&&!Frozen(other.Name))awake++;if(awake==0){message="Keep another crew member awake on watch.";return;}}
++            c.Resting=!c.Resting;message=c.Name+(c.Resting?" is resting in crew quarters. Time remains 1x.":" returned to duty.");Save();
++        }
++        void DrawNeeds()
++        {
++            GUILayout.Label("CREW NEEDS / 1x TIME");
++            GUILayout.Label("Walk to the quarters/galley and press I to eat, drink or rest. Meters advance during loaded flight, even with watch tracking paused. No offline catch-up or instant sleep recovery.");
++            foreach(var c in crew)GUILayout.Label(c.Name+" | Hunger "+c.Hunger.ToString("F0")+"% | Thirst "+c.Thirst.ToString("F0")+"% | Fatigue "+c.Fatigue.ToString("F0")+"% | "+(Frozen(c.Name)?"FROZEN":c.Resting?"RESTING":NeedsModel.Fit(c)?"FIT":"NEEDS ATTENTION"));
++            if(Ship!=null)foreach(string name in new[]{"Food","Water"}){double a=0,b=0;foreach(var p in Ship.parts)foreach(PartResource r in p.Resources)if(r.resourceName==name){a+=r.amount;b+=r.maxAmount;}GUILayout.Label(name+": "+a.ToString("F2")+" / "+b.ToString("F2"));}
++            GUILayout.Label("Game tuning: empty-to-urgent hunger in 6 h, thirst/fatigue in 4 h; full fatigue recovery in 2 h of ordinary rest. Frozen crew pause food/water needs. At 90% any unmet need blocks custom engineering/science work until addressed. Stock flight controls and emergency treatment remain available. No deaths are simulated. These are fictional Kerbal gameplay rates.");
++        }
++    }
++}
+diff --git a/Source/Interior.cs b/Source/Interior.cs
+new file mode 100644
+index 0000000..c1fe8c6
+--- /dev/null
++++ b/Source/Interior.cs
+@@ -0,0 +1,92 @@
++using System;
++using System.Reflection;
++using UnityEngine;
++
++namespace MegaCrew
++{
++    public sealed partial class MissionConsole
++    {
++        bool interiorOpen;
++        Rect interiorWindow=new Rect(790,70,410,560);
++        Vector2 interiorScroll;
++        static Type freeIvaType;
++        Part CurrentRoom
++        {
++            get{
++                if(!HighLogic.LoadedSceneIsFlight||CameraManager.Instance==null||CameraManager.Instance.currentCameraMode!=CameraManager.CameraMode.IVA)return null;
++                if(freeIvaType==null)freeIvaType=Type.GetType("FreeIva.FreeIva, FreeIva");
++                var prop=freeIvaType==null?null:freeIvaType.GetProperty("CurrentPart",BindingFlags.Static|BindingFlags.Public);
++                var p=prop==null?null:prop.GetValue(null,null) as Part;
++                if(p!=null&&p.vessel==Ship)return p;
++                var k=ViewedKerbal;
++                return k!=null&&k.protoCrewMember!=null&&k.protoCrewMember.seat!=null?k.protoCrewMember.seat.internalModel.part:null;
++            }
++        }
++        Kerbal ViewedKerbal
++        {
++            get{if(CameraManager.Instance==null)return null;var flags=BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;var f=typeof(CameraManager).GetField("ivaCameraActiveKerbal",flags);if(f!=null)return f.GetValue(CameraManager.Instance) as Kerbal;var p=typeof(CameraManager).GetProperty("ivaCameraActiveKerbal",flags);return p==null?null:p.GetValue(CameraManager.Instance,null) as Kerbal;}
++        }
++        CrewRecord InteriorCrew
++        {
++            get{var k=CameraManager.Instance==null?null:ViewedKerbal;return k==null?null:crew.Find(c=>c.Name==k.protoCrewMember.name);}
++        }
++        void UpdateInterior()
++        {
++            if(!HighLogic.LoadedSceneIsFlight)return;
++            if(Input.GetKeyDown(KeyCode.I)&&!FlightDriver.Pause)interiorOpen=!interiorOpen;
++            var room=CurrentRoom;
++            if(room!=null&&room.vessel==Ship&&InteriorCrew!=null&&checks.Add("visited:"+room.partInfo.name))Save();
++        }
++        void DrawInterior()
++        {
++            if(!Allowed||!HighLogic.LoadedSceneIsFlight||!interiorOpen)return;
++            var room=CurrentRoom;
++            interiorWindow.width=Math.Min(410,Screen.width-20);interiorWindow.height=Math.Min(560,Screen.height-40);
++            interiorWindow.x=Mathf.Clamp(interiorWindow.x,0,Math.Max(0,Screen.width-interiorWindow.width));interiorWindow.y=Mathf.Clamp(interiorWindow.y,0,Math.Max(0,Screen.height-interiorWindow.height));
++            interiorWindow=GUILayout.Window(719305,interiorWindow,DrawRoom,"HERMES / INTERACT [I]",GUILayout.Width(interiorWindow.width),GUILayout.Height(interiorWindow.height));
++        }
++        void DrawRoom(int id)
++        {
++            if(GUILayout.Button("Close [I]"))interiorOpen=false;
++            interiorScroll=GUILayout.BeginScrollView(interiorScroll);
++            var room=CurrentRoom;var c=InteriorCrew;
++            if(room==null||c==null){GUILayout.Label("Enter a mission Kerbal's IVA with C. Walk into a room, then press I. Interior operations require your actual room and viewed Kerbal.");GUILayout.EndScrollView();GUI.DragWindow();return;}
++            GUILayout.Label(room.partInfo.title+" | "+c.Name);
++            GUILayout.Label("Hunger "+c.Hunger.ToString("F0")+"% | Thirst "+c.Thirst.ToString("F0")+"% | Fatigue "+c.Fatigue.ToString("F0")+"%");
++            GUILayout.Label("Station controls operate this vessel. F still operates FreeIVA hatches. Decorative geometry is not a simulated mechanism.");
++            if(GUILayout.Button("Inspect the object I am looking at"))InspectInterior(room);
++            string name=room.partInfo.name;
++            bool quarters=name.Contains("habitation")||name.Contains("centrifuge");
++            bool lab=name.Contains("lab");bool cryo=name.Contains("Freezer");bool engineering=name.Contains("tube")||name.Contains("centrifuge");bool cockpit=name.Contains("core");
++            if(quarters){GUILayout.Label("GALLEY / BUNKS");GUI.enabled=!c.Resting&&!Frozen(c.Name);if(GUILayout.Button("Eat ration / 0.5 Food"))Eat(c);if(GUILayout.Button("Drink / 0.25 Water"))Drink(c);GUI.enabled=true;if(GUILayout.Button(c.Resting?"Wake from ordinary sleep":"Sleep in crew quarters"))Rest(c);}
++            bool fit=NeedsModel.Fit(c)&&!Frozen(c.Name);
++            if(!fit)GUILayout.Label("Address food, water or sleep before engineering/science duty. Wake through the galley/bunk controls; emergency care is available.");
++            if(engineering){GUILayout.Label("ENGINEERING / POWER & COOLING");GUI.enabled=fit;foreach(var p in Ship.parts)foreach(PartModule m in p.Modules)if(m.moduleName=="ModuleDeployableSolarPanel"||m.moduleName=="ModuleDeployableRadiator"){
++                GUILayout.Label(p.partInfo.title+" #"+p.flightID);GUILayout.BeginHorizontal();if(GUILayout.Button("Extend"))Deploy(m,true);if(GUILayout.Button("Retract"))Deploy(m,false);GUILayout.EndHorizontal();
++            }GUI.enabled=true;}
++            if(lab){GUILayout.Label("MEDICAL / SCIENCE");foreach(var patient in crew)if(patient.Injury!="None"&&!patient.Treated&&Aboard(patient.Name)&&!Frozen(patient.Name)&&GUILayout.Button("Treat "+patient.Name))Treat(patient);
++                GUI.enabled=fit;if(GUILayout.Button("Record orbital / power / temperature survey")){checks.Add("scienceSurvey");message="Survey logged at UT "+Planetarium.GetUniversalTime().ToString("F0")+": Pe "+(Ship.orbit.PeA/1000).ToString("F1")+" km, Ap "+(Ship.orbit.ApA/1000).ToString("F1")+" km. Observation recorded; stock science points are not fabricated.";Debug.Log("[MegaCrew] "+message);Save();}GUI.enabled=true;
++            }
++            if(cryo){GUILayout.Label("CRYOBAY / ACTUAL DEEPFREEZE CONTROLS");GUILayout.Label("Transfer crew into pods using stock transfer first. Keep another awake crewmember and enough EC/Glykerol.");foreach(var x in crew){if(Frozen(x.Name)){if(GUILayout.Button("Queue thaw: "+x.Name)){if(!wakeQueue.Contains(x.Name))wakeQueue.Enqueue(x.Name);running=true;Save();}}
++                else if(Aboard(x.Name)&&GUILayout.Button("Freeze: "+x.Name)){int awake=0;foreach(var y in crew)if(Aboard(y.Name)&&!Frozen(y.Name)&&!y.Resting)awake++;message=awake<2?"Keep another awake watch member.":CryoBridge.Freeze(x.Name)?"Freeze requested. Wait for actual pod completion.":"Transfer into an idle pod; check EC and Glykerol.";Save();}}
++            }
++            if(cockpit){GUILayout.Label("FLIGHT DECK");DrawTelemetry();GUILayout.Label("Navigation readout only; stock flight controls retain authority.");}
++            if(!quarters&&!lab&&!cryo&&!engineering&&!cockpit)GUILayout.Label("Transit / storage compartment. Inspect fittings and use FreeIVA hatch controls.");
++            GUILayout.Label(message);GUILayout.EndScrollView();GUI.DragWindow(new Rect(0,0,10000,24));
++        }
++        void Deploy(PartModule m,bool extend)
++        {
++            try{var method=m.GetType().GetMethod(extend?"Extend":"Retract",BindingFlags.Public|BindingFlags.Instance,null,Type.EmptyTypes,null);if(method==null){message="This module does not expose the requested deployment operation.";return;}method.Invoke(m,null);message="Requested "+(extend?"extension":"retraction")+" of "+m.part.partInfo.title+"; verify actual state.";}
++            catch(Exception e){message="Part rejected deployment: "+e.GetBaseException().Message;}
++        }
++        void InspectInterior(Part room)
++        {
++            var camera=InternalCamera.Instance==null?null:InternalCamera.Instance.GetComponentInChildren<Camera>();
++            if(camera==null){message="IVA camera unavailable.";return;}
++            var hits=Physics.RaycastAll(camera.transform.position,camera.transform.forward,3f,~0,QueryTriggerInteraction.Collide);
++            Array.Sort(hits,(a,b)=>a.distance.CompareTo(b.distance));
++            foreach(var hit in hits){var prop=hit.collider.GetComponentInParent<InternalProp>();if(prop==null||!prop.transform.IsChildOf(room.internalModel.transform))continue;message="Inspected "+prop.propName+" at "+hit.distance.ToString("F1")+" m. Use this room's station controls for functional operations.";checks.Add("inspected:"+room.partInfo.name);Save();return;}
++            message="No nearby prop collider under the crosshair. The room station remains usable; hatches use F.";
++        }
++    }
++}
+diff --git a/Source/MegaCrew.cs b/Source/MegaCrew.cs
+index f20a525..32c1904 100644
+--- a/Source/MegaCrew.cs
++++ b/Source/MegaCrew.cs
+@@ -17,7 +17,8 @@ namespace MegaCrew
+     public sealed class CrewRecord
+     {
+         public string Name, Role, Injury = "None";
+-        public double Fatigue, Recovery;
++        public double Fatigue, Recovery, Hunger, Thirst;
++        public bool Resting;
+         public bool Treated;
+         public CrewRecord(string name, string role) { Name=name; Role=role; }
+     }
+@@ -43,7 +44,7 @@ namespace MegaCrew
+             new CrewRecord("Ada Kerman", "NPC physician / relief commander"),
+             new CrewRecord("Vikram Kerman", "NPC systems engineer")
+         };
+-        readonly string[] tabs = {"Mission", "Crew & cryosleep", "Engineering", "Emergency", "Practice", "Setup"};
++        readonly string[] tabs = {"Mission", "Crew & cryosleep", "Engineering", "Emergency", "Practice", "Crew needs", "Setup"};
+         readonly string[] titles = {"01 / Design and assemble", "02 / Launch and rendezvous", "03 / Commission Hermes", "04 / Cryogenic handover", "05 / Emergency exercise", "06 / Orbital science", "07 / Prepare Duna expedition", "08 / Return and recovery"};
+         readonly string[][] tasks = {
+             new[]{"Design a Hermes-inspired long spine, rotating habitat, command deck and cryobay.","Fit four crew berths, four cryopod spaces, reserve batteries and an independent control core.","Choose the radius from the installed habitat's geometry; calculate rpm and gravity.","Provide docking, radiators, redundant power and a return vehicle. Record mass and delta-v."},
+@@ -56,7 +57,7 @@ namespace MegaCrew
+             new[]{"Wake and medically assess every crew member before recovery.","Return to Kerbin on a planned trajectory with a thermal protection and landing system.","Recover the crew and archive the mission log.","Review incidents and update the next mission's design."}
+         };
+ 
+-        public void Awake() { DontDestroyOnLoad(this); Debug.Log("[MegaCrew] Mission console 0.2.0 loaded; single-player / real-time watch operations."); }
++        public void Awake() { DontDestroyOnLoad(this); Debug.Log("[MegaCrew] Mission console 0.3.0 loaded; single-player / real-time watch operations."); }
+         bool InGame { get { return HighLogic.CurrentGame != null && HighLogic.LoadedScene != GameScenes.MAINMENU; } }
+         bool Allowed { get { return InGame && (HighLogic.SaveFolder ?? "").StartsWith("MegaCrew", StringComparison.OrdinalIgnoreCase); } }
+         string StatePath { get { return Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "MegaCrewMission.cfg"); } }
+@@ -70,14 +71,16 @@ namespace MegaCrew
+             // This rule applies only to the new MegaCrew save. Cryosleep never advances the clock.
+             if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene==GameScenes.TRACKSTATION) && TimeWarp.CurrentRateIndex>0) TimeWarp.SetRate(0,true);
+             double ut=Planetarium.GetUniversalTime(), dt=ut-lastUt; lastUt=ut;
++            UpdateNeeds(dt);
++            UpdateInterior();
+             UpdatePractice(dt);
+             // Do not count closed-game time, scene-load jumps, or a skipped/warped interval as a watch.
+             if (dt<=0 || dt>5 || !HighLogic.LoadedSceneIsFlight || !running) return;
+             shiftElapsed+=dt;
+             foreach(var c in crew) {
+                 if (!Aboard(c.Name) && !Frozen(c.Name)) continue;
+-                bool sleeping=Frozen(c.Name);
+-                c.Fatigue=Math.Max(0,Math.Min(100,c.Fatigue+dt*(sleeping?-0.012:0.003)));
++
++                // Fatigue is updated by NeedsModel, independently of watch tracking.
+                 if(c.Treated && c.Injury!="None") { c.Recovery=Math.Max(0,c.Recovery-dt); if(c.Recovery==0){ c.Injury="None";c.Treated=false;message=c.Name+" completed simulated injury recovery."; } }
+             }
+             if(alarmTime>0 && ut>=alarmTime) { alarmTime=0; WakeRelief(); }
+@@ -95,7 +98,7 @@ namespace MegaCrew
+             return false;
+         }
+         bool Frozen(string name) { return CryoBridge.IsFrozen(name); }
+-        void ResetState(){ResetPractice();checks.Clear();wakeQueue.Clear();phase=0;running=false;shiftElapsed=0;drillActive=false;alarmTime=0;pilot=crew[0].Name;foreach(var c in crew){c.Fatigue=0;c.Recovery=0;c.Injury="None";c.Treated=false;} }
++        void ResetState(){ResetPractice();checks.Clear();wakeQueue.Clear();phase=0;running=false;shiftElapsed=0;drillActive=false;alarmTime=0;pilot=crew[0].Name;foreach(var c in crew){c.Fatigue=0;c.Hunger=0;c.Thirst=0;c.Resting=false;c.Recovery=0;c.Injury="None";c.Treated=false;} }
+         void WakeRelief() {
+             wakeQueue.Clear();
+             foreach(var c in crew)if(Frozen(c.Name))wakeQueue.Enqueue(c.Name);
+@@ -107,10 +110,10 @@ namespace MegaCrew
+             if(!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene!=GameScenes.SPACECENTER && HighLogic.LoadedScene!=GameScenes.EDITOR && HighLogic.LoadedScene!=GameScenes.MAINMENU)return;
+             GUI.skin=HighLogic.Skin;
+             if(GUI.Button(new Rect(12,Screen.height-95,165,34),"MEGACREW  /  F8"))visible=!visible;
+-            if(!visible)return;
++            DrawInterior();if(!visible)return;
+             window.width=Math.Min(760,Screen.width-20);window.height=Math.Min(650,Screen.height-45);
+             window.x=Mathf.Clamp(window.x,0,Math.Max(0,Screen.width-window.width));window.y=Mathf.Clamp(window.y,0,Math.Max(0,Screen.height-window.height));
+-            window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.2",GUILayout.Width(window.width),GUILayout.Height(window.height));
++            window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.3",GUILayout.Width(window.width),GUILayout.Height(window.height));
+         }
+         void Draw(int id)
+         {
+@@ -118,7 +121,7 @@ namespace MegaCrew
+             tab=GUILayout.Toolbar(tab,tabs);
+             scroll=GUILayout.BeginScrollView(scroll);
+             if(!Allowed)GUILayout.Label("MISSION EDITING LOCKED: create/load a Sandbox save whose name begins MegaCrew. Other saves are unaffected.");
+-            if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else DrawSetup();
++            if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else if(tab==5)DrawNeeds();else DrawSetup();
+             GUILayout.Space(12);GUILayout.Label(message);GUILayout.EndScrollView();GUI.DragWindow(new Rect(0,0,10000,24));
+         }
+         void DrawMission()
+@@ -164,7 +167,7 @@ namespace MegaCrew
+             GUILayout.Label("Health model: fatigue and minor injury records are custom gameplay abstractions, not physiological predictions. Cryosleep is fictional technology; no claim of real human feasibility.");
+         }
+         void Treat(CrewRecord patient) {
+-            int medics=0;foreach(var c in crew)if(c!=patient&&Aboard(c.Name)&&!Frozen(c.Name)&&c.Injury=="None")medics++;
++            int medics=0;foreach(var c in crew)if(c!=patient&&Aboard(c.Name)&&!Frozen(c.Name)&&!c.Resting&&c.Injury=="None")medics++;
+             if(medics==0){message="An awake, uninjured second crew member is required to treat this injury.";return;}
+             patient.Treated=true;patient.Recovery=300;message="Simulated treatment complete. Five-minute recovery watch; no global flight controls or Kerbal abilities were changed.";Save();
+         }
+@@ -227,13 +230,13 @@ namespace MegaCrew
+                 var n=new ConfigNode("MEGACREW");n.AddValue("version",1);n.AddValue("phase",phase);n.AddValue("pilot",pilot);n.AddValue("running",running);n.AddValue("watchSeconds",shiftElapsed);n.AddValue("wakeUT",alarmTime);n.AddValue("drill",drillActive);
+                 foreach(var k in checks)n.AddValue("check",k);
+                 foreach(var c in crew){var x=n.AddNode("CREW");x.AddValue("name",c.Name);x.AddValue("fatigue",c.Fatigue);x.AddValue("injury",c.Injury);x.AddValue("treated",c.Treated);x.AddValue("recovery",c.Recovery);}
+-                SavePractice(n);n.Save(StatePath);
++                foreach(var queued in wakeQueue)n.AddValue("wakeQueued",queued);SavePractice(n);SaveNeeds(n);n.Save(StatePath);
+             }catch(Exception e){Debug.LogError("[MegaCrew] State save failed: "+e.Message);message="Mission state could not save; see KSP.log.";}
+         }
+         void Load()
+         {
+             try {
+-                if(!File.Exists(StatePath)){message="Open Practice for the orbital maintenance exercise, or Mission for the longer campaign.";return;}var n=ConfigNode.Load(StatePath);if(n==null)return;LoadPractice(n);
++                if(!File.Exists(StatePath)){message="Open Practice for the orbital maintenance exercise, or Mission for the longer campaign.";return;}var n=ConfigNode.Load(StatePath);if(n==null)return;if(n.HasNode("MEGACREW"))n=n.GetNode("MEGACREW");LoadPractice(n);LoadNeeds(n);foreach(var queued in n.GetValues("wakeQueued"))if(crew.Exists(c=>c.Name==queued)&&!wakeQueue.Contains(queued))wakeQueue.Enqueue(queued);
+                 int.TryParse(n.GetValue("phase"),out phase);phase=Math.Max(0,Math.Min(titles.Length-1,phase));pilot=n.GetValue("pilot")??crew[0].Name;
+                 bool.TryParse(n.GetValue("running"),out running);double.TryParse(n.GetValue("watchSeconds"),out shiftElapsed);double.TryParse(n.GetValue("wakeUT"),out alarmTime);bool.TryParse(n.GetValue("drill"),out drillActive);
+                 foreach(var k in n.GetValues("check"))checks.Add(k);
+diff --git a/dependencies.json b/dependencies.json
+index 9eb8852..9bbad62 100644
+--- a/dependencies.json
++++ b/dependencies.json
+@@ -22,5 +22,17 @@
+     "version": "2.3",
+     "url": "https://github.com/ihsoft/EasyVesselSwitch/releases/download/2.3/EasyVesselSwitch_v2.3.zip",
+     "sha256": "420576178a60c8259f4d147cb3de2e483a0800fdcc2e663e9b5a3583d7bb9ed4"
++  },
++  {
++    "name": "EVE Redux",
++    "version": "1.11.7.2",
++    "url": "https://github.com/LGhassen/EnvironmentalVisualEnhancements/releases/download/1.11.7.2/Environmental_Visual_Enhancements_Redux-1.11.7.2.zip",
++    "sha256": "fe1ad45337f65976ae27001d629408b653ee75f7a88274a1621f6cedc3506ecc"
++  },
++  {
++    "name": "BoulderCo stock-planet clouds",
++    "version": "1.2.2.1",
++    "url": "https://github.com/WazWaz/EnvironmentalVisualEnhancements/releases/download/EVE-1.2.2-1/EnvironmentalVisualEnhancements-Configs-1.2.2.1.zip",
++    "sha256": "d4cb6f9ec08abae876e2ca8eba7b6159213ebd6fe612c138ed5b5e91325cfd84"
+   }
+ ]
+diff --git a/docs/ROADMAP.md b/docs/ROADMAP.md
+new file mode 100644
+index 0000000..23e9a0f
+--- /dev/null
++++ b/docs/ROADMAP.md
+@@ -0,0 +1,46 @@
++# Hermes: implementation order and future campaign
++
++The owner requested Luna multiplayer and custom stories **after the single-player foundation is complete**. This is an ordered roadmap, not a claim these features are implemented or a scheduled background task.
++
++## 1. Finish and validate the single-player ship
++
++- Load the orbital trainer reliably and preserve saves across restarts.
++- Verify physical stability, usable hatches and internal routes. Repair or replace the problematic centrifuge before making rotation a mission requirement.
++- Test room-based interactions: engineering deployment, galley, bunks, lab/medical station and real DeepFreeze pods.
++- Verify finite Food/Water consumption, no pantry refill on reload, hunger/thirst/fatigue progression and safe watch rotation.
++- Build lander storage and usable landers, with proven clearance, release/recovery, crew capacity, propulsion, target-body limits and return capability.
++- Confirm planet graphics render correctly at an acceptable frame rate on both Macs.
++- Complete the maintenance practice sequence, save/reload it, and repeat independently on Basil's copy. Record PASS/FAIL evidence in issue #1.
++
++The current room panels do not make every decorative prop interactive. Physical EVA repair, autonomous NPC activity and fully interactive cockpit navigation remain implementation work, not completed features.
++
++## 2. Integrate Luna Multiplayer
++
++Use separate test copies and a separate test server Universe. Keep existing saves and the original server's IPv4 fix/backup untouched. Do not publish passwords or credentials.
++
++Start with one shared engineering switch and a deterministic fault. Define one authoritative owner for mission state, supplies, crew health, cryosleep and objectives. Commands need unique IDs, authority checks, deduplication and full reconnect snapshots. Do not let two clients independently consume supplies or perform conflicting repairs.
++
++Then verify distinct player Kerbals, interior positions, station handover, resource state, crew rest, actual freeze/thaw and objective progression on both clients. Keep engineering and science useful alongside piloting; allow two players to hand over roles.
++
++Acceptance: both clients enter the same Sandbox session, observe a shared vessel/Kerbal and the same state changes, reconnect without duplicating actions, and save/reload consistently. A successful connection alone is not completed co-op integration. The existing console is single-player and Luna does not automatically synchronize its custom state.
++
++Keep the owner's **no time warp** rule. Crew cryosleep does not accelerate the universe. Any future change to shared time progression must be explicitly agreed and separately tested.
++
++## 3. Add custom cooperative stories
++
++Use an authored campaign with a mission log, prerequisites, clear evidence for objectives, choices and consequences. Story milestones should advance from observed game state or clearly identified crew sign-offs. Reuse an authoritative event system in multiplayer so both players receive the same briefing, incident and outcome.
++
++Candidate chapters (design proposals):
++
++1. **First Watch:** commission Hermes in Kerbin orbit, complete supply/medical checks and rotate the relief crew.
++2. **The Warm Loop:** investigate a cooling fault; pilot holds safe attitude, engineer isolates a loop, scientist protects an experiment. Diagnose before deciding whether EVA repair is necessary.
++3. **Quiet Side:** an eclipse tests reserves. Choose which experiments to pause, maintain cryopod power and verify recovery after sunrise.
++4. **Lander Readiness:** inspect stored landers, verify propellant and communications, rehearse release and recovery before a surface mission.
++5. **Red Horizon:** plan a scientifically grounded Duna campaign, surface measurements and a defined ascent/rendezvous/return budget. Travel duration follows the game clock.
++6. **Long Way Home:** manage finite spares and supplies, reassess crew injuries, and recover the expedition.
++
++These chapters are not installed missions yet. Add one short, fully tested story before expanding the campaign. Cooperation and maintenance tasks only: no impostors, murder or player sabotage. Injuries and readable emergencies can create problems to solve, with warning time and recovery options.
++
++## Coordination
++
++Use GitHub issues/PRs with concise findings, changes, next action and evidence. Hami's Codex currently owns custom console/interior/needs source; Basil's Codex was asked to own the separate lander/storage craft contribution. Agree new boundaries before overlapping edits. Keep story proposals separate from implementation status.
+diff --git a/docs/Systems-Validation.json b/docs/Systems-Validation.json
+new file mode 100644
+index 0000000..90a1cba
+--- /dev/null
++++ b/docs/Systems-Validation.json
+@@ -0,0 +1,28 @@
++{
++  "custom_version": "0.3.0",
++  "compiled_against": "KSP 1.12.5 build 03190",
++  "pure_need_model_tests": "passed: rates, frame partitioning, clamps, rest, frozen needs, duty thresholds",
++  "preflight_tests": "6 passed",
++  "in_game_0_3_verified": false,
++  "graphics_installed": [
++    "EVE Redux 1.11.7.2",
++    "BoulderCo clouds 1.2.2.1"
++  ],
++  "graphics_render_verified": false,
++  "limitations": [
++    "Room panels rather than individually animated clickable props",
++    "No stock flight-control lockout or deaths for unmet needs",
++    "No oxygen/carbon-dioxide or life-support recycling simulation",
++    "Multiplayer state not synchronized",
++    "Lander/storage work requested from Basil via PR review"
++  ],
++  "runtime_startup_verified": true,
++  "runtime_evidence": [
++    "KSP log: MegaCrew 0.3.0 loaded at 18:17:24",
++    "Flight switched to Hermes Maintenance Trainer at 18:19:02",
++    "Mission state recorded visits to command and habitation modules",
++    "Saved crew needs advanced despite watch running=False",
++    "EVE CloudsManager initialized Kerbin-clouds1 at 18:19:03"
++  ],
++  "pantry_followup": "Resource registration warning found in first 0.3 load; Food/Water definitions added to prefab config for next launch. Consumption and no-refill persistence still need testing."
++}
+diff --git a/tests/NeedsModelTests.cs b/tests/NeedsModelTests.cs
+new file mode 100644
+index 0000000..c1653a2
+--- /dev/null
++++ b/tests/NeedsModelTests.cs
+@@ -0,0 +1,17 @@
++using System;
++using MegaCrew;
++class NeedsModelTests
++{
++    static void Equal(double a,double b){if(Math.Abs(a-b)>1e-7)throw new Exception("Expected "+b+", got "+a);}
++    static void Yes(bool value){if(!value)throw new Exception("Condition failed");}
++    static void Main()
++    {
++        var c=new CrewRecord("test","test");NeedsModel.Tick(c,3600,false);Equal(c.Hunger,100.0/6);Equal(c.Thirst,25);Equal(c.Fatigue,25);
++        var split=new CrewRecord("test","test");for(int i=0;i<3600;i++)NeedsModel.Tick(split,1,false);Equal(c.Hunger,split.Hunger);Equal(c.Thirst,split.Thirst);Equal(c.Fatigue,split.Fatigue);
++        NeedsModel.Tick(c,21600,false);Equal(c.Hunger,100);Equal(c.Thirst,100);Equal(c.Fatigue,100);
++        c=new CrewRecord("test","test");c.Resting=true;c.Fatigue=100;NeedsModel.Tick(c,7200,false);Equal(c.Fatigue,0);Equal(c.Hunger,100.0/3);Equal(c.Thirst,50);
++        c.Resting=true;c.Hunger=10;c.Thirst=20;c.Fatigue=100;NeedsModel.Tick(c,7200,true);Equal(c.Hunger,10);Equal(c.Thirst,20);Equal(c.Fatigue,0);Yes(!c.Resting);
++        c.Hunger=89.9;c.Thirst=89.9;c.Fatigue=89.9;Yes(NeedsModel.Fit(c));c.Hunger=90;Yes(!NeedsModel.Fit(c));c.Hunger=0;c.Thirst=90;Yes(!NeedsModel.Fit(c));c.Thirst=0;c.Fatigue=90;Yes(!NeedsModel.Fit(c));c.Fatigue=0;c.Resting=true;Yes(!NeedsModel.Fit(c));Yes(!NeedsModel.Fit(null));
++        Console.WriteLine("PASS: rates, frame partitioning, upper limits, ordinary sleep, frozen needs and duty thresholds.");
++    }
++}
+diff --git a/tests/run_needs_tests.py b/tests/run_needs_tests.py
+new file mode 100644
+index 0000000..d02f6e7
+--- /dev/null
++++ b/tests/run_needs_tests.py
+@@ -0,0 +1,18 @@
++"""Run pure production need-model logic without launching Unity/KSP."""
++import argparse,json,pathlib,subprocess,tempfile
++p=argparse.ArgumentParser();p.add_argument('--runtime',type=pathlib.Path,required=True);p.add_argument('--csc',type=pathlib.Path,required=True);a=p.parse_args()
++root=pathlib.Path(__file__).resolve().parents[1]
++def actual_class(file,name):
++ text=file.read_text();start=text.index('public '+name);brace=text.index('{',start);depth=1;end=brace+1
++ while depth:
++  depth+= (text[end]=='{')-(text[end]=='}');end+=1
++ return text[start:end]
++model='using System; namespace MegaCrew {\n'+actual_class(root/'Source/MegaCrew.cs','sealed class CrewRecord')+'\n'+actual_class(root/'Source/CrewNeeds.cs','static class NeedsModel')+'\n}'
++with tempfile.TemporaryDirectory() as d:
++ d=pathlib.Path(d);(d/'Model.cs').write_text(model)
++ refs=['System.Private.CoreLib.dll','System.Runtime.dll','System.Console.dll']
++ args=['-nologo','-nostdlib+','-target:exe',f'-out:"{d}/Tests.dll"']+[f'-reference:"{a.runtime.resolve()/r}"' for r in refs]+[f'"{d}/Model.cs"',f'"{root}/tests/NeedsModelTests.cs"']
++ (d/'args.rsp').write_text('\n'.join(args))
++ subprocess.run(['dotnet',str(a.csc),'@'+str(d/'args.rsp')],check=True)
++ (d/'Tests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+a.runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':a.runtime.name}}}))
++ subprocess.run(['dotnet',str(d/'Tests.dll')],check=True)
