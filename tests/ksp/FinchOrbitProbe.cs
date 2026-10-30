@@ -10,11 +10,11 @@ public sealed class FinchOrbitStart : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(5);
         string root=KSPUtil.ApplicationRootPath;
-        string marker=Path.Combine(root,"FinchSpawnQA.enable");
+        string marker=Path.Combine(root,"FinchSpawn2QA.enable");
         if(!File.Exists(marker)) yield break;
-        File.Move(marker,Path.Combine(root,"FinchSpawnQA.consumed"));
+        File.Move(marker,Path.Combine(root,"FinchSpawn2QA.consumed"));
         try {
-            const string folder="MegaCrew Finch Spawn QA";
+            const string folder="MegaCrew Finch Spawn2 QA";
             var game=GamePersistence.LoadGame("persistent",folder,true,false);
             if(game==null)throw new Exception("Disposable save could not load");
             HighLogic.SaveFolder=folder;HighLogic.CurrentGame=game;
@@ -28,7 +28,7 @@ public sealed class FinchOrbitCheck : MonoBehaviour
 {
     IEnumerator Start()
     {
-        if(HighLogic.SaveFolder!="MegaCrew Finch Spawn QA")yield break;
+        if(HighLogic.SaveFolder!="MegaCrew Finch Spawn2 QA")yield break;
         yield return new WaitForSecondsRealtime(12);
         if(FlightGlobals.ActiveVessel==null){Debug.LogError("[FinchOrbitQA] Practice vessel failed to load");yield break;}
         Debug.Log("[FinchOrbitQA] Practice vessel loaded: "+FlightGlobals.ActiveVessel.vesselName);
@@ -44,7 +44,7 @@ public sealed class FinchOrbitCheck : MonoBehaviour
             foreach(var snapshot in dummyProto.protoPartSnapshots)snapshot.storePartRefs();
             var nodes=new ConfigNode[dummyProto.protoPartSnapshots.Count];
             for(int i=0;i<nodes.Length;i++){nodes[i]=new ConfigNode("PART");dummyProto.protoPartSnapshots[i].Save(nodes[i]);}
-            var orbit=new Orbit(0,0,0,900000,0,0,Planetarium.GetUniversalTime(),FlightGlobals.GetHomeBody());
+            var orbit=new Orbit(0,0,900000,0,0,0,Planetarium.GetUniversalTime(),FlightGlobals.GetHomeBody());
             var node=ProtoVessel.CreateVesselNode("Finch Orbit QA",VesselType.Station,orbit,0,nodes);
             var proto=game.AddVessel(node);Destroy(dummyObject);
             if(proto==null||proto.vesselRef==null)throw new Exception("AddVessel returned no vessel");

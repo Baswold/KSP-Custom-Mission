@@ -148,3 +148,10 @@ unresolved; the generated craft is not flight-qualified. A third one-shot probe
 copies that generated QA save into a new `MegaCrew Finch Resume QA` directory
 and attempts a clean reload of vessel index 1. This tests reload mechanics only;
 it does not modify any earlier fixture or user save.
+
+The clean reload of the generated fixture exposed a zero semimajor axis: the
+probe passed orbital-constructor arguments in the wrong order. KSP removed the
+invalid orbit and threw while loading the vessel. The probe now supplies the
+semimajor axis in the correct third argument and uses another new disposable
+save; this is a fixture correction, not evidence of a defective craft. The
+separate part-snapshot loading exception also needs to be retested.
