@@ -63,3 +63,27 @@ Record each result as PASS, FAIL or NOT TESTED; do not infer gameplay from files
 Share only short redacted excerpts. A screenshot or observed successful walk is
 stronger evidence than a manual objective checkbox. LMP co-op needs its own
 multi-client test; none of the above establishes multiplayer synchronization.
+
+## Independent Mac result (2026-10-30)
+
+- Published mission ZIP SHA-256 matched Hami's reported
+  `f1f61edb538423f9818c7b0768564da7ed542bdec0f943146286026c7e29c7bc`.
+- Pinned installer completed successfully: all four downloaded archives passed
+  its SHA-256 comparison, including the separate SSPX IVA installation.
+- The isolated copy reached the main menu. Its log recorded FreeIva **0.2.20.2**,
+  DeepFreeze **0.31.0.0**, EasyVesselSwitch **2.3.7852.41352** and:
+  `[MegaCrew] Mission console 0.2.0 loaded; single-player / real-time watch operations.`
+- MegaCrew console was visible. F8 closed it; Escape dismissed release notes.
+- Automated pointer clicks did not activate either the console Close button,
+  stock release-note Close button or stock Start Game button, including held
+  clicks and a double-click. Keyboard events worked. This blocks automated save
+  loading in this session; it is not enough evidence to blame MegaCrew or claim
+  ordinary human mouse input fails.
+- Startup logs contain `DF.DeepFreezer.OnDestroy` NullReferenceExceptions during
+  part-icon/drag-cube generation and FreeIVA's missing collider report for the
+  Cry-2300 interior ladder. Their gameplay impact remains unverified.
+- Practice save load, vessel stability, walking, objective completion, freeze/thaw
+  and reload persistence remain **NOT TESTED** on this Mac.
+
+The source, DLL, craft, pristine save and upstream build/install scripts added to
+this branch match the published ZIP byte-for-byte. No running save is committed.
