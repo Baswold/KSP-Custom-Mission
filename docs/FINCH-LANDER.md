@@ -78,3 +78,21 @@ probe now uses a real-time wait and explicit begin markers, and is being rerun.
 The temporary `tests/ksp/LanderLoaderProbe.cs` is test-only and must not be placed
 in a normal installation: it instantiates and destroys both craft in the main menu.
 It is not included in the production MegaCrew DLL.
+
+### Native loader result
+
+The corrected files were loaded with `ShipConstruction.LoadShip` in the separate
+KSP 1.12.5 test copy. The Finch loader returned 17 parts, two seats, one docking
+module and one engine; the loader reported 6.967 t with resources and no crew.
+The cradle returned 35 parts, 32 total seats, two docking modules and two engines.
+The Finch's loaded root was the Mk2 lander cabin. The probe did not report a root
+for the cradle, so its actual in-game attachment hierarchy needs investigation;
+the Python graph test is not sufficient proof of this. KSP logged a module-index
+mismatch before finding the cabin's variant module, plus the existing SSPX
+adapter module mismatch. The test ran at the main menu, outside a real editor
+or flight scene, and generated unrelated main-menu module-start exceptions.
+
+The measured loaded mass is not the fully crewed design estimate; resolve the
+remaining difference against the stock editor and module/crew mass before relying
+on the ideal delta-v figure. Loading does not establish docking-node state, collider
+clearance, working legs, staging, EVA access, propulsion or landing/recovery.
