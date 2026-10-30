@@ -121,3 +121,15 @@ may destroy its own simulated craft and must never target an existing personal
 save or server Universe. The marker and probe should be removed after testing.
 At present the probe is running; no launch, release or safe-clearance result has
 been established. Launchpad observation does not substitute for orbital testing.
+
+### Orbital fixture probe
+
+The launchpad fixture failed: KSP could not find `Facility/LaunchPad_spawn` and
+returned to the space center. It did not yield a vessel or docking result. A
+separate `FinchOrbitProbe.cs` is now being tested against a **new** disposable
+`MegaCrew Finch Orbit QA` copy. It loads the cradle as a ShipConstruct, asks KSP
+to serialize its actual parts into ProtoPartSnapshots, creates a 150-km circular
+Kerbin orbit and focuses that vessel. It intentionally clears vessels only in the
+new QA game object and has no production role. This test can diagnose flight state
+and the docking modules; it does not establish a crewed mission, redocking or safe
+clearance. A marker makes it one-shot. Results must be observed in the log.
