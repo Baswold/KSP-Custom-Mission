@@ -17,8 +17,10 @@
     "lander_seats": 2,
     "cradle_parts": 35,
     "cradle_docking_modules": 2,
-    "cradle_root_observed": false,
+    "cradle_root_observed": true,
     "scene": "main menu ShipConstruction.LoadShip",
-    "flight_verified": false
+    "flight_verified": false,
+    "cradle_root": "sspx-core-375-1",
+    "dock_parent_identity_verified": false
   }
 }

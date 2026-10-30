@@ -96,3 +96,11 @@ The measured loaded mass is not the fully crewed design estimate; resolve the
 remaining difference against the stock editor and module/crew mass before relying
 on the ideal delta-v figure. Loading does not establish docking-node state, collider
 clearance, working legs, staging, EVA access, propulsion or landing/recovery.
+
+A repeat probe that waits a real second between destroying the first construct
+and loading the second did report `sspx-core-375-1` as the cradle root and the
+expected carrier spine parent chain. The first no-root observation therefore is
+not reproducible under separated probe lifetimes. Both docking parts have
+`flightID = 0` in this main-menu context, so the parent log cannot distinguish
+which is the lander-side port. Confirm the two ports' actual attachment and
+release behavior in an editor/flight scene before claiming the cradle works.
