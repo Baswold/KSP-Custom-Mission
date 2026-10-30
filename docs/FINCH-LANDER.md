@@ -109,3 +109,15 @@ The later index-based loader probe confirms cradle part 18 (lander cabin) is
 parented to part 21 (lander port), which is parented to part 17 (carrier port).
 Both docking modules report `Ready` in the main-menu load context; that is not
 proof of their initialized flight docking state or an operational release event.
+
+### Disposable flight probe in progress
+
+`tests/ksp/FinchFlightProbe.cs` is a separate test-only addon, never part of the
+production MegaCrew build. It checks for a one-shot marker in an isolated test
+copy, loads a separately named `MegaCrew Finch QA` save, consumes the marker,
+launches the cradle on the launchpad and reports in-flight docking event state.
+The named QA save is a copy of the pristine practice fixture. This experiment
+may destroy its own simulated craft and must never target an existing personal
+save or server Universe. The marker and probe should be removed after testing.
+At present the probe is running; no launch, release or safe-clearance result has
+been established. Launchpad observation does not substitute for orbital testing.
