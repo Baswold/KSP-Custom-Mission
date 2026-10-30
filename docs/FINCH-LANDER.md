@@ -171,3 +171,15 @@ flight initialization. That fixture does not reproduce stock launch's
 fixture. A new isolated test sets the two linked ports to the stock
 `PreAttached` state before loading and records all vessels; this is test-fixture
 initialization, not a production change or proof that stock launch will do so.
+
+### Evidence correction: packed versus loaded vessels
+
+The last log's world list also records the Finch vessel as `loaded=False` with
+35 serialized part snapshots while the partial live part list had 18. The count
+difference therefore **does not prove loss of the lander**. Likewise, the single
+live docking module is insufficient to qualify release behavior on a packed or
+partially loaded vessel. The probe now waits for both loaded and unpacked state
+with a bounded timeout, reports live and snapshot counts, and marks the test
+inconclusive if the load gate does not pass. This corrected probe compiles against
+KSP 1.12.5; no new runtime pass is claimed. The prior results remain as diagnostic
+history rather than evidence of an operational or defective cradle.

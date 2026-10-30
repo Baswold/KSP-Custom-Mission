@@ -67,6 +67,11 @@ public sealed class FinchOrbitCheck : MonoBehaviour
         yield return new WaitForSecondsRealtime(12);
         var v=FlightGlobals.ActiveVessel;
         if(v==null||v.vesselName!="Finch Orbit QA"){Debug.LogError("[FinchOrbitQA] Target not active");yield break;}
+        float deadline=Time.realtimeSinceStartup+30;
+        while((!v.loaded||v.packed)&&Time.realtimeSinceStartup<deadline){yield return new WaitForSecondsRealtime(1);v=FlightGlobals.ActiveVessel;if(v==null)yield break;}
+        int snapshots=v.protoVessel==null?-1:v.protoVessel.protoPartSnapshots.Count;
+        Debug.Log("[FinchOrbitQA] LOAD_GATE loaded="+v.loaded+" packed="+v.packed+" liveParts="+v.parts.Count+" snapshotParts="+snapshots);
+        if(!v.loaded||v.packed){Debug.LogError("[FinchOrbitQA] INCONCLUSIVE: vessel never became loaded and unpacked; do not infer part loss or docking from partial live lists");yield break;}
         Debug.Log("[FinchOrbitQA] Vessel="+v.vesselName+" parts="+v.parts.Count+" situation="+v.situation+" Pe="+v.orbit.PeA+" Ap="+v.orbit.ApA);
         foreach(var other in FlightGlobals.Vessels)if(other!=null)Debug.Log("[FinchOrbitQA] WORLD "+other.vesselName+" loaded="+other.loaded+" parts="+(other.loaded?other.parts.Count:other.protoVessel.protoPartSnapshots.Count));
         foreach(var p in v.parts)foreach(PartModule m in p.Modules)if(m.moduleName=="ModuleDockingNode"){
