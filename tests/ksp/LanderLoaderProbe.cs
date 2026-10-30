@@ -18,7 +18,15 @@ public sealed class LanderLoaderProbe : MonoBehaviour
                 double mass=0; int seats=0, docks=0, engines=0;
                 foreach(var p in craft.parts) { mass+=p.mass+p.GetResourceMass(); seats+=p.CrewCapacity;foreach(PartModule m in p.Modules){if(m.moduleName=="ModuleDockingNode")docks++;if(m.moduleName.StartsWith("ModuleEngines"))engines++;} }
                 Debug.Log("[FinchQA] LOADED "+name+" parts="+craft.parts.Count+" wetMass="+mass+" seats="+seats+" docks="+docks+" engines="+engines);
-                foreach(var p in craft.parts) Debug.Log("[FinchQA] PARENT "+p.partInfo.name+"_"+p.flightID+" -> "+(p.parent==null?"ROOT":p.parent.partInfo.name+"_"+p.parent.flightID));
+                for (int i=0; i<craft.parts.Count; i++) {
+                    var p=craft.parts[i];
+                    int parent=p.parent==null ? -1 : craft.parts.IndexOf(p.parent);
+                    Debug.Log("[FinchQA] EDGE "+i+" "+p.partInfo.name+" parent="+parent);
+                    foreach(PartModule m in p.Modules) if(m.moduleName=="ModuleDockingNode") {
+                        var field=m.GetType().GetField("state");
+                        Debug.Log("[FinchQA] DOCK "+i+" state="+(field==null?"unknown":Convert.ToString(field.GetValue(m))));
+                    }
+                }
             }
             catch(Exception ex) { Debug.LogError("[FinchQA] FAILED "+name+" "+ex); }
             finally { if(craft!=null)foreach(var p in craft.parts)if(p!=null)Destroy(p.gameObject); }
