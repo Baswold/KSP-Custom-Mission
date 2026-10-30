@@ -1,0 +1,193 @@
+diff --git a/Source/MegaCrew.cs b/Source/MegaCrew.cs
+--- a/Source/MegaCrew.cs
++++ b/Source/MegaCrew.cs
+@@ -68,6 +68,7 @@
+         public void Update()
+         {
+             if (Input.GetKeyDown(KeyCode.F8)) visible=!visible;
++            UpdateConsoleInputLock();
+             if (!Allowed) return;
+             string key=HighLogic.SaveFolder;
+             if (key!=loadedSave) { ResetState(); loadedSave=key; Load(); lastUt=Planetarium.GetUniversalTime(); }
+@@ -115,11 +116,15 @@
+         {
+             if(!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene!=GameScenes.SPACECENTER && HighLogic.LoadedScene!=GameScenes.EDITOR && HighLogic.LoadedScene!=GameScenes.MAINMENU)return;
+             GUI.skin=HighLogic.Skin;
++            ClearConsoleFocusOutside();
++            try {
+             if(GUI.Button(new Rect(12,Screen.height-95,165,34),"MEGACREW  /  F8"))visible=!visible;
+             DrawInterior();if(!visible)return;
+             window.width=Math.Min(760,Screen.width-20);window.height=Math.Min(650,Screen.height-45);
+             window.x=Mathf.Clamp(window.x,0,Math.Max(0,Screen.width-window.width));window.y=Mathf.Clamp(window.y,0,Math.Max(0,Screen.height-window.height));
+             window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.3.4 candidate",GUILayout.Width(window.width),GUILayout.Height(window.height));
++            }
++            finally { RefreshConsoleGuiFocus(); }
+         }
+         void Draw(int id)
+         {
+@@ -190,7 +195,7 @@
+             double i,w,d;if(Parse(isp,out i)&&Parse(wet,out w)&&Parse(dry,out d)&&i>0&&d>0&&w>d)GUILayout.Label("Ideal single-stage delta-v: "+Science.DeltaV(i,w,d).ToString("F0")+" m/s. Excludes gravity/steering losses, reserves and stage changes.");
+             GUILayout.Label("Defaults are design examples, not measurements of your ship. No manoeuvre or throttle commands are executed by this version.");DrawTelemetry();
+         }
+-        void InputRow(string label,ref string value){GUILayout.BeginHorizontal();GUILayout.Label(label,GUILayout.Width(200));value=GUILayout.TextField(value,16,GUILayout.Width(120));GUILayout.EndHorizontal();}
++        void InputRow(string label,ref string value){GUILayout.BeginHorizontal();GUILayout.Label(label,GUILayout.Width(200));GUI.SetNextControlName(ConsoleFieldPrefix+label);value=GUILayout.TextField(value,16,GUILayout.Width(120));GUILayout.EndHorizontal();}
+         static bool Parse(string s,out double v){return double.TryParse(s,NumberStyles.Float,CultureInfo.InvariantCulture,out v)&&!double.IsNaN(v)&&!double.IsInfinity(v);}
+         void DrawTelemetry()
+         {
+diff --git a/Source/ConsoleInput.cs b/Source/ConsoleInput.cs
+new file mode 100644
+--- /dev/null
++++ b/Source/ConsoleInput.cs
+@@ -0,0 +1,53 @@
++using System;
++using UnityEngine;
++
++namespace MegaCrew
++{
++    public sealed partial class MissionConsole
++    {
++        const string ConsoleLockId="MegaCrew.ConsoleInput";
++        const string ConsoleFieldPrefix="MegaCrew.ConsoleField.";
++        bool consoleControlsLocked;
++        bool consoleHasFocus=true;
++        bool consoleFieldFocused;
++        bool PointerOverConsole()
++        {
++            var p=new Vector2(Input.mousePosition.x,Screen.height-Input.mousePosition.y);
++            return (visible&&window.Contains(p)) ||
++                (Allowed&&interiorOpen&&interiorWindow.Contains(p)) ||
++                new Rect(12,Screen.height-95,165,34).Contains(p);
++        }
++        void ClearConsoleFocusOutside()
++        {
++            if(Event.current!=null&&Event.current.type==EventType.MouseDown&&!PointerOverConsole()&&
++                (GUI.GetNameOfFocusedControl()??"").StartsWith(ConsoleFieldPrefix,StringComparison.Ordinal))
++                GUI.FocusControl(null);
++        }
++        void RefreshConsoleGuiFocus()
++        {
++            consoleFieldFocused=(GUI.GetNameOfFocusedControl()??"").StartsWith(ConsoleFieldPrefix,StringComparison.Ordinal);
++            UpdateConsoleInputLock();
++        }
++        void UpdateConsoleInputLock()
++        {
++            if(!HighLogic.LoadedSceneIsFlight)consoleFieldFocused=false;
++            bool field=visible&&consoleFieldFocused;
++            bool required=consoleHasFocus&&HighLogic.LoadedSceneIsFlight&&(PointerOverConsole()||field);
++            if(required&&!consoleControlsLocked)
++            {
++                InputLockManager.SetControlLock(ControlTypes.ALL_SHIP_CONTROLS,ConsoleLockId);
++                consoleControlsLocked=true;
++            }
++            else if(!required)ReleaseConsoleInputLock();
++        }
++        void ReleaseConsoleInputLock()
++        {
++            if(!consoleControlsLocked)return;
++            InputLockManager.RemoveControlLock(ConsoleLockId);
++            consoleControlsLocked=false;
++        }
++        void OnApplicationFocus(bool focused){consoleHasFocus=focused;if(!focused)ReleaseConsoleInputLock();}
++        void OnDisable(){ReleaseConsoleInputLock();}
++        void OnDestroy(){ReleaseConsoleInputLock();}
++    }
++}
+diff --git a/tests/ConsoleInputTests.cs b/tests/ConsoleInputTests.cs
+new file mode 100644
+--- /dev/null
++++ b/tests/ConsoleInputTests.cs
+@@ -0,0 +1,43 @@
++// Exercise the production lock lifecycle against a recording KSP boundary.
++using System;
++using System.Collections.Generic;
++namespace UnityEngine {
++ public struct Vector2 {public float x,y;public Vector2(float x,float y){this.x=x;this.y=y;}}
++ public struct Rect {float x,y,w,h;public Rect(float x,float y,float w,float h){this.x=x;this.y=y;this.w=w;this.h=h;}public bool Contains(Vector2 p){return p.x>=x&&p.x<x+w&&p.y>=y&&p.y<y+h;}}
++ public static class Input {public static Vector2 mousePosition;}
++ public static class Screen {public static int height=1000;}
++ public enum EventType {MouseDown,Repaint}
++ public class Event {public static Event current;public EventType type;}
++ public static class GUI {public static string focus="";public static string GetNameOfFocusedControl(){return focus;}public static void FocusControl(string name){focus=name;}}
++}
++public static class HighLogic {public static bool LoadedSceneIsFlight=true;}
++public enum ControlTypes {ALL_SHIP_CONTROLS}
++public static class InputLockManager {
++ public static readonly HashSet<string> locks=new HashSet<string>();public static int sets,removes;
++ public static void SetControlLock(ControlTypes controls,string id){locks.Add(id);sets++;}
++ public static void RemoveControlLock(string id){locks.Remove(id);removes++;}
++}
++namespace MegaCrew {
++ public sealed partial class MissionConsole {
++  UnityEngine.Rect window=new UnityEngine.Rect(30,65,760,650),interiorWindow=new UnityEngine.Rect(790,70,410,560);
++  bool visible=true,interiorOpen;bool Allowed=true;
++  static void Assert(bool yes,string message){if(!yes)throw new Exception(message);}
++  static void Pointer(float x,float guiY){UnityEngine.Input.mousePosition=new UnityEngine.Vector2(x,1000-guiY);}
++  void Check(bool expected,string context){UpdateConsoleInputLock();Assert(InputLockManager.locks.Contains(ConsoleLockId)==expected,context);Assert(InputLockManager.locks.Contains("FreeIVA"),"Removed another mod's lock");}
++  public static void Main(){
++   InputLockManager.locks.Add("FreeIVA");var c=new MissionConsole();
++   Pointer(500,800);c.Check(false,"outside");Pointer(40,100);c.Check(true,"main hover");int sets=InputLockManager.sets;c.Check(true,"held");Assert(sets==InputLockManager.sets,"Repeated lock acquisition");
++   Pointer(500,800);c.Check(false,"leave panel");
++   UnityEngine.GUI.focus=ConsoleFieldPrefix+"Radius";c.RefreshConsoleGuiFocus();c.Check(true,"typing outside panel");
++   UnityEngine.Event.current=new UnityEngine.Event{type=UnityEngine.EventType.MouseDown};c.ClearConsoleFocusOutside();c.RefreshConsoleGuiFocus();c.Check(false,"outside click clears field");
++   UnityEngine.GUI.focus="OtherMod.field";c.RefreshConsoleGuiFocus();c.Check(false,"other mod focus");
++   Pointer(40,100);c.Check(true,"hover again");c.visible=false;c.Check(false,"close main");
++   Pointer(800,100);c.interiorOpen=true;c.Check(true,"interior hover");c.Allowed=false;c.Check(false,"interior not permitted");c.Allowed=true;
++   c.Check(true,"interior permitted");c.OnApplicationFocus(false);c.Check(false,"app loses focus");c.OnApplicationFocus(true);c.Check(true,"app returns");
++   HighLogic.LoadedSceneIsFlight=false;c.Check(false,"scene exit");HighLogic.LoadedSceneIsFlight=true;c.Check(true,"scene return");
++   c.OnDisable();Assert(!InputLockManager.locks.Contains(ConsoleLockId),"disable leaked lock");c.Check(true,"re-enabled");c.OnDestroy();Assert(!InputLockManager.locks.Contains(ConsoleLockId),"destroy leaked lock");
++   c.interiorOpen=false;Pointer(20,920);c.Check(true,"launcher button hover");Pointer(500,800);c.Check(false,"leave launcher");
++   Assert(InputLockManager.locks.Count==1,"foreign lock altered");Console.WriteLine("PASS: production console hover, focus, hide, scene and lifecycle lock checks; FreeIVA lock preserved.");
++  }
++ }
++}
+diff --git a/tests/run_console_input_tests.py b/tests/run_console_input_tests.py
+new file mode 100644
+--- /dev/null
++++ b/tests/run_console_input_tests.py
+@@ -0,0 +1,11 @@
++"""Run the actual production input-lock adapter with recording KSP/GUI boundaries."""
++import argparse,json,pathlib,subprocess,tempfile
++p=argparse.ArgumentParser();p.add_argument('--runtime',type=pathlib.Path,required=True);p.add_argument('--csc',type=pathlib.Path,required=True);a=p.parse_args()
++r=pathlib.Path(__file__).resolve().parents[1]
++with tempfile.TemporaryDirectory() as folder:
++ d=pathlib.Path(folder)
++ refs=['System.Private.CoreLib.dll','System.Runtime.dll','System.Console.dll','System.Collections.dll']
++ args=['-nologo','-nostdlib+','-target:exe',f'-out:"{d}/Tests.dll"']+[f'-reference:"{a.runtime.resolve()/x}"' for x in refs]+[f'"{r}/Source/ConsoleInput.cs"',f'"{r}/tests/ConsoleInputTests.cs"']
++ (d/'compile.rsp').write_text('\n'.join(args));subprocess.run(['dotnet',str(a.csc),'@'+str(d/'compile.rsp')],check=True)
++ (d/'Tests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+a.runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':a.runtime.name}}}))
++ subprocess.run(['dotnet',str(d/'Tests.dll')],check=True)
+diff --git a/docs/CONSOLE-INPUT.md b/docs/CONSOLE-INPUT.md
+new file mode 100644
+--- /dev/null
++++ b/docs/CONSOLE-INPUT.md
+@@ -0,0 +1,30 @@
++# Console input isolation candidate
++
++Apply Hermes-Console-Input.patch after the cumulative 0.3.4 source patch.
++This focused source delta does not include a DLL, save or provider. Rebuild
++an isolated candidate with the current campaign/operations sources.
++
++The mission and interior panels now hold their own ALL_SHIP_CONTROLS lock
++while hovered in flight. Named console text fields retain that lock while
++being edited; an outside click clears the console field focus. The toolbar
++button is covered too. Closing/hiding, leaving the pointer without a field
++focus, changing scene, losing application focus, disabling or destroying
++the console releases only MegaCrew.ConsoleInput. It never removes FreeIVA
++or another mod's locks. GUI focus is read only in OnGUI, not Update.
++
++Production lock lifecycle checks with recording KSP/GUI boundaries pass. The
++full plugin compiles against KSP 1.12.5. These do not prove actual IMGUI event
++ordering, click-through prevention or FreeIVA behavior. No new DLL has been
++installed into a play copy for this change.
++
++Runtime gates in the disposable copy:
++- Hover both panels and the toolbar: clicks/keys must not change stock ship
++  attitude, throttle or staging. Leave the panels: controls must return.
++- Type and edit engineering fields, move the pointer away, then click outside;
++  check focus and stock controls. Verify F8 and the Close button release.
++- Exercise I-panel actions and FreeIVA hatches/walking. The stock control lock
++  does not itself guarantee that FreeIVA raw keyboard input is suppressed.
++- Change scenes, switch application focus, and close the console. Inspect KSP
++  input locks and verify no lingering MegaCrew.ConsoleInput entry.
++- Repeat alongside Basil's standalone navigation panel so each independent
++  lock releases without changing the other.
