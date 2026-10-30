@@ -133,3 +133,10 @@ Kerbin orbit and focuses that vessel. It intentionally clears vessels only in th
 new QA game object and has no production role. This test can diagnose flight state
 and the docking modules; it does not establish a crewed mission, redocking or safe
 clearance. A marker makes it one-shot. Results must be observed in the log.
+
+The first orbital snapshot fixture reached flight but did not create an active
+vessel and produced module-initialization exceptions. It is not a craft flight
+result. The next isolated probe loads the existing practice orbit first, then
+creates the test cradle at a separate 300-km Kerbin orbit through KSP's
+`Game.AddVessel`; the original practice vessel remains in the disposable copy.
+This alternative is awaiting runtime results.
