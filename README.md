@@ -74,3 +74,10 @@ Known pending checks: generated save load, physical stability, hatch traversal, 
 ## Build from source
 
 With a .NET SDK installed, run `python3 tools/build.py --managed "/path/to/KSP.app/Contents/Resources/Data/Managed" --csc "/path/to/dotnet/sdk/VERSION/Roslyn/bincore/csc.dll"`. On Windows/Linux select the equivalent KSP Data/Managed folder. This uses your own KSP reference assemblies and does not redistribute them. Restart KSP after replacing the DLL.
+
+## Optional Mac visual profile
+
+See [docs/VISUAL-PROFILE.md](docs/VISUAL-PROFILE.md) for the pinned clouds v3,
+NativeParallax Mac renderer, Firefly and VaporCones profile requested in issue #3.
+Install the base mission first. Visual rendering and the F8 binding conflict need
+separate verification; this profile does not enable multiplayer.
