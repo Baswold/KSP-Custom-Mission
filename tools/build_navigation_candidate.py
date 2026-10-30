@@ -23,6 +23,37 @@ import zipfile
 EXPECTED_ZIP_SHA256 = "0071eacf3a1b38a63c611fe2a65877ea2f62f6076b7e97d22e9cdf58b412cf40"
 ZIP_PATH = "Hermes-Practice-v0.3.0.zip"
 NAV_ROOT = "Source/Navigation"
+NAVIGATION_TEST_PATHS = (
+    "tests/navigation/BurnDurationTests.cs",
+    "tests/navigation/LambertRandomizedTests.cs",
+    "tests/navigation/MissionControlMathTests.cs",
+    "tests/navigation/WatchCoverageTests.cs",
+    "tests/navigation/run.py",
+)
+OPERATIONS_SOURCE_PATHS = (
+    "Source/OnboardEngineering.cs",
+    "Source/OnboardOperations.cs",
+    "Source/OperationsModel.cs",
+    "Source/OnboardRendezvous.cs",
+    "Source/RendezvousModel.cs",
+    "Source/OnboardScienceObservation.cs",
+    "Source/ScienceObservationModel.cs",
+    "Source/DutyReadinessBridge.cs",
+    "Source/OnboardPowerSurvey.cs",
+    "Source/PowerSurveyModel.cs",
+)
+OPERATIONS_TEST_PATHS = (
+    "tests/OperationsModelTests.cs",
+    "tests/run_operations_tests.py",
+    "tests/RendezvousModelTests.cs",
+    "tests/run_rendezvous_model_tests.py",
+    "tests/ScienceObservationModelTests.cs",
+    "tests/run_science_observation_model_tests.py",
+    "tests/DutyReadinessBridgeTests.cs",
+    "tests/run_duty_readiness_bridge_tests.py",
+    "tests/PowerSurveyModelTests.cs",
+    "tests/run_power_survey_model_tests.py",
+)
 PATCH_SEQUENCE = (
     {
         "ref": "f76e437",
@@ -168,6 +199,28 @@ def navigation_sources(repo, commit):
     return result
 
 
+def fixed_git_files(repo, commit, paths, label):
+    """Read an exact tracked-file allowlist from a pinned commit."""
+    result = {}
+    for path in paths:
+        rel = PurePosixPath(path)
+        if rel.is_absolute() or ".." in rel.parts or "\\" in path:
+            raise BuildError("Unsafe {} path: {!r}".format(label, path))
+        result[path] = git_blob(repo, commit, path)
+    return result
+
+
+def navigation_tests(repo, commit):
+    return fixed_git_files(repo, commit, NAVIGATION_TEST_PATHS, "navigation test")
+
+
+def operations_files(repo, commit):
+    return {
+        "sources": fixed_git_files(repo, commit, OPERATIONS_SOURCE_PATHS, "operations source"),
+        "tests": fixed_git_files(repo, commit, OPERATIONS_TEST_PATHS, "operations test"),
+    }
+
+
 def apply_patch_once(root, patch_bytes, patch_label, sequence_number):
     patch_file = root / (".integration-patch-{}.patch".format(sequence_number))
     patch_file.write_bytes(patch_bytes)
@@ -184,13 +237,33 @@ def apply_patch_once(root, patch_bytes, patch_label, sequence_number):
     patch_file.unlink()
 
 
-def overlay_navigation(root, sources):
-    for path, content in sorted(sources.items()):
+def overlay_files(root, groups):
+    """Overlay several pinned file maps after preflighting all paths and collisions."""
+    combined = {}
+    owners = {}
+    for label, files in groups:
+        for path, content in sorted(files.items()):
+            rel = PurePosixPath(path)
+            if rel.is_absolute() or ".." in rel.parts or "\\" in path:
+                raise BuildError("Unsafe {} overlay path: {!r}".format(label, path))
+            if path in combined:
+                raise BuildError("Overlay path collision between {} and {}: {}".format(
+                    owners[path], label, path))
+            combined[path] = content
+            owners[path] = label
+    for path in sorted(combined):
+        target = root.joinpath(*PurePosixPath(path).parts)
+        if target.exists() or target.is_symlink():
+            raise BuildError("{} overlay would overwrite an existing path: {}".format(
+                owners[path], path))
+    for path, content in sorted(combined.items()):
         target = root.joinpath(*PurePosixPath(path).parts)
         target.parent.mkdir(parents=True, exist_ok=True)
-        if target.exists() or target.is_symlink():
-            raise BuildError("Navigation overlay would overwrite an existing path: {}".format(path))
         target.write_bytes(content)
+
+
+def overlay_navigation(root, sources):
+    overlay_files(root, [("Navigation", sources)])
 
 
 def hash_tree(root):
@@ -257,7 +330,7 @@ def ensure_new_destination(path, repo=None):
 
 
 def collect_inputs(repo, upstream_ref, navigation_ref, patch_sequence=PATCH_SEQUENCE,
-                   expected_zip_sha256=EXPECTED_ZIP_SHA256):
+                   expected_zip_sha256=EXPECTED_ZIP_SHA256, operations_ref=None):
     """Read and verify every pinned input before creating an output directory."""
     if not patch_sequence:
         raise BuildError("Patch sequence must contain at least one patch")
@@ -295,6 +368,12 @@ def collect_inputs(repo, upstream_ref, navigation_ref, patch_sequence=PATCH_SEQU
         })
 
     nav_files = navigation_sources(repo, nav_commit)
+    nav_test_files = navigation_tests(repo, nav_commit)
+    operations_commit = None
+    operations = None
+    if operations_ref is not None:
+        operations_commit = resolve_commit(repo, operations_ref)
+        operations = operations_files(repo, operations_commit)
     return {
         "upstream_commit": upstream_commit,
         "zip_bytes": zip_bytes,
@@ -302,6 +381,10 @@ def collect_inputs(repo, upstream_ref, navigation_ref, patch_sequence=PATCH_SEQU
         "patches": patches,
         "navigation_commit": nav_commit,
         "navigation_files": nav_files,
+        "navigation_tests": nav_test_files,
+        "operations_ref": operations_ref,
+        "operations_commit": operations_commit,
+        "operations": operations,
     }
 
 
@@ -309,9 +392,10 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
     repo = Path(args.repo).resolve()
     if not repo.is_dir() or not (repo / ".git").exists():
         raise BuildError("--repo must be a Git checkout")
+    operations_ref = getattr(args, "operations_ref", None)
     inputs = collect_inputs(repo, args.upstream_ref, args.navigation_ref,
                             PATCH_SEQUENCE if patch_sequence is None else patch_sequence,
-                            expected_zip_sha256)
+                            expected_zip_sha256, operations_ref=operations_ref)
 
     output = ensure_new_destination(args.output, repo)
     try:
@@ -324,7 +408,16 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
         count = safe_extract(inputs["zip_bytes"], output)
         for patch in inputs["patches"]:
             apply_patch_once(output, patch["bytes"], patch["path"], patch["index"])
-        overlay_navigation(output, inputs["navigation_files"])
+        overlay_groups = [
+            ("Navigation source", inputs["navigation_files"]),
+            ("Navigation tests", inputs["navigation_tests"]),
+        ]
+        if inputs["operations"] is not None:
+            overlay_groups.extend([
+                ("Operations source", inputs["operations"]["sources"]),
+                ("Operations tests", inputs["operations"]["tests"]),
+            ])
+        overlay_files(output, overlay_groups)
         compiled = False
         compiler_inputs = None
         if not args.prepare_only:
@@ -340,6 +433,13 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
             "upstream_commit": inputs["upstream_commit"],
             "navigation_ref": args.navigation_ref,
             "navigation_commit": inputs["navigation_commit"],
+            "navigation_tests": {
+                "ref": args.navigation_ref,
+                "commit": inputs["navigation_commit"],
+                "files": {path: sha256(data) for path, data in sorted(inputs["navigation_tests"].items())},
+            },
+            "operations_ref": inputs["operations_ref"],
+            "operations_commit": inputs["operations_commit"],
             "inputs": {
                 ZIP_PATH: {
                     "sha256": inputs["zip_sha256"],
@@ -351,6 +451,10 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
                                for patch in inputs["patches"]],
             "zip_member_count": count,
             "navigation_files": {path: sha256(data) for path, data in sorted(inputs["navigation_files"].items())},
+            "operations_sources": ({path: sha256(data) for path, data in sorted(inputs["operations"]["sources"].items())}
+                                   if inputs["operations"] is not None else None),
+            "operations_tests": ({path: sha256(data) for path, data in sorted(inputs["operations"]["tests"].items())}
+                                 if inputs["operations"] is not None else None),
             "compiled": compiled,
             "compiler_language_version": "7.3" if compiled else None,
             "compiler_inputs": compiler_inputs,
@@ -369,6 +473,7 @@ def main(argv=None):
     parser.add_argument("--repo", required=True, help="Git checkout to read (no writes)")
     parser.add_argument("--upstream-ref", default="f76e437", help="Pinned upstream artifact ref (default: f76e437)")
     parser.add_argument("--navigation-ref", default="294c667", help="Explicit navigation source ref (default: 294c667)")
+    parser.add_argument("--operations-ref", help="Optional explicit commit/ref for reviewed onboard operations addons and focused tests; no default")
     parser.add_argument("--output", required=True, type=Path, help="New output directory; must not exist")
     parser.add_argument("--managed", type=Path, help="KSP Data/Managed directory")
     parser.add_argument("--csc", type=Path, help="Roslyn csc.dll")

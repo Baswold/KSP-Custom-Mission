@@ -1,14 +1,52 @@
 # Build an isolated 0.3.7 navigation candidate
 
-The default builder pins upstream commit `f76e437` and navigation commit `294c667`. It reads the published `Hermes-Practice-v0.3.0.zip`, verifies its pinned SHA-256, then applies the single cumulative `Hermes-Campaign-v0.3.7-source.patch` exactly once and verifies SHA-256 `5f59faa0a8220abf9a5119b76fb98caac8e4e73c189cc7e4d2f05948b80b8770`.
+The builder defaults to upstream commit `f76e437` and navigation commit
+`294c667`. It reads the published `Hermes-Practice-v0.3.0.zip`, verifies its
+pinned SHA-256, then applies the single cumulative
+`Hermes-Campaign-v0.3.7-source.patch` exactly once and verifies SHA-256
+`5f59faa0a8220abf9a5119b76fb98caac8e4e73c189cc7e4d2f05948b80b8770`.
 
-Do not stack 0.3.6, coast, tests, console, supply, epoch, or QA patches on top of 0.3.7. The packet includes its host-owned source, tests, and documentation. The builder extracts and modifies only a new output directory, overlays tracked navigation source files from the explicit navigation ref, and can compile all plugin sources as C# 7.3 against a local KSP `Data/Managed` directory. It does not install the plugin, access saves or a server, or change the checkout.
+Do not stack 0.3.6, coast, tests, console, supply, epoch, or QA patches on 0.3.7.
+The packet contains the host-owned campaign source, tests, and documentation.
+
+By default the tool prepares an upstream-plus-navigation candidate. It overlays
+tracked C# files under `Source/Navigation` and the fixed five navigation test
+files from the explicit navigation ref. Navigation-only use remains the default.
+
+To build a combined candidate, pass `--operations-ref` with an explicit reviewed
+Git commit or ref. There is no default or mutable working-tree fallback. The
+builder reads only its fixed ten-file onboard source allowlist and the five
+model test/runner pairs at that commit. It never overlays upstream campaign
+core files such as `MegaCrew.cs`, `Practice.cs`, or campaign/needs sources. All
+navigation and operations source/test refs and file hashes are written to the
+manifest. Existing candidate paths are rejected; overlays are collision-checked
+as a group and never overwrite files.
 
 Examples (from repository root):
 
 ```sh
-python3 tools/build_navigation_candidate.py --repo . --output /tmp/megacrew-037-prepare --prepare-only
-python3 tools/build_navigation_candidate.py --repo . --output /tmp/megacrew-037-build --managed /path/to/KSP_Data/Managed --csc /path/to/dotnet/sdk/Roslyn/bincore/csc.dll
+python3 tools/build_navigation_candidate.py \
+  --repo . \
+  --output /tmp/megacrew-037-nav \
+  --prepare-only
+
+python3 tools/build_navigation_candidate.py \
+  --repo . \
+  --navigation-ref 294c667 \
+  --operations-ref 3c1fe22 \
+  --output /tmp/megacrew-037-combined \
+  --managed /path/to/KSP_Data/Managed \
+  --csc /path/to/dotnet/sdk/Roslyn/bincore/csc.dll
 ```
 
-An existing output directory is rejected. The manifest records exact patch sequence and hashes, source refs, output hashes, and compile inputs. Tests include unsafe ZIP members, traversal/symlink defense, hash mismatch, pre-existing destinations, relative output paths, and a synthetic two-patch dependency proving ordered cumulative application.
+An output directory must be new and outside the source checkout. Inputs are
+resolved and verified before the output is created. The builder does not
+install the plugin, access saves or a server, download inputs, or modify the
+checkout. With `--managed` and `--csc`, it compiles every candidate plugin source
+as C# 7.3 against the supplied local KSP assemblies.
+
+The safety tests cover unsafe ZIP members, traversal and symlink defense,
+artifact hashes, existing destinations, relative output paths, ordered
+cumulative patch application, missing operations blobs, collision/no-overwrite
+behavior, core-source preservation, and both navigation-only and combined
+synthetic candidate preparation.

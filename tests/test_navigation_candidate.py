@@ -145,6 +145,105 @@ class BuilderSafetyTests(unittest.TestCase):
             self.assertEqual(files["nested/manifest.json"], builder.sha256(b"nested manifest"))
             self.assertTrue(digest)
 
+    def test_operations_overlay_preflights_collisions_without_overwrite_or_partial_write(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            existing = root / "Source" / "OnboardEngineering.cs"
+            existing.parent.mkdir()
+            existing.write_text("preserve published core")
+            with self.assertRaisesRegex(builder.BuildError, "would overwrite an existing path"):
+                builder.overlay_files(root, [("Operations", {
+                    "Source/OnboardEngineering.cs": b"replacement",
+                    "Source/OnboardOperations.cs": b"must not be written",
+                })])
+            self.assertEqual(existing.read_text(), "preserve published core")
+            self.assertFalse((root / "Source" / "OnboardOperations.cs").exists())
+
+    def test_missing_operations_blob_fails_before_destination_creation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp = Path(temp)
+            repo = temp / "fixture-repo"
+            repo.mkdir()
+            subprocess.run(["git", "init", "--quiet", str(repo)], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.name", "Fixture"], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "fixture@example.invalid"], check=True)
+
+            archive = make_zip([
+                (zipfile.ZipInfo("README.md"), b"fixture base\n"),
+                (zipfile.ZipInfo("Source/MegaCrew.cs"), b"published core\n"),
+            ])
+            (repo / builder.ZIP_PATH).write_bytes(archive)
+            (repo / "stage.patch").write_bytes(("""
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -1 +1 @@
+-fixture base
++fixture patched
+""").lstrip().encode("utf-8"))
+
+            for rel in builder.NAVIGATION_TEST_PATHS:
+                target = repo / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("// nav test fixture: " + rel + "\n")
+            nav_source = repo / "Source" / "Navigation" / "Fixture.cs"
+            nav_source.parent.mkdir(parents=True)
+            nav_source.write_text("// fixture navigation source\n")
+            for rel in builder.OPERATIONS_SOURCE_PATHS + builder.OPERATIONS_TEST_PATHS:
+                target = repo / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("// operations fixture: " + rel + "\n")
+            (repo / "Source" / "MegaCrew.cs").write_text("untrusted core from operations ref\n")
+
+            subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+            subprocess.run([
+                "git", "-C", str(repo), "-c", "commit.gpgsign=false",
+                "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "fixture inputs",
+            ], check=True)
+            fixture_ref = subprocess.run(
+                ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+                stdout=subprocess.PIPE, text=True,
+            ).stdout.strip()
+
+            empty_ref_args = type("Args", (), {
+                "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "operations_ref": "", "output": temp / "empty-operations-ref",
+                "prepare_only": True, "managed": None, "csc": None,
+            })()
+            with self.assertRaisesRegex(builder.BuildError, "Invalid Git ref"):
+                builder.build(empty_ref_args,
+                              patch_sequence=({
+                                  "ref": fixture_ref, "path": "stage.patch",
+                                  "expected_sha256": builder.sha256((repo / "stage.patch").read_bytes()),
+                              },),
+                              expected_zip_sha256=builder.sha256(archive))
+            self.assertFalse(empty_ref_args.output.exists())
+
+            missing = repo / "Source" / "OnboardEngineering.cs"
+            missing.unlink()
+            subprocess.run(["git", "-C", str(repo), "add", "-u"], check=True)
+            subprocess.run([
+                "git", "-C", str(repo), "-c", "commit.gpgsign=false",
+                "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "remove allowed blob",
+            ], check=True)
+            missing_ref = subprocess.run(
+                ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+                stdout=subprocess.PIPE, text=True,
+            ).stdout.strip()
+            args = type("Args", (), {
+                "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "operations_ref": missing_ref, "output": temp / "must-not-exist",
+                "prepare_only": True, "managed": None, "csc": None,
+            })()
+            with self.assertRaisesRegex(builder.BuildError, "Missing Git object"):
+                builder.build(args,
+                              patch_sequence=({
+                                  "ref": fixture_ref, "path": "stage.patch",
+                                  "expected_sha256": builder.sha256((repo / "stage.patch").read_bytes()),
+                              },),
+                              expected_zip_sha256=builder.sha256(archive))
+            self.assertFalse(args.output.exists())
+
     def test_duplicate_and_case_colliding_members_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp) / "out"
@@ -165,7 +264,10 @@ class BuilderSafetyTests(unittest.TestCase):
             subprocess.run(["git", "-C", str(repo), "config", "user.name", "Fixture"], check=True)
             subprocess.run(["git", "-C", str(repo), "config", "user.email", "fixture@example.invalid"], check=True)
 
-            archive = make_zip([(zipfile.ZipInfo("README.md"), b"fixture base\n")])
+            archive = make_zip([
+                (zipfile.ZipInfo("README.md"), b"fixture base\n"),
+                (zipfile.ZipInfo("Source/MegaCrew.cs"), b"published core\n"),
+            ])
             first_patch = (
                 "diff --git a/Source/Sequence.txt b/Source/Sequence.txt\n"
                 "new file mode 100644\n"
@@ -188,6 +290,17 @@ class BuilderSafetyTests(unittest.TestCase):
             nav = repo / "Source" / "Navigation" / "Fixture.cs"
             nav.parent.mkdir(parents=True)
             nav.write_text("// fixture navigation source\n")
+            for rel in builder.NAVIGATION_TEST_PATHS:
+                target = repo / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("// nav test fixture: " + rel + "\n")
+            for rel in builder.OPERATIONS_SOURCE_PATHS + builder.OPERATIONS_TEST_PATHS:
+                target = repo / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("// operations fixture: " + rel + "\n")
+            # The source ref contains a different core file, but the operations
+            # allowlist must never copy it over the published package.
+            (repo / "Source" / "MegaCrew.cs").write_text("untrusted core from operations ref\n")
             subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
             subprocess.run([
                 "git", "-C", str(repo), "-c", "commit.gpgsign=false",
@@ -205,6 +318,7 @@ class BuilderSafetyTests(unittest.TestCase):
             output = temp / "candidate"
             args = type("Args", (), {
                 "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "operations_ref": fixture_ref,
                 "output": output, "prepare_only": True, "managed": None, "csc": None,
             })()
 
@@ -212,6 +326,7 @@ class BuilderSafetyTests(unittest.TestCase):
             bad_sequence = (patch_sequence[0], dict(patch_sequence[1], expected_sha256="0" * 64))
             bad_args = type("Args", (), {
                 "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "operations_ref": fixture_ref,
                 "output": temp / "rejected", "prepare_only": True, "managed": None, "csc": None,
             })()
             with self.assertRaisesRegex(builder.BuildError, "SHA-256 mismatch"):
@@ -233,6 +348,28 @@ class BuilderSafetyTests(unittest.TestCase):
             self.assertEqual([item["commit"] for item in manifest["patch_sequence"]],
                              [fixture_ref, fixture_ref])
             self.assertEqual(manifest["inputs"][builder.ZIP_PATH]["sha256"], builder.sha256(archive))
+            self.assertEqual(manifest["operations_ref"], fixture_ref)
+            self.assertEqual(manifest["operations_commit"], fixture_ref)
+            self.assertEqual(set(manifest["operations_sources"]), set(builder.OPERATIONS_SOURCE_PATHS))
+            self.assertEqual(set(manifest["operations_tests"]), set(builder.OPERATIONS_TEST_PATHS))
+            self.assertEqual(set(manifest["navigation_tests"]["files"]), set(builder.NAVIGATION_TEST_PATHS))
+            self.assertEqual((built / "Source" / "MegaCrew.cs").read_text(), "published core\n")
+            for rel in builder.OPERATIONS_SOURCE_PATHS + builder.OPERATIONS_TEST_PATHS:
+                self.assertEqual((built / rel).read_text(), "// operations fixture: " + rel + "\n")
+            for rel in builder.NAVIGATION_TEST_PATHS:
+                self.assertEqual((built / rel).read_text(), "// nav test fixture: " + rel + "\n")
+            nav_only_args = type("Args", (), {
+                "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "output": temp / "nav-only", "prepare_only": True, "managed": None, "csc": None,
+            })()
+            nav_only = builder.build(nav_only_args, patch_sequence=patch_sequence,
+                                     expected_zip_sha256=builder.sha256(archive))
+            nav_only_manifest = json.loads((nav_only / "manifest.json").read_text())
+            self.assertIsNone(nav_only_manifest["operations_ref"])
+            self.assertIsNone(nav_only_manifest["operations_sources"])
+            self.assertIsNone(nav_only_manifest["operations_tests"])
+            self.assertTrue((nav_only / "tests/navigation/run.py").is_file())
+            self.assertFalse((nav_only / "Source/OnboardOperations.cs").exists())
             self.assertTrue((built / "provenance" / "first.patch").is_file())
             self.assertTrue((built / "provenance" / "second.patch").is_file())
             repo_status = subprocess.run(
