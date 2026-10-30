@@ -25,14 +25,9 @@ ZIP_PATH = "Hermes-Practice-v0.3.0.zip"
 NAV_ROOT = "Source/Navigation"
 PATCH_SEQUENCE = (
     {
-        "ref": "4e86cc0",
-        "path": "Hermes-Campaign-v0.3.5-source.patch",
-        "expected_sha256": "280c77e0128b2201d875343047f8e4ccdff3e723640d9cf87af3bbc9d4d03851",
-    },
-    {
-        "ref": "591ca74",
-        "path": "Hermes-Epoch-Planner.patch",
-        "expected_sha256": "7fc77d8a78da8b81c7f48d35445a72e73ddd8e1eec89e72859869ab06b067ab4",
+        "ref": "f426997",
+        "path": "Hermes-Campaign-v0.3.6-source.patch",
+        "expected_sha256": "8756f2dfb46e3e915f1185fd440e79cd84f6d6a5cbd291d7583863d1a0777f05",
     },
 )
 MAX_ENTRIES = 1000
@@ -372,7 +367,7 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", required=True, help="Git checkout to read (no writes)")
-    parser.add_argument("--upstream-ref", default="f749068", help="Pinned upstream artifact ref (default: f749068)")
+    parser.add_argument("--upstream-ref", default="f426997", help="Pinned upstream artifact ref (default: f426997)")
     parser.add_argument("--navigation-ref", default="418229a", help="Explicit navigation source ref (default: 418229a)")
     parser.add_argument("--output", required=True, type=Path, help="New output directory; must not exist")
     parser.add_argument("--managed", type=Path, help="KSP Data/Managed directory")

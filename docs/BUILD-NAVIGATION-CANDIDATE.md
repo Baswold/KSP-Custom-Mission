@@ -1,65 +1,49 @@
-# Isolated navigation candidate builder
+# Isolated navigation candidate builder — 0.3.6 profile
 
-This stdlib-only tool reconstructs a reviewable source tree from fixed Git
-objects. By default it reads the pristine published `Hermes-Practice-v0.3.0.zip`
-from upstream commit `f749068`, verifies its SHA-256, then applies an ordered,
-hash-pinned patch sequence to a fresh extraction:
+This temporary profile is based on builder commit `3ea374b`. It reconstructs a
+candidate from the pristine published `Hermes-Practice-v0.3.0.zip` in upstream
+commit `f426997` and applies exactly one cumulative patch:
 
-1. `Hermes-Campaign-v0.3.5-source.patch` from `4e86cc0` (cumulative source;
-   replaces the previous 0.3.4 patch and its console/supply/QA supplements).
-2. `Hermes-Epoch-Planner.patch` from `591ca74` (additive epoch/watch planner).
+- `Hermes-Campaign-v0.3.6-source.patch` from `f426997`, SHA-256
+  `8756f2dfb46e3e915f1185fd440e79cd84f6d6a5cbd291d7583863d1a0777f05`.
 
-The 0.3.5 patch applies to the pristine 0.3.0 package exactly once; do not stack
-it on top of 0.3.4 or apply the superseded supplements. The second patch is
-applied only after the first. The tool verifies every artifact hash before it
-creates the output directory, preserves the ZIP and both patches in
-`provenance/`, records the ordered patch refs/hashes in `manifest.json`, and
-overlays tracked `Source/Navigation/*.cs` from navigation ref `418229a`. It
-compiles C# 7.3 sources only into the new output directory when requested. No
-install, game save outside the pinned published archive, server access, network
-download, or checkout write is used.
+The 0.3.6 patch includes the cumulative 0.3.5 campaign and epoch work. Apply it
+once to the pristine 0.3.0 ZIP. Do not stack it with 0.3.5, the epoch planner,
+0.3.4, or the superseded console/supply/QA supplements. The builder verifies
+the ZIP and patch hashes before creating output, preserves both artifacts under
+`provenance/`, records the single patch sequence in `manifest.json`, and overlays
+tracked navigation C# files from `418229a`.
 
-The output parent must exist and the output directory must be new. If a build
-fails after output creation, the incomplete output directory is removed. The
-manifest includes resolved commit IDs, input hashes, ordered patch metadata,
-navigation file hashes, builder/compiler inputs, every output file hash, and a
-content digest for the output tree that excludes only the root `manifest.json`.
+The output must be a new directory outside the checkout. It is a review/build
+artifact, not an installer. No game, save, server, or network access is used.
 
-## Prepare the source tree without a KSP installation
+## Prepare without KSP assemblies
 
 ```sh
 python3 tools/build_navigation_candidate.py \
   --repo /path/to/KSP-Custom-Mission \
-  --upstream-ref f749068 \
+  --upstream-ref f426997 \
   --navigation-ref 418229a \
   --output /tmp/megacrew-candidate \
   --prepare-only
 ```
 
-## Compile using the user's own KSP assemblies
+## Compile against KSP 1.12.5
 
 ```sh
 python3 tools/build_navigation_candidate.py \
   --repo /path/to/KSP-Custom-Mission \
-  --upstream-ref f749068 \
+  --upstream-ref f426997 \
   --navigation-ref 418229a \
   --output /tmp/megacrew-candidate \
   --managed /path/to/KSP_Data/Managed \
   --csc /path/to/dotnet/sdk/VERSION/Roslyn/bincore/csc.dll
 ```
 
-The output contains the extracted published practice package and its original
-DLL until compilation replaces that DLL inside the new output. It is a review
-artifact, not an installer. Do not copy it into a game until separate runtime
-and acceptance gates pass.
-
-## Tests
+## Focused tests
 
 ```sh
 python3 -m unittest discover -s tests -p test_navigation_candidate.py -v
 ```
 
-Tests cover bad artifact hashes, traversal/absolute/Windows/backslash paths,
-symlinks, case-colliding members, extraction-root layout, output/path overwrite
-refusal, preservation of existing files, and ordered patch application using a
-synthetic two-patch Git fixture.
+The original safety suite and dependent two-patch sequence fixture are retained.
