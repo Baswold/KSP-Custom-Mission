@@ -1,0 +1,177 @@
+# MegaCrew KSP campaign implementation and acceptance plan
+
+**Read-only planning baseline:** upstream `main` at `9574934` and open Issues/PRs checked on 2026-10-30. This plan preserves the complete requested campaign. It is an execution order and evidence map, not a claim that the work is implemented or qualified.
+
+## Current baseline and operating constraints
+
+- The repository README at this baseline still describes the published 0.3.0 package: single-player only, `MegaCrew*` time warp blocked, no offline simulation, no autonomous NPC maintenance, and no campaign-wide watch or LMP authority. It also marks generated-save load, complete practice, pantry persistence, cryosleep handover, IVA traversal and controls as needing further game verification.
+- The 0.3.1–0.3.4 campaign work is available as source-only patch artifacts and issue updates, not as a published replacement package. Integrate the latest cumulative patch against its documented 0.3.0 base in an isolated review tree; do not stack cumulative patches or overlay an old ZIP/DLL onto newer source. PRs #4–#8 remain drafts; their reports have candidate-level scope and do not establish release acceptance.
+- A user update in Issue #9 explicitly asked that KSP not be used until about 9 o'clock, noting that the Mac may lock. Respect that runtime restriction; do not start, automate, or perform KSP testing before the stated window has passed and the machine is available. Source/model work, document review, deterministic tests and build planning can continue. No runtime checks were performed for this plan.
+- Preserve the user's original saves, the Luna server Universe, installed server configuration and backups. Use a separate clean KSP 1.12.5 build 03190 copy, disposable QA saves, pinned dependencies and backups for all runtime gates. Do not post credentials, private paths or raw unredacted logs.
+- Evidence must distinguish source inspection, model/unit tests, successful compilation, KSP main-menu startup, actual single-player flight behavior, save/reload/revert behavior, and two-client LMP observations. A lower tier never substitutes for a higher tier.
+
+## Campaign contract to preserve
+
+- Twenty-four mission months use the documented calendar convention of 30 days × 24 hours per mission month. Six alternating four-month watches: human Hamish/Basil, then Ada/Vikram relief, repeated three times. The human pair must actually be in DeepFreeze for their NPC watches; a console label or roster assignment alone is insufficient.
+- Each human awake month targets 80 minutes of active, varied play (5 h 20 min per four-month human watch). Each four-month NPC watch targets one minute of coast. The stated baseline is 16 h 03 min before alignment, burns, handovers and other added play. Targets are scheduling goals, not permission to leave an idle timer running.
+- KSP Universal Time and the actual orbital trajectory/resource behavior are authoritative. Coasting advances real UT and follows the map/orbital trajectory. Burns consume actual fuel and their alignment, ignition, execution and verification take real play time. Watch/mission clocks do not stop for a burn, and burn UT must not be silently shifted to force it into a watch.
+- Both Hamish and Basil verify each programmed burn. Before LMP, single-player role gates are rehearsal only and cannot prove two human approvals. In LMP, approvals must bind to distinct authenticated client principals, the immutable current plan revision, a live fingerprint, a communication/request round trip and an unexpired approval window. Any plan edit, stale response, disconnect or identity failure clears readiness and blocks execution.
+- Exactly **one planned emergency** occurs in the full expedition. Its schedule is confidential: keep it out of plans, source comments, issues, public lore, test output and ordinary reports. Routine maintenance, social/care work, drills, injuries from training and normal mission events are not emergencies. If an emergency story is authored, it implements/replaces the one planned event; it does not add another. Cooperative tone only: no impostors, murder or sabotage.
+- 80-minute months require multiple useful investigation → measurement → decision → action → observation → verification → record activities. Do not use an empty countdown, repetitive checkbox padding, imaginary sensors, invisible repairs or an “all fixed” flag.
+
+## Dependency-ordered work plan
+
+### 0. Reconcile source, ownership and patch baseline
+
+**Work**
+
+1. Obtain a verified snapshot of upstream `main` and its published 0.3.0 archive; record commit, archive hash, dependency manifest and KSP build.
+2. Apply the newest cumulative campaign patch (v0.3.4 source patch) once to a disposable copy of the documented 0.3.0 source. Verify the patch's included source/docs/tests against the patch manifest and run its packager comparison. Do not apply 0.3.1, 0.3.2 or 0.3.3 cumulatively on top of 0.3.4.
+3. Preserve upstream-owned 0.3 files and define one maintainer/merge boundary per subsystem. Keep separate contributions in separate source files until reviewed; reconcile PR #5's exact-source integration with upstream room/needs ownership rather than merging its older compiled DLL.
+4. Maintain a single integration build manifest with source hashes, dependency archive hashes, DLL hash and origin for each test copy. Keep third-party assets and personal server data out of packages.
+
+**Gate 0 evidence**: clean patch apply; package/hash comparison; deterministic test/build commands documented and reproducible. No game test required.
+
+### 1. Restore a known single-player test foundation
+
+**Work**
+
+1. Build the combined current source against KSP 1.12.5 build 03190 assemblies. Check compiler output and ensure the candidate DLL corresponds to this source revision.
+2. In a clean separate game copy, install exact pinned SSPX + IVA extras, B9PartSwitch, NearFutureProps, ModuleManager 4.2.3, FreeIVA 0.2.20.2, DeepFreeze 0.31.0.0, CRP, EVS 2.3, and the agreed EVE/BoulderCo visual set. Validate hashes and avoid duplicate ModuleManager/cloud packs.
+3. Verify startup logs report exact mod/plugin versions. Run the preflight and needs/model suites, campaign state codec, timing, coast decision, supply adapter and 0.3.4 cryo audit tests. Treat DLL compilation and model tests as code evidence only.
+4. After runtime restriction clears, load the generated practice save from the clean copy. Test physical stability, actual vessel and crew manifest, save/reload/revert, room panel interactions, input-lock cleanup and known collider/warning impact. Keep the centrifuge stopped pending its separate qualification.
+
+**Gate 1 evidence**: reproducible install hashes; clean startup with version logs; save load and return-to-flight; no evidence inferred from folder presence or the earlier 0.2 trainer. Record warnings and determine gameplay impact without editing existing saves.
+
+### 2. Qualify the base ship, FreeIVA route, room controls and interaction state
+
+**Work**
+
+1. Verify the 150 km Kerbin practice orbit and all four mission crew in actual flight. Confirm vessel stability and correct IVA/FreeIVA compartments.
+2. Walk command → quarters → lab/medical → centrifuge spine/corridor → cryobay. Test hatch traversal, colliders, camera/movement bindings, current-room and viewed-Kerbal association, panel clearance, concurrent I/F8/engineering/operations windows, click capture and cleanup after close/scene changes.
+3. Validate physical stock device actions and state transitions: deploy/stow individual arrays/radiators; compare objective state to module animation and part state. No claim that an overlay is a physical IVA prop.
+4. Verify room-based food/water/rest, medical treatment, observation logging and DeepFreeze calls against the actual viewed Kerbal, actual room, awake/frozen status, available supplies, pod occupancy, power and Glykerol. Verify restrictions do not block stock controls, treatment or recovery paths.
+5. Complete the existing 10–15 minute practice mission end to end, including deployment, real 60-second EC trend, manual route sign-off, training injury treatment/recovery, Ada freeze/thaw, final orbit/crew checks and persistence. Separate manually signed tasks from automatically verified facts.
+
+**Gate 2 evidence**: a fresh-start run and a saved/reloaded run with short redacted logs or screen evidence; verify all objective transitions and errors; specific behavior reports for input, room/crew gating and persistence. Current documented status still leaves several of these unverified.
+
+### 3. Integrate onboard flight operations and navigation in single player
+
+**Work**
+
+1. Rebase/adapt PR #5's onboard engineering/operations candidate onto current 0.3.4 sources. Preserve its actual-device Extend/Retract events, orbital/node/SAS readouts, stock experiment execution, EC/Food/Water/Glykerol diagnostics and bounded per-save journal. Keep overlays as local UI; they are not shared authority or physically animated stations.
+2. Perform the PR #5 checklist in a disposable flight save: compare telemetry to stock; test pilot/engineer/scientist gates, unsupported SAS modes, pause/warp disable, actual stock experiment result/data, supply sample resets and journal save/reload/save-folder isolation; test three panels and input-lock cleanup together.
+3. Complete PR #8's numerical trajectory work in layers: pure math/range/property tests; KSP frame mapping to stock `GetBurnVector`; patched-conic patch/transition validity; maneuver node creation on a disposable vessel; orbital prediction comparison to KSP after propagation; invalid/near-collinear/extreme-time/refusal behavior. Extend from two-body Lambert into planet intercept/atmospheric periapsis/docking approach only with KSP-patched-conic validation and robust no-solution output.
+4. Resolve PR #8 review cases: impossible approval window (`now + roundTrip` must leave adequate time before ignition), unique request nonce/generation and stale request rejection, auth role-to-principal binding and canonical principal identity, exact expiry semantics, disconnect/reconnect invalidation, and finite/range checks. Bind approval to complete canonical maneuver data and recompute fingerprint from the live node at dispatch. The caller must not omit UT, vector/frame, reference body, vessel, target or plan revision from the hash.
+5. Before LMP, permit only clearly labeled single-player rehearsal where the adapter explicitly admits it cannot establish distinct humans. Execute no node unless plan fingerprint/revision, two valid approvals, comm state, UT window, watch coverage, vessel identity and fresh simulation all pass.
+
+**Gate 3 evidence**: source/model/property tests, KSP assembly build, disposable flight run of generated node and subsequent actual orbit/fuel change agreeing with prediction within declared tolerance; proof stale/invalid plans fail closed. No planet-intercept or rendezvous feature is accepted on math tests alone.
+
+### 4. Qualify and integrate the Finch lander/storage system
+
+**Work**
+
+1. Resolve PR #6's open craft-loader/fixture ambiguity using the corrected orbital QA fixture with stock PreAttached port state. Determine whether the earlier 18/35 part retention was a fixture artifact; do not count successful `LoadShip` as docking qualification.
+2. Reconcile cabin/SSPX variant, carrier hierarchy, docking port parent and loaded/unloaded mass/delta-v. Confirm root, attachment chain and matching port state in the editor and actual flight.
+3. Verify cradle attachment and separation, collider/clearance around Hermes, two crew seats, propellant transfer/isolation if designed, safe stored configuration, undock/decouple, controlled Mun/Minmus low-orbit descent and landing, EVA, ascent, rendezvous/redock, crew recovery, save/reload and failure recovery. Include abort windows and real propellant margins; distinguish ideal delta-v from measured flight performance.
+4. Keep the craft scope honest: Finch is a vacuum lander candidate. No launch booster, atmospheric return or full Kerbin recovery claim until designed and qualified.
+
+**Gate 4 evidence**: native craft load plus editor/flight observations for full attach → operate → recover loop and persistence in a disposable save; independent mass/propellant reconciliation. Until then, no lander readiness story or deployable/recoverable claim.
+
+### 5. Implement finite needs, daily care, and measured maintenance workload
+
+**Work**
+
+1. Integrate the campaign source model with actual KSP UT and persisted scenario state: human crew needs, actual frozen-state pause, finite meal/drink/rest/hygiene/exercise/social tasks, injury/treatment/recovery, daily schedule, cooldown and per-save journal. Keep all need values explicitly fictional gameplay abstractions, not human medical advice.
+2. Test each activity against the actual room, currently viewed Kerbal, awake/available person, 1x clock and cancellation rules. Save/reload/revert mid-activity. Confirm pause, warp, scene/load gap, vessel change, freeze/thaw and crew transfer handling.
+3. Reconcile real Food/Water transactions and conservative transitions using actual flow-enabled vessel stores and verified DeepFreeze state. Validate supply ledger deltas against part resources, no duplicate charge at repeated UT, locked stores, depletion, insufficient supply, clock regression, gaps and all freeze/thaw transitions.
+4. Resolve background provider concerns before any coast: pinned DeepFreeze active-vessel checks are rate-limited (EC below warp index 5; thermal below index 2). Do not simulate safety by hiding huge rates in lower indices. BackgroundResources handles unloaded vessels but its DeepFreeze IL requires correction/verification; proposed patch is source/IL evidence only, not game qualification. Inspect exact provider hash, consumption direction, elapsed-UT arithmetic, per-pod frozen count, shortage/recharge timestamps, settings, active/unloaded transition and save/reload in a disposable probe. Do not patch third-party binaries without exact-hash guard, separate output, preserved original and review.
+5. Measure complete resource and pod-power margins over representative light/dark/eclipsed orbits and actual onboard generation. A pod-only endurance estimate is not whole-vessel safety. Include EC generation/loads, pod thermal requirements, Food/Water, reserves, and a verified horizon to the next stop. Report assumptions and fail closed on unknown telemetry.
+6. Address modeled versus real agency: NPCs are not autonomous today. Add durable, auditable NPC watch-maintenance tasks only when actions affect actual modeled state and resource/work logs; never silently repair craft or supply needs for free. Simulated tasks must remain distinguishable from live physical KSP effects.
+
+**Gate 5 evidence**: production model tests plus actual KSP 1x supply and pod telemetry deltas across load/save/revert, transitions, shortage, dark orbit and disabled-setting cases. No accelerated coast until provider behavior and resource horizon are game-qualified.
+
+### 6. Add full 24-month watch progression and safe coast control
+
+**Work**
+
+1. Integrate the pure CampaignTiming/CampaignCoast contracts with an explicit campaign-start scenario module storing epoch UT, original vessel GUID, four-crew snapshot, schema/version and fail-closed load errors. Test quicksave/quickload/revert, save switch and campaign completion: six watches, no wrap, no retroactive offline progress.
+2. Validate target arithmetic: 30-day months; 4-month watch length; 540× human coast (one 30-day month in 80 minutes); 172800× NPC coast (four months in one minute); 57780 seconds overall baseline before operational work. These are targets only, never assume KSP/DeepFreeze safely supports the requested warp values.
+3. Implement controlled coast only through stock warp/rate APIs. Every dispatch takes fresh observations; only campaign vessel; confirmed watch role/state; actual crew freeze/thaw; verified pod power/temperature and background accounting; resource coverage to the conservative next stop; no missing/stale UT, halt, due event or completed campaign. Brake before watch boundary, burn alignment, next maintenance, alert, eclipse or handover. Respect KSP altitude, physics-warp and rate safety limits; never set UT directly.
+4. Coast through actual trajectory, resource depletion/generation and current celestial mechanics. No time shifting, instant travel, universal freeze, resource replenishment, background assumption or skipping an unknown event. Catch-up must be based only on validated, continuously accounted UT and reject unobserved gaps.
+5. Build a dispatcher simulation with boundary/property tests for fresh/stale observation, stop windows, all six watches, safe braking, pause, halt, low resources, pod/API failure, light/shadow transitions and save/revert. Then validate at 1x with one loaded vessel and short safe coast before any candidate-rate test.
+6. Only after short-rate performance/pod/supply checks pass, gradually qualify higher rates in a disposable save. Test interaction with stock warp, scene changes, time-warp limits, DeepFreeze checks, BackgroundResources, burn planner and rate changes. If the 540×/172800× targets are unsafe or not representable, document a safe achieved rate and honest longer play time; never bypass safety throttles.
+
+**Gate 6 evidence**: documented runtime table of requested/actual warp, UT progression, pod temperature/EC/resources, orbital state, crew, stop latency and save/revert consistency at every accepted rate. Full six-watch completion required before claiming a complete expedition.
+
+### 7. Integrate maneuver execution with watches, burn timing and approvals
+
+**Work**
+
+1. Bind each immutable plan revision to exact node inputs and predicted consequences. Include outbound/return comms delay assumptions, authority source, request nonce, expiration and change audit.
+2. Schedule all burn windows inside human awake watches, allowing alignment, distinct Hamish/Basil verification, ignition, execution and post-burn verification. Do not pause the shift clock during burns. Ensure `CoversBurn` checks the *whole* operation interval and does not move burn epoch; replan when a watch or operational stop cannot cover it.
+3. At each coast decision, stop for validated burn-alignment window, request/ack round trip, approved burn and observation period. If communications are lost, node changes, identity cannot be authenticated, timing is stale, trajectory verification fails, ship is not the campaign vessel, or fuel/resource checks fail: coast may stop/hold; do not burn.
+4. Verify actual maneuver node and resulting UT/orbit/fuel before and after execution. Keep an auditable persisted approval/result journal tied to plan hash/revision and authenticated clients in the future LMP path.
+
+**Gate 7 evidence**: unit tests for boundaries, impossible windows, stale nonce/revision, disconnect/regain, plan-field mutation, duplicate principal, authentication changes and expiry; KSP orbital flight with actual node execution and predicted/observed delta comparison; tested pre/post-burn save/reload. No approval may be represented as two humans in single-player.
+
+### 8. Build maintenance and EVA work as deterministic, recoverable gameplay
+
+**Work**
+
+1. Define a small set of routine degradations/maintenance counters driven by actual module/resource/temperature/EC/orbit state. First failures should be diagnosable and reversible, not random damage or destructive sabotage. Use actual stock/installed components where possible; clearly mark any custom simulated work order.
+2. Provide at least four varied 80-minute-month work patterns: resource/pantry reconciliation; power and thermal trend observations; orbital tracking/observation; cryobay readiness/handover; science operations; storage/lander readiness; EVA inspect/replace/repair only where actual part/module action can be verified. Use useful activities during natural observation/rest intervals instead of empty timers.
+3. Gate exterior EVA by crew health/readiness, suit/EVA resource and vehicle state, route/airlock access and at least one safe return operator. For repair, make the work alter a real component/state and persist; do not claim physical repairs from a manual checkbox. Define wrong-diagnosis recovery, resupply, safe abort and handover records.
+4. Add automated evidence only for actual telemetry/state. A manual sign-off can document inspection but never assert traversal, repair or science success that the code cannot observe.
+
+**Gate 8 evidence**: each maintenance story replayed with success and recoverable mistake paths; actual component/resource changes, persistence and handoff journal demonstrated; all tasks use real clocks with clear active-play estimates. Verify target month contains varied useful work without repetitive or idle padding.
+
+### 9. Integrate Luna LMP and shared authoritative state
+
+**Work**
+
+1. Begin only after single-player systems, watch/coast safety, navigation/burn checks and lander foundation have passed their preceding gates. Preserve the user's existing Luna server and Universe; make a disposable test instance/Universe and tested backups. Existing Luna 0.29.2 alone does not synchronize custom objective, health, routine, resource ledger or approval state.
+2. Specify a single authoritative state owner/authority for vessel, crew, resource consumption, health/needs, story variables, watch state, maneuver plan/revision, approval records, emergency lifecycle and save serialization. Define conflict resolution, duplicate/replay rejection, reconnect snapshot, host migration (if supported), schema migration and audit events before implementation.
+3. Authenticate separate clients. Bind each account/session to one allowed crew role through trusted multiplayer identity, never UI text, Kerbal name, roster membership or local single-player flags. Distinct Hamish/Basil approvals must be from distinct authenticated clients. Recheck auth and plan hash at execution.
+4. Validate matched KSP/mod/DLL/config versions, port/firewall/session setup without exposing secrets, shared vessel and Kerbal state, IVA occupancy/current Kerbal, stock controls, LMP physics and custom replicated commands. Start with one authoritative shared engineering action; observe the same state transition and journal entry on both clients.
+5. Add network-fault tests: latency/round-trip, packet reorder/duplicate/loss, disconnect during action/approval/burn, reconnect, simultaneous actions, stale authority, game pause/time warp disagreement and save conflict. Fail closed and reconcile to authority; never let two clients independently consume or repair the same state.
+6. Extend tests to shared crew needs, actual stores, DeepFreeze handover, campaign coast, orbital node and post-burn state only after single-owner synchronization is stable. Test a full session with two clients sharing the same Sandbox vessel/Kerbal. The old server Universe remains untouched.
+
+**Gate 9 evidence**: two independent client logs/video/screen observations of shared vessel and crew; same authoritative actual resource/objective/mission state before and after reconnect; distinct authenticated Hamish/Basil approvals; controlled induced network failures recover without duplication/desync. A local overlay on two clients is not LMP success.
+
+### 10. Author and implement the cooperative story campaign
+
+**Work**
+
+1. Preserve the #7 “Before the Handover” scene as routine maintenance/social/crew-care: pantry ledger mismatch, sample-observation versus feeding/rest/medical priorities, truthful diagnosis, actual Food/Water and observational data, cryopod power/Glykerol, corrected records and verified relief watch. It is not an emergency.
+2. Author all stories against a capability matrix and the supplied issue template: place/crew/starting state, observable problem/clues, actual supplies/equipment, sequenced tasks, active time, dialogue/social choices, outcomes/recovery, handover state and acceptance evidence. Tag each item existing/implemented/proposed. Do not invent sensors, working repairs, NPC autonomy or on-screen animation as already implemented.
+3. Sequence the roadmap chapter themes reported in the coordination thread: **First Watch**, **Warm Loop**, **Quiet Side**, **Lander Readiness**, **Red Horizon**, **Long Way Home**. Use a clear destination campaign (Duna is current starting suggestion; Laythe remains an alternate not yet selected) and introductory command-pod/mothership flight as onboarding only after the underlying vessel/flight path is qualified.
+4. Implement story triggers, state, branching and replay/recovery in the shared authoritative campaign layer. Scripted animated Kerbal handoffs are a requested feature; first define animation/IK/room pose, crew ownership and LMP synchronization gates. Until implemented, describe dialogue/handovers as UI or player performed rather than seamless animation.
+5. Add exactly one planned-emergency record/lifecycle with single issuance and resolution, duplicate prevention across save/load/reconnect and clear separation from routine maintenance. Keep its schedule in private runtime state that is never surfaced in docs, plans, logs or story templates. Test uniqueness without displaying the scheduled time.
+6. Include human care and maintenance without extra “emergency” labels: meals, drinking, sleep, exercise, hygiene, social care, medical care and useful routine tasks. Keep threats cooperative; exclude murder, impostors, sabotage.
+
+**Gate 10 evidence**: each chapter replayable on two clients; trigger, state, dialogue choice, actual task effects, recovery and handover persist through save/reload/reconnect; active-play timing is observed; one-emergency uniqueness invariant passes while its scheduled time remains undisclosed.
+
+### 11. Release, documentation and joint acceptance
+
+**Work**
+
+1. Reconcile main README and dependency manifest with actual qualified artifact, controls, campaign defaults, supported KSP/mod versions and limitations. Do not describe future targets as implemented. Document deterministic test/build/run commands and clean-copy install/update/rollback.
+2. Build a release archive from reviewed source with pinned hashes and license/redistribution boundaries. Confirm no personal saves, server files, credentials, unreleased emergency timing or unrelated visual prototype assets are included.
+3. Verify install on both Macs with separately prepared copies. Capture exact KSP/plugin/mod versions and short redacted diagnostics. Run complete single-player campaign before final two-client LMP session.
+4. Use focused PRs, one integration owner per file/subsystem and trace each acceptance criterion to evidence. Keep draft PRs unmerged until their specific runtime gates pass; do not replace a newer installed combined build with an older candidate.
+5. Final joint review with Hamish and Basil: fresh campaign, realistic campaign timescale, actual burns, alternating watches, co-op decisions, lander operations, recovery and ending; confirm no pre-existing save/Universe changed.
+
+**Gate 11 evidence**: release checksum; clean install and reproducible build; complete documented single-player and multiplayer evidence; all release-gate rows signed with evidence URLs/log references; owner review and explicit acceptance. Until all gates pass, state that the project remains incomplete.
+
+## Immediate next actions
+
+1. Treat the bedtime request as no KSP runtime tests before 09:00 Australia/Sydney on 2026-10-31 (the next morning after the request). Continue source/model work in the meantime; inspect availability before resuming runtime tests.
+2. Review the source-only v0.3.4 patch and PR #8 pure timing/approval contracts against the exact base without installing a new DLL. Add deterministic coverage for impossible approval windows, request replay/nonce, full burn watch coverage and canonical plan hashes.
+3. Resolve the PR #6 test-fixture state and mass/hierarchy evidence in a disposable environment after runtime is allowed.
+4. Build a test matrix and collect missing single-player evidence for Gates 1–5 before enabling any accelerated coast or declaring lander readiness.
+5. Keep LMP and in-game stories downstream of qualified single-player foundations and lander operations.
+
+## Status summary at review time
+
+Source/model and compilation work has progressed: 0.3.4 source-only campaign/care/accounting/cryo audit candidates; PR #5 single-player onboard overlay candidate; PR #6 craft loader evidence; PR #8 bounded orbital math and approval/timing candidates. Runtime/high-warp/pod-power/lander flight qualification remains explicitly pending in upstream updates. LMP, synchronized custom state, two-human approval, physical EVA maintenance and authored playable stories remain future acceptance gates. The bedtime request is treated conservatively as no KSP runtime tests before 09:00 Australia/Sydney on 2026-10-31; source/model work continues. No emergency schedule is reproduced here.
