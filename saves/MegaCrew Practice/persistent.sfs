@@ -1,0 +1,3274 @@
+GAME
+{
+	version = 1.12.5
+	Title = MegaCrew Practice (SANDBOX)
+	Description = Hermes orbital maintenance training: four crew, real-time watch, cryosleep handover.
+	linkURL = 
+	linkCaption = 
+	Mode = SANDBOX
+	Status = 1
+	scene = 7
+	editor = None
+	flag = Squad/Flags/default
+	launchID = 1
+	Seed = 31903190
+	PARAMETERS
+	{
+		preset = Normal
+		FLIGHT
+		{
+			CanQuickSave = True
+			CanQuickLoad = True
+			CanAutoSave = True
+			CanUseMap = True
+			CanSwitchVesselsNear = True
+			CanSwitchVesselsFar = True
+			CanEVA = True
+			CanIVA = True
+			CanBoard = True
+			CanRestart = True
+			CanLeaveToEditor = True
+			CanLeaveToTrackingStation = True
+			CanLeaveToSpaceCenter = True
+			CanLeaveToMainMenu = True
+			CanTimeWarpHigh = False
+			CanTimeWarpLow = False
+		}
+		EDITOR
+		{
+			CanSave = True
+			CanLoad = True
+			CanStartNew = True
+			CanLaunch = True
+			CanLeaveToSpaceCenter = True
+			CanLeaveToMainMenu = False
+			startUpMode = 0
+			craftFileToLoad = 
+		}
+		TRACKINGSTATION
+		{
+			CanFlyVessel = True
+			CanAbortVessel = True
+			CanLeaveToSpaceCenter = True
+			CanLeaveToMainMenu = False
+		}
+		SPACECENTER
+		{
+			CanGoInVAB = True
+			CanGoInSPH = True
+			CanGoInTrackingStation = True
+			CanLaunchAtPad = True
+			CanLaunchAtRunway = True
+			CanGoToAdmin = True
+			CanGoToAstronautC = True
+			CanGoToMissionControl = True
+			CanGoToRnD = True
+			CanSelectFlag = True
+			CanLeaveToMainMenu = True
+		}
+		DIFFICULTY
+		{
+			AutoHireCrews = False
+			MissingCrewsRespawn = True
+			RespawnTimer = 7200
+			BypassEntryPurchaseAfterResearch = True
+			AllowStockVessels = True
+			IndestructibleFacilities = False
+			ResourceAbundance = 1
+			ReentryHeatScale = 1
+			EnableCommNet = True
+			AllowOtherLaunchSites = True
+			persistKerbalInventories = False
+		}
+		CAREER
+		{
+			TechTreeUrl = GameData/ModuleManager.TechTree
+			StartingFunds = 25000
+			StartingScience = 0
+			StartingReputation = 0
+			FundsGainMultiplier = 1
+			RepGainMultiplier = 1
+			ScienceGainMultiplier = 1
+			FundsLossMultiplier = 1
+			RepLossMultiplier = 1
+			RepLossDeclined = 1
+		}
+		DeepFreeze_SettingsParms_Sec2
+		{
+			CBstring = #autoLOC_DF_00161
+			RegTempReqd = False
+			RegTempFreeze = 300
+			RegTempMonitor = 400
+			heatamtMonitoringFrznKerbals = 100
+			heatamtThawFreezeKerbal = 1000
+			TempinKelvin = False
+		}
+		DeepFreeze_SettingsParms
+		{
+			ECreqdForFreezer = False
+			backgroundresources = True
+			fatalOption = False
+			comatoseTime = 300
+			AutoRecoverFznKerbals = False
+			KSCcostToThawKerbal = 10000
+			ECReqdToFreezeThaw = 3000
+			GlykerolReqdToFreeze = 5
+		}
+		DeepFreeze_SettingsParms_Sec3
+		{
+			StripLightsActive = True
+			BeepSoundsActive = True
+			OtherSoundsActive = True
+			ToolTips = True
+			EditorFilter = True
+			UseAppLToolbar = True
+			DebugLogging = False
+		}
+		CommNetParams
+		{
+			requireSignalForControl = False
+			plasmaBlackout = False
+			rangeModifier = 1
+			DSNModifier = 1
+			occlusionMultiplierVac = 0.9
+			occlusionMultiplierAtm = 0.75
+			enableGroundStations = True
+		}
+		BackgroundResources_SettingsParms
+		{
+			backgroundresources = True
+			ProduceResources = True
+			ConsumeResources = True
+			IncludeGenericResourceConverters = False
+		}
+		AdvancedParams
+		{
+			EnableKerbalExperience = False
+			ImmediateLevelUp = False
+			AllowNegativeCurrency = False
+			PressurePartLimits = False
+			GPartLimits = False
+			GKerbalLimits = False
+			KerbalGToleranceMult = 1
+			ResourceTransferObeyCrossfeed = False
+			ActionGroupsAlways = False
+			BuildingImpactDamageMult = 0.05
+			PartUpgradesInSandbox = False
+			PartUpgradesInCareer = True
+			PartUpgradesInMission = False
+			EnableFullSASInSandbox = False
+			EnableFullSASInMissions = False
+		}
+		MissionParamsGeneral
+		{
+			enableFunding = False
+			startingFunds = 100000
+			spacer = 
+			enableKerbalLevels = False
+			kerbalLevelPilot = 4
+			kerbalLevelScientist = 4
+			kerbalLevelEngineer = 4
+			spacer2 = 
+			preventVesselRecovery = False
+		}
+		MissionParamsExtras
+		{
+			facilityOpenAC = False
+			astronautHiresAreFree = True
+			spacer = 
+			facilityOpenEditor = False
+			launchSitesOpen = True
+			spacer2 = 
+			cheatsEnabled = False
+		}
+		MissionParamsFacilities
+		{
+			facilityLevelAdmin = 3
+			facilityLevelAC = 3
+			facilityLevelLaunchpad = 3
+			facilityLevelMC = 3
+			facilityLevelRD = 3
+			facilityLevelRunway = 3
+			facilityLevelSPH = 3
+			facilityLevelTS = 3
+			facilityLevelVAB = 3
+		}
+	}
+	FLIGHTSTATE
+	{
+		version = 1.12.5
+		UT = 100000
+		activeVessel = 0
+		VESSEL
+		{
+			pid = 127a346263a459759049a0c447bd0ba0
+			persistentId = 950000000
+			name = Hermes Maintenance Trainer
+			type = Station
+			sit = ORBITING
+			landed = False
+			splashed = False
+			landedAt = 
+			met = 0
+			lct = 100000
+			lastUT = 100000
+			root = 0
+			lat = 0
+			lon = 0
+			alt = 150000
+			hgt = -1
+			nrm = 0,1,0
+			rot = 0,0,0,1
+			CoM = 0,0,0
+			stg = 0
+			prst = False
+			ref = 930000000
+			ctrl = True
+			ORBIT
+			{
+				SMA = 750000
+				ECC = 0
+				INC = 0
+				LPE = 0
+				LAN = 0
+				MNA = 0
+				EPH = 100000
+				REF = 1
+			}
+			PART
+			{
+				name = sspx-core-375-1
+				cid = 0
+				uid = 930000000
+				mid = 950000000
+				persistentId = 940000000
+				launchID = 1
+				parent = 0
+				position = 0.0,0.0,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 3.7725
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = bottom, 1
+				srfN = None, -1
+				crew = Hamish Kerman
+				crew = Basil Kerman
+				crew = Ada Kerman
+				crew = Vikram Kerman
+				MODULE
+				{
+					name = ModuleProbeControlPoint
+					minimumCrew = 3
+					multiHop = True
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleCommand
+					minimumCrew = 2
+					isEnabled = True
+				}
+				RESOURCE
+				{
+					name = ElectricCharge
+					amount = 450
+					maxAmount = 450
+					flowState = True
+				}
+				MODULE
+				{
+					name = ModuleReactionWheel
+					PitchTorque = 40
+					YawTorque = 40
+					RollTorque = 40
+					isEnabled = True
+					RESOURCE
+					{
+						name = ElectricCharge
+						rate = 4
+					}
+				}
+				MODULE
+				{
+					name = ModuleScienceExperiment
+					experimentID = crewReport
+					experimentActionName = Crew Report
+					resetActionName = Discard Crew Report
+					reviewActionName = Review Report
+					useStaging = False
+					useActionGroups = True
+					hideUIwhenUnavailable = True
+					rerunnable = True
+					usageReqMaskInternal = 5
+					usageReqMaskExternal = -1
+					xmitDataScalar = 1.0
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleScienceContainer
+					reviewActionName = Review Stored Data
+					storeActionName = Store Experiments
+					evaOnlyStorage = True
+					storageRange = 4.0
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleExperienceManagement
+					costPerKerbal = 0
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = surfaceSwitch
+					switcherDescription = Surface
+					isEnabled = True
+					SUBTYPE
+					{
+						name = White
+						title = White
+						descriptionSummary = White painted exterior
+						descriptionDetail = An aerospace white paint job for your station modules
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal
+						descriptionSummary = Bare metal exterior
+						descriptionDetail = An industrial, metal look to your station modules
+						primaryColor = #999999
+						secondaryColor = #999999
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Rigid/station-375/sspx-375-3-alt
+							transform = 375Control
+							shaderProperty = _MainTex
+						}
+						MATERIAL
+						{
+							transform = 375Control
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch
+					switcherDescription = Upper Mount
+					affectDragCubes = false
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlack
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhite
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetal
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBare
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch2
+					switcherDescription = Lower Mount
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlackFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhiteFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetalFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBareFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = FlagDecal
+					textureQuadName = flagTransform
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleColorChanger
+					shaderProperty = _EmissiveColor
+					animRate = 0.8
+					animState = false
+					useRate = true
+					toggleInEditor = true
+					toggleInFlight = true
+					toggleInFlight = true
+					unfocusedRange = 5
+					toggleName = Toggle Lights
+					eventOnName = Lights On
+					eventOffName = Lights Off
+					toggleAction = True
+					defaultActionGroup = Light
+					isEnabled = True
+					redCurve
+					{
+						key = 0 0 0 3
+						key = 1 1 0 0
+					}
+					greenCurve
+					{
+						key = 0 0 0 1
+						key = 1 1 1 0
+					}
+					blueCurve
+					{
+						key = 0 0 0 0
+						key = 1 0.7 1.5 0
+					}
+					alphaCurve
+					{
+						key = 0 1
+					}
+				}
+				MODULE
+				{
+					name = ModuleInventoryPart
+					InventorySlots = 6
+					packedVolumeLimit = 360
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartInfo
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = sspx-habitation-375-1
+				cid = 1
+				uid = 930000001
+				mid = 950000000
+				persistentId = 940000001
+				launchID = 1
+				parent = 0
+				position = 0.0,-2.9170000000000016,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 7.5
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 0
+				attN = bottom, 2
+				srfN = None, -1
+				MODULE
+				{
+					name = ModuleScienceExperiment
+					experimentID = crewReport
+					experimentActionName = Crew Report
+					resetActionName = Discard Crew Report
+					reviewActionName = Review Report
+					useStaging = False
+					useActionGroups = True
+					hideUIwhenUnavailable = True
+					rerunnable = True
+					usageReqMaskInternal = 5
+					usageReqMaskExternal = -1
+					xmitDataScalar = 1.0
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleScienceContainer
+					reviewActionName = Review Stored Data
+					storeActionName = Store Experiments
+					evaOnlyStorage = True
+					storageRange = 4.0
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleExperienceManagement
+					costPerKerbal = 0
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = surfaceSwitch
+					switcherDescription = Surface
+					isEnabled = True
+					SUBTYPE
+					{
+						name = White
+						title = White
+						descriptionSummary = White painted exterior
+						descriptionDetail = An aerospace white paint job for your station modules
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal
+						descriptionSummary = Bare metal exterior
+						descriptionDetail = An industrial, metal look to your station modules
+						primaryColor = #999999
+						secondaryColor = #999999
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Rigid/station-375/sspx-375-1-alt
+							transform = 375HabLong
+							shaderProperty = _MainTex
+						}
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Common/restock-crewed-hatch-1-grey
+							transform = CommonHatchOblong
+							shaderProperty = _MainTex
+						}
+						MATERIAL
+						{
+							transform = CommonHatchOblong
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+						MATERIAL
+						{
+							transform = 375HabLong
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch
+					switcherDescription = Upper Mount
+					affectDragCubes = false
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlack
+						transform = EndcapHatchRoundWhite
+						transform = Ladders
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhite
+						transform = EndcapHatchRoundWhite
+						transform = Ladders
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetal
+						transform = EndcapHatchRoundMetal
+						transform = Ladders
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBare
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch2
+					switcherDescription = Lower Mount
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlackFlip
+						transform = EndcapHatchRoundWhiteFlip
+						transform = Ladders
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhiteFlip
+						transform = EndcapHatchRoundWhiteFlip
+						transform = Ladders
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetalFlip
+						transform = EndcapHatchRoundMetalFlip
+						transform = Ladders
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBareFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = FlagDecal
+					textureQuadName = flagTransform
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleColorChanger
+					shaderProperty = _EmissiveColor
+					animRate = 0.8
+					animState = false
+					useRate = true
+					toggleInEditor = true
+					toggleInFlight = true
+					toggleInFlight = true
+					unfocusedRange = 5
+					toggleName = Toggle Lights
+					eventOnName = Lights On
+					eventOffName = Lights Off
+					toggleAction = True
+					defaultActionGroup = Light
+					isEnabled = True
+					redCurve
+					{
+						key = 0 0 0 3
+						key = 1 1 0 0
+					}
+					greenCurve
+					{
+						key = 0 0 0 1
+						key = 1 1 1 0
+					}
+					blueCurve
+					{
+						key = 0 0 0 0
+						key = 1 0.7 1.5 0
+					}
+					alphaCurve
+					{
+						key = 0 1
+					}
+				}
+				MODULE
+				{
+					name = ModuleInventoryPart
+					InventorySlots = 36
+					packedVolumeLimit = 3000
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartInfo
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = sspx-lab-375-1
+				cid = 2
+				uid = 930000002
+				mid = 950000000
+				persistentId = 940000002
+				launchID = 1
+				parent = 1
+				position = 0.0,-5.833999999999996,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 4.125
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 1
+				attN = bottom, 3
+				srfN = None, -1
+				MODULE
+				{
+					name = ModuleScienceContainer
+					reviewActionName = Review Data
+					storeActionName = Store Experiments
+					collectActionName = Take Data
+					evaOnlyStorage = True
+					storageRange = 2
+					allowRepeatedSubjects = True
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleScienceLab
+					containerModuleIndex = 0
+					dataStorage = 1500
+					crewsRequired = 1
+					canResetConnectedModules = True
+					canResetNearbyModules = True
+					interactionRange = 5
+					SurfaceBonus = 0.1
+					ContextBonus = 0.25
+					homeworldMultiplier = 0.1
+					isEnabled = True
+					RESOURCE_PROCESS
+					{
+						name = ElectricCharge
+						amount = 10
+					}
+				}
+				MODULE
+				{
+					name = ModuleScienceConverter
+					dataProcessingMultiplier = 0.5
+					scientistBonus = 0.25
+					researchTime = 7
+					scienceMultiplier = 5
+					scienceCap = 500
+					powerRequirement = 5
+					ConverterName = Research
+					StartActionName = Start Research
+					StopActionName = Stop Research
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleKerbNetAccess
+					MinimumFoV = 17
+					MaximumFoV = 63
+					AnomalyDetection = 0
+					isEnabled = True
+					DISPLAY_MODES
+					{
+						Mode = Terrain,#autoLOC_438839
+						Mode = Biome,#autoLOC_438890
+					}
+					REQUIRED_EFFECTS
+					{
+						Effect = ScienceSkill
+					}
+				}
+				MODULE
+				{
+					name = ModuleExperienceManagement
+					costPerKerbal = 0
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = surfaceSwitch
+					switcherDescription = Surface
+					isEnabled = True
+					SUBTYPE
+					{
+						name = White
+						title = White
+						descriptionSummary = White painted exterior
+						descriptionDetail = An aerospace white paint job for your station modules
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal
+						descriptionSummary = Bare metal exterior
+						descriptionDetail = An industrial, metal look to your station modules
+						primaryColor = #999999
+						secondaryColor = #999999
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Rigid/station-375/sspx-375-2-alt
+							transform = 375ScienceLab
+							shaderProperty = _MainTex
+						}
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Common/restock-crewed-hatch-1-grey
+							transform = CommonHatchOblong
+							shaderProperty = _MainTex
+						}
+						MATERIAL
+						{
+							transform = CommonHatchOblong
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+						MATERIAL
+						{
+							transform = 375ScienceLab
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch
+					switcherDescription = Upper Mount
+					affectDragCubes = false
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlack
+						transform = EndcapHatchRoundWhite
+						transform = Ladders
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhite
+						transform = EndcapHatchRoundWhite
+						transform = Ladders
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetal
+						transform = EndcapHatchRoundMetal
+						transform = Ladders
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBare
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch2
+					switcherDescription = Lower Mount
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlackFlip
+						transform = EndcapHatchRoundWhiteFlip
+						transform = Ladders
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhiteFlip
+						transform = EndcapHatchRoundWhiteFlip
+						transform = Ladders
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetalFlip
+						transform = EndcapHatchRoundMetalFlip
+						transform = Ladders
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBareFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = FlagDecal
+					textureQuadName = flagTransform
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleColorChanger
+					shaderProperty = _EmissiveColor
+					animRate = 0.8
+					animState = false
+					useRate = true
+					toggleInEditor = true
+					toggleInFlight = true
+					toggleInFlight = true
+					unfocusedRange = 5
+					toggleName = Toggle Lights
+					eventOnName = Lights On
+					eventOffName = Lights Off
+					toggleAction = True
+					defaultActionGroup = Light
+					isEnabled = True
+					redCurve
+					{
+						key = 0 0 0 3
+						key = 1 1 0 0
+					}
+					greenCurve
+					{
+						key = 0 0 0 1
+						key = 1 1 1 0
+					}
+					blueCurve
+					{
+						key = 0 0 0 0
+						key = 1 0.7 1.5 0
+					}
+					alphaCurve
+					{
+						key = 0 1
+					}
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartInfo
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = sspx-expandable-centrifuge-375-1
+				cid = 3
+				uid = 930000003
+				mid = 950000000
+				persistentId = 940000003
+				launchID = 1
+				parent = 2
+				position = 0.0,-10.820999999999998,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 15.75
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 2
+				attN = bottom, 4
+				srfN = None, -1
+				MODULE
+				{
+					name = ModuleDeployableCentrifuge
+					DeployAnimationName = CentrifugeCollapse
+					AnimationSpeed = 0.025
+					AnimationLayer = 1
+					CrewToDeploy = 3
+					CrewSkillNeeded = Engineer
+					CrewSkillNeededName = Engineer
+					DeployedCrewCapacity = 14
+					Deployed = True
+					Radius = 15
+					DeployActionName = Deploy
+					RetractActionName = Retract
+					ToggleActionName = Toggle Deploy
+					StartSpinActionName = Start Rotation
+					StopSpinActionName = Stop Rotation
+					ToggleSpinActionName = Toggle Rotation
+					SpinRate = 28.55808875
+					SpinAccelerationRate = 1.0
+					CounterweightSpinRate = -57.11617751
+					CounterweightSpinAccelerationRate = 2.0
+					SpinTransformName = B_Center
+					CounterweightTransformName = Counterweight
+					InternalSpinMapping = 1
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleScienceExperiment
+					experimentID = crewReport
+					experimentActionName = Crew Report
+					resetActionName = Discard Crew Report
+					reviewActionName = Review Report
+					useStaging = False
+					useActionGroups = True
+					hideUIwhenUnavailable = True
+					rerunnable = True
+					xmitDataScalar = 1.0
+					usageReqMaskInternal = 5
+					usageReqMaskExternal = -1
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleScienceContainer
+					reviewActionName = Review Stored Data
+					storeActionName = Store Experiments
+					evaOnlyStorage = True
+					storageRange = 3.5
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleColorChanger
+					shaderProperty = _EmissiveColor
+					animRate = 0.8
+					animState = false
+					useRate = true
+					toggleInEditor = true
+					toggleInFlight = true
+					toggleInFlight = true
+					unfocusedRange = 5
+					toggleName = Toggle Lights
+					eventOnName = Lights On
+					eventOffName = Lights Off
+					toggleAction = True
+					defaultActionGroup = Light
+					isEnabled = True
+					redCurve
+					{
+						key = 0 0 0 3
+						key = 1 1 0 0
+					}
+					greenCurve
+					{
+						key = 0 0 0 1
+						key = 1 1 1 0
+					}
+					blueCurve
+					{
+						key = 0 0 0 0
+						key = 1 0.7 1.5 0
+					}
+					alphaCurve
+					{
+						key = 0 1
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = surfaceSwitch
+					switcherDescription = Surface
+					isEnabled = True
+					SUBTYPE
+					{
+						name = White
+						title = White
+						descriptionSummary = White painted exterior
+						descriptionDetail = An aerospace white paint job for your station modules
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal
+						descriptionSummary = Bare metal exterior
+						descriptionDetail = An industrial, metal look to your station modules
+						primaryColor = #999999
+						secondaryColor = #999999
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Extendable/extendable-375/sspx-extensible-375-1-alt
+							baseTransform = SSPX-Revised-375-Centrifuge_1
+							shaderProperty = _MainTex
+						}
+						MATERIAL
+						{
+							baseTransform = SSPX-Revised-375-Centrifuge_1
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch
+					switcherDescription = Upper Mount
+					affectDragCubes = false
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlack
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhite
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetal
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBare
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch2
+					switcherDescription = Lower Mount
+					affectDragCubes = false
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlackFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhiteFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetalFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBareFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					requireDeploy = true
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartInfo
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = sspx-tube-375-1
+				cid = 4
+				uid = 930000004
+				mid = 950000000
+				persistentId = 940000004
+				launchID = 1
+				parent = 3
+				position = 0.0,-21.392,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 7.2
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 3
+				attN = bottom, 5
+				srfN = None, -1
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = surfaceSwitch
+					switcherDescription = Surface
+					isEnabled = True
+					SUBTYPE
+					{
+						name = White
+						title = White
+						descriptionSummary = White painted exterior
+						descriptionDetail = An aerospace white paint job for your station modules
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal
+						descriptionSummary = Bare metal exterior
+						descriptionDetail = An industrial, metal look to your station modules
+						primaryColor = #999999
+						secondaryColor = #999999
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Rigid/station-375/sspx-375-5-alt
+							transform = CrewTubeLarge
+							shaderProperty = _MainTex
+						}
+						MATERIAL
+						{
+							transform = CrewTubeLarge
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch
+					switcherDescription = Upper Mount
+					affectDragCubes = false
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlack
+						transform = EndcapHatchRoundWhite
+						transform = Ladders
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhite
+						transform = EndcapHatchRoundWhite
+						transform = Ladders
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetal
+						transform = EndcapHatchRoundMetal
+						transform = Ladders
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBare
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch2
+					switcherDescription = Lower Mount
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlackFlip
+						transform = EndcapHatchRoundWhiteFlip
+						transform = Ladders
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhiteFlip
+						transform = EndcapHatchRoundWhiteFlip
+						transform = Ladders
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetalFlip
+						transform = EndcapHatchRoundMetalFlip
+						transform = Ladders
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBareFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = FlagDecal
+					textureQuadName = flagTransform
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleColorChanger
+					shaderProperty = _EmissiveColor
+					animRate = 0.8
+					animState = false
+					useRate = true
+					toggleInEditor = true
+					toggleInFlight = true
+					toggleInFlight = true
+					unfocusedRange = 5
+					toggleName = Toggle Lights
+					eventOnName = Lights On
+					eventOffName = Lights Off
+					toggleAction = True
+					defaultActionGroup = Light
+					isEnabled = True
+					redCurve
+					{
+						key = 0 0 0 3
+						key = 1 1 0 0
+					}
+					greenCurve
+					{
+						key = 0 0 0 1
+						key = 1 1 1 0
+					}
+					blueCurve
+					{
+						key = 0 0 0 0
+						key = 1 0.7 1.5 0
+					}
+					alphaCurve
+					{
+						key = 0 1
+					}
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartInfo
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = sspx-adapter-25-375-2
+				cid = 5
+				uid = 930000005
+				mid = 950000000
+				persistentId = 940000005
+				launchID = 1
+				parent = 4
+				position = 0.0,-25.436999999999998,0.0
+				rotation = 0,0,1,0
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 0.36
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = bottom, 4
+				attN = top, 6
+				srfN = None, -1
+				MODULE
+				{
+					name = ModuleB9DisableTransform
+					transform = EndcapInsulated
+					transform = EndcapInsulatedBare
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = surfaceSwitch
+					switcherDescription = Surface
+					isEnabled = True
+					SUBTYPE
+					{
+						name = White
+						title = White
+						descriptionSummary = White painted exterior
+						descriptionDetail = An aerospace white paint job for your station modules
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal
+						descriptionSummary = Bare metal exterior
+						descriptionDetail = An industrial, metal look to your station modules
+						primaryColor = #999999
+						secondaryColor = #999999
+						TEXTURE
+						{
+							texture = StationPartsExpansionRedux/Parts/Rigid/station-375/sspx-375-3-alt
+							transform = 375AdapterShort
+							shaderProperty = _MainTex
+						}
+						MATERIAL
+						{
+							transform = 375AdapterShort
+							FLOAT
+							{
+								shaderProperty = _Shininess
+								value = 0.08
+							}
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch
+					switcherDescription = Upper Mount
+					affectDragCubes = false
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlack
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhite
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetal
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBare
+						transform = EndcapHatchRoundWhite
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBare
+						transform = EndcapHatchRoundMetal
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = endcapSwitch2
+					switcherDescription = Lower Mount
+					isEnabled = True
+					SUBTYPE
+					{
+						name = BlackHandles
+						title = Classic
+						transform = EndcapBlackFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = WhiteHandles
+						title = White
+						transform = EndcapWhiteFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Painted white endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = MetalHandles
+						title = Metal
+						transform = EndcapMetalFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings with handles
+						descriptionDetail = 
+						primaryColor = #b18b1b
+						secondaryColor = #999999
+					}
+					SUBTYPE
+					{
+						name = Black
+						title = Classic (Bare)
+						transform = EndcapBlackBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = Black painted endcap rings
+						descriptionDetail = 
+						primaryColor = #000000
+						secondaryColor = #000000
+					}
+					SUBTYPE
+					{
+						name = White
+						title = White (Bare)
+						transform = EndcapWhiteBareFlip
+						transform = EndcapHatchRoundWhiteFlip
+						descriptionSummary = White painted endcap rings
+						descriptionDetail = 
+						primaryColor = #ffffff
+						secondaryColor = #ffffff
+					}
+					SUBTYPE
+					{
+						name = Metal
+						title = Metal (Bare)
+						transform = EndcapMetalBareFlip
+						transform = EndcapHatchRoundMetalFlip
+						descriptionSummary = Bare metal endcap rings
+						descriptionDetail = 
+						primaryColor = #999999
+						secondaryColor = #999999
+					}
+				}
+				MODULE
+				{
+					name = ModuleColorChanger
+					shaderProperty = _EmissiveColor
+					animRate = 0.8
+					animState = false
+					useRate = true
+					toggleInEditor = true
+					toggleInFlight = true
+					toggleInFlight = true
+					unfocusedRange = 5
+					toggleName = Toggle Lights
+					eventOnName = Lights On
+					eventOffName = Lights Off
+					toggleAction = True
+					defaultActionGroup = Light
+					isEnabled = True
+					redCurve
+					{
+						key = 0 0 0 3
+						key = 1 1 0 0
+					}
+					greenCurve
+					{
+						key = 0 0 0 1
+						key = 1 1 1 0
+					}
+					blueCurve
+					{
+						key = 0 0 0 0
+						key = 1 0.7 1.5 0
+					}
+					alphaCurve
+					{
+						key = 0 1
+					}
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					passThroughNodeA = top
+					passThroughNodeB = bottom
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartInfo
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = CRY-2300Freezer
+				cid = 6
+				uid = 930000006
+				mid = 950000000
+				persistentId = 940000006
+				launchID = 1
+				parent = 5
+				position = 0.0,-27.543905,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 5.25
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 5
+				attN = bottom, 7
+				srfN = None, -1
+				RESOURCE
+				{
+					name = Glykerol
+					amount = 50
+					maxAmount = 50
+					flowState = True
+				}
+				MODULE
+				{
+					name = DeepFreezer
+					FreezerSize = 10
+					ChargeRequired = 3000
+					GlykerolRequired = 5
+					ChargeRate = 30
+					FrznChargeRequired = 10
+					isPartAnimated = True
+					cryopodstateclosedstring = True, True, True, True, True, True, True, True, True, True
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = batteryBankLarge
+				cid = 7
+				uid = 930000007
+				mid = 950000000
+				persistentId = 940000007
+				launchID = 1
+				parent = 6
+				position = 0.0,-29.48481,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 0.2
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 6
+				attN = bottom, 8
+				srfN = None, -1
+				RESOURCE
+				{
+					name = ElectricCharge
+					amount = 4000
+					maxAmount = 4000
+					flowState = True
+				}
+				MODULE
+				{
+					name = ModuleCargoPart
+					stackableQuantity = 1
+					packedVolume = -1
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					passThroughNodeA = top
+					passThroughNodeB = bottom
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = Rockomax32.BW
+				cid = 8
+				uid = 930000008
+				mid = 950000000
+				persistentId = 940000008
+				launchID = 1
+				parent = 7
+				position = 0.0,-31.48681,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 2
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 7
+				attN = bottom, 9
+				srfN = None, -1
+				RESOURCE
+				{
+					name = LiquidFuel
+					amount = 1440
+					maxAmount = 1440
+					flowState = True
+				}
+				RESOURCE
+				{
+					name = Oxidizer
+					amount = 1760
+					maxAmount = 1760
+					flowState = True
+				}
+				MODULE
+				{
+					name = ModulePartVariants
+					baseVariant = BlackAndWhite
+					isEnabled = True
+					VARIANT
+					{
+						name = BlackAndWhite
+						displayName = Black and White
+						themeName = White
+						primaryColor = #ffffff
+						secondaryColor = #000000
+						GAMEOBJECTS
+						{
+							Rockomax_32_White = true
+							Rockomax_32_Orange = false
+							Rockomax_32_ESA = false
+						}
+					}
+					VARIANT
+					{
+						name = Orange
+						displayName = Orange
+						themeName = Orange
+						primaryColor = #f49841
+						secondaryColor = #4c4f47
+						GAMEOBJECTS
+						{
+							Rockomax_32_White = false
+							Rockomax_32_Orange = true
+							Rockomax_32_ESA = false
+						}
+						TEXTURE
+						{
+							mainTextureURL = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_16 [AlbedoM] O
+							_BumpMap = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_16 [Normal]O
+						}
+					}
+					VARIANT
+					{
+						name = ESA
+						displayName = ESA
+						description = European Space Agency
+						primaryColor = #ffffff
+						secondaryColor = #124d7f
+						GAMEOBJECTS
+						{
+							Rockomax_32_White = false
+							Rockomax_32_Orange = false
+							Rockomax_32_ESA = true
+						}
+						TEXTURE
+						{
+							mainTextureURL = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_32 [AlbedoM] ESA
+							_BumpMap = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_32 [Normal]ESA
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					moduleID = FreeIva_fuelSwitch
+					baseVolume = 3200
+					isEnabled = True
+					SUBTYPE
+					{
+						name = LFOX
+						tankType = FreeIva_LFOX
+						addedMass = -2
+						addedCost = -1468.8
+					}
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					partInfo = This part can be traversible in IVA with a penalty of 25% of its tank volume.
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleB9PartSwitch
+					switcherDescription = FreeIva
+					moduleID = FreeIvaSwitch
+					parentID = FreeIva_fuelSwitch
+					isEnabled = True
+					SUBTYPE
+					{
+						name = Blocked
+						title = Blocked
+					}
+					SUBTYPE
+					{
+						name = Passable
+						title = Passable
+						volumeAddedToParent = -800
+						addedMass = 1.2
+						addedCost = 400
+						MODULE
+						{
+							IDENTIFIER
+							{
+								name = ModuleFreeIva
+							}
+							DATA
+							{
+								passThroughNodeA = top
+								passThroughNodeB = bottom
+							}
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleB9PartInfo
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = largeAdapter2
+				cid = 9
+				uid = 930000009
+				mid = 950000000
+				persistentId = 940000009
+				launchID = 1
+				parent = 8
+				position = 0.0,-33.536026299999996,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 0.08
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 8
+				attN = bottom, 10
+				srfN = None, -1
+				MODULE
+				{
+					name = ModulePartVariants
+					baseVariant = BlackAndWhite
+					useMultipleDragCubes = false
+					isEnabled = True
+					VARIANT
+					{
+						name = BlackAndWhite
+						displayName = Black and White
+						themeName = White
+						primaryColor = #ffffff
+						secondaryColor = #000000
+					}
+					VARIANT
+					{
+						name = Orange
+						displayName = Orange
+						themeName = Orange
+						primaryColor = #ffffff
+						secondaryColor = #f49841
+						TEXTURE
+						{
+							mainTextureURL = Squad/Parts/Utility/rockomaxAdapters/Assets/Rockomax_Adapters_diffuse_O
+							_BumpMap = Squad/Parts/Utility/rockomaxAdapters/Assets/Rockomax_Adapters_normal_O
+						}
+					}
+				}
+				MODULE
+				{
+					name = ModuleCargoPart
+					packedVolume = -1
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleFreeIva
+					passThroughNodeA = top
+					passThroughNodeB = bottom
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = nuclearEngine
+				cid = 10
+				uid = 930000010
+				mid = 950000000
+				persistentId = 940000010
+				launchID = 1
+				parent = 9
+				position = 0.0,-35.12907259999999,0.0
+				rotation = 0,0,0,1
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 0
+				mass = 3
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				attN = top, 9
+				srfN = None, -1
+				MODULE
+				{
+					name = ModuleEngines
+					thrustVectorTransformName = thrustTransform
+					exhaustDamage = True
+					ignitionThreshold = 0.1
+					minThrust = 0
+					maxThrust = 60
+					heatProduction = 250
+					fxOffset = 0, 0, 1
+					EngineType = Nuclear
+					exhaustDamageDistanceOffset = 1.86
+					isEnabled = True
+					EngineIgnited = False
+					currentThrottle = 0
+					PROPELLANT
+					{
+						name = LiquidFuel
+						ratio = 0.9
+						DrawGauge = True
+					}
+					atmosphereCurve
+					{
+						key = 0 800
+						key = 1 185
+						key = 2 0.001
+					}
+				}
+				MODULE
+				{
+					name = ModuleJettison
+					jettisonName = fairingL
+					bottomNodeName = bottom
+					isFairing = False
+					jettisonedObjectMass = 0.1
+					jettisonForce = 1
+					jettisonDirection = 1 0 0
+					actionSuffix = L
+					useProceduralDragCubes = true
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleJettison
+					jettisonName = fairingR
+					bottomNodeName = bottom
+					isFairing = False
+					jettisonedObjectMass = 0.1
+					jettisonForce = 1
+					jettisonDirection = -1 0 0
+					actionSuffix = R
+					useProceduralDragCubes = true
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleAnimateHeat
+					ThermalAnim = overheat
+					isEnabled = True
+				}
+				MODULE
+				{
+					name = ModuleAlternator
+					isEnabled = True
+					RESOURCE
+					{
+						name = ElectricCharge
+						rate = 5.0
+					}
+				}
+				MODULE
+				{
+					name = ModuleTestSubject
+					useStaging = True
+					useEvent = True
+					situationMask = 121
+					isEnabled = True
+					CONSTRAINT
+					{
+						type = REPEATABILITY
+						value = ALWAYS
+						prestige = Trivial
+					}
+					CONSTRAINT
+					{
+						type = REPEATABILITY
+						value = BODYANDSITUATION
+						prestige = Significant
+					}
+					CONSTRAINT
+					{
+						type = REPEATABILITY
+						value = ONCEPERPART
+						prestige = Exceptional
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDEENV
+						test = GT
+						value = 4000
+						prestige = Trivial
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDEENV
+						test = LT
+						value = 8000
+						prestige = Trivial
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDEENV
+						test = GT
+						value = 2000
+						prestige = Significant
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDEENV
+						test = LT
+						value = 4000
+						prestige = Significant
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDEENV
+						test = GT
+						value = 1000
+						prestige = Exceptional
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDEENV
+						test = LT
+						value = 2000
+						prestige = Exceptional
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDE
+						test = LT
+						value = 300000
+						situationMask = 16
+						body = _NotSun
+					}
+					CONSTRAINT
+					{
+						type = ALTITUDE
+						test = LT
+						value = 600000
+						situationMask = 32
+						body = _NotSun
+					}
+					CONSTRAINT
+					{
+						type = SPEED
+						test = GT
+						value = 0
+						situationMask = 8
+						prestige = Trivial
+					}
+					CONSTRAINT
+					{
+						type = SPEED
+						test = LT
+						value = 600
+						situationMask = 8
+						prestige = Trivial
+					}
+					CONSTRAINT
+					{
+						type = SPEED
+						test = GT
+						value = 300
+						situationMask = 8
+						prestige = Significant
+					}
+					CONSTRAINT
+					{
+						type = SPEED
+						test = LT
+						value = 1200
+						situationMask = 8
+						prestige = Significant
+					}
+					CONSTRAINT
+					{
+						type = SPEED
+						test = GT
+						value = 600
+						situationMask = 8
+						prestige = Exceptional
+					}
+					CONSTRAINT
+					{
+						type = SPEED
+						test = LT
+						value = 2500
+						situationMask = 8
+						prestige = Exceptional
+					}
+					CONSTRAINT
+					{
+						type = SPEEDENV
+						test = LT
+						value = 200
+						prestige = Trivial
+					}
+					CONSTRAINT
+					{
+						type = SPEEDENV
+						test = GT
+						value = 100
+						prestige = Trivial
+					}
+					CONSTRAINT
+					{
+						type = SPEEDENV
+						test = LT
+						value = 100
+						prestige = Significant
+					}
+					CONSTRAINT
+					{
+						type = SPEEDENV
+						test = GT
+						value = 50
+						prestige = Significant
+					}
+					CONSTRAINT
+					{
+						type = SPEEDENV
+						test = LT
+						value = 50
+						prestige = Exceptional
+					}
+					CONSTRAINT
+					{
+						type = SPEEDENV
+						test = GT
+						value = 20
+						prestige = Exceptional
+					}
+				}
+				MODULE
+				{
+					name = ModuleSurfaceFX
+					thrustProviderModuleIndex = 0
+					fxMax = 0.7
+					maxDistance = 50
+					falloff = 2.5
+					thrustTransformName = thrustTransform
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = largeSolarPanel
+				cid = 11
+				uid = 930000011
+				mid = 950000000
+				persistentId = 940000011
+				launchID = 1
+				parent = 4
+				position = 1.9,-21.392,0.0
+				rotation = 0,0.0,0,1.0
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 1
+				mass = 0.3
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				srfN = srfAttach, 4
+				MODULE
+				{
+					name = ModuleDeployableSolarPanel
+					secondaryTransformName = suncatcher
+					resourceName = ElectricCharge
+					chargeRate = 24.4
+					impactResistance = 2
+					impactResistanceRetracted = 6
+					animationName = bigsolarpanel
+					extendActionName = Extend <<1>>
+					retractActionName = Retract <<1>>
+					extendpanelsActionName = Toggle <<1>>
+					isEnabled = True
+					deployState = RETRACTED
+				}
+				MODULE
+				{
+					name = ModuleCargoPart
+					packedVolume = -1
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = largeSolarPanel
+				cid = 12
+				uid = 930000012
+				mid = 950000000
+				persistentId = 940000012
+				launchID = 1
+				parent = 4
+				position = -1.9,-21.392,0.0
+				rotation = 0,1.0,0,6.123233995736766e-17
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 1
+				mass = 0.3
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				srfN = srfAttach, 4
+				MODULE
+				{
+					name = ModuleDeployableSolarPanel
+					secondaryTransformName = suncatcher
+					resourceName = ElectricCharge
+					chargeRate = 24.4
+					impactResistance = 2
+					impactResistanceRetracted = 6
+					animationName = bigsolarpanel
+					extendActionName = Extend <<1>>
+					retractActionName = Retract <<1>>
+					extendpanelsActionName = Toggle <<1>>
+					isEnabled = True
+					deployState = RETRACTED
+				}
+				MODULE
+				{
+					name = ModuleCargoPart
+					packedVolume = -1
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = largeSolarPanel
+				cid = 13
+				uid = 930000013
+				mid = 950000000
+				persistentId = 940000013
+				launchID = 1
+				parent = 4
+				position = 0.0,-21.392,1.9
+				rotation = 0,0.7071067811865475,0,0.7071067811865476
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 1
+				mass = 0.3
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				srfN = srfAttach, 4
+				MODULE
+				{
+					name = ModuleDeployableSolarPanel
+					secondaryTransformName = suncatcher
+					resourceName = ElectricCharge
+					chargeRate = 24.4
+					impactResistance = 2
+					impactResistanceRetracted = 6
+					animationName = bigsolarpanel
+					extendActionName = Extend <<1>>
+					retractActionName = Retract <<1>>
+					extendpanelsActionName = Toggle <<1>>
+					isEnabled = True
+					deployState = RETRACTED
+				}
+				MODULE
+				{
+					name = ModuleCargoPart
+					packedVolume = -1
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = largeSolarPanel
+				cid = 14
+				uid = 930000014
+				mid = 950000000
+				persistentId = 940000014
+				launchID = 1
+				parent = 4
+				position = 0.0,-21.392,-1.9
+				rotation = 0,-0.7071067811865475,0,0.7071067811865476
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 1
+				mass = 0.3
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				srfN = srfAttach, 4
+				MODULE
+				{
+					name = ModuleDeployableSolarPanel
+					secondaryTransformName = suncatcher
+					resourceName = ElectricCharge
+					chargeRate = 24.4
+					impactResistance = 2
+					impactResistanceRetracted = 6
+					animationName = bigsolarpanel
+					extendActionName = Extend <<1>>
+					retractActionName = Retract <<1>>
+					extendpanelsActionName = Toggle <<1>>
+					isEnabled = True
+					deployState = RETRACTED
+				}
+				MODULE
+				{
+					name = ModuleCargoPart
+					packedVolume = -1
+					isEnabled = True
+				}
+			}
+			PART
+			{
+				name = foldingRadLarge
+				cid = 15
+				uid = 930000015
+				mid = 950000000
+				persistentId = 940000015
+				launchID = 1
+				parent = 4
+				position = 1.9,-23.392,0.0
+				rotation = 0,0.0,0,1.0
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 1
+				mass = 1.0
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				srfN = srfAttach, 4
+				MODULE
+				{
+					name = ModuleDeployableRadiator
+					animationName = Deploy
+					showStatus = false
+					retractable = true
+					pivotName = Pivot
+					raycastTransformName = Panel_006
+					windResistance = 2.5
+					trackingSpeed = 0.1
+					sunAlignmentOffset = 0
+					extendActionName = Extend <<1>>
+					retractActionName = Retract <<1>>
+					extendpanelsActionName = Toggle <<1>>
+					isEnabled = True
+					deployState = RETRACTED
+				}
+				MODULE
+				{
+					name = ModuleActiveRadiator
+					maxEnergyTransfer = 50000
+					overcoolFactor = 0.25
+					isCoreRadiator = true
+					isEnabled = True
+					RESOURCE
+					{
+						name = ElectricCharge
+						rate = 0.5
+					}
+				}
+			}
+			PART
+			{
+				name = foldingRadLarge
+				cid = 16
+				uid = 930000016
+				mid = 950000000
+				persistentId = 940000016
+				launchID = 1
+				parent = 4
+				position = -1.9,-23.392,0.0
+				rotation = 0,1.0,0,6.123233995736766e-17
+				mirror = 1,1,1
+				symMethod = Radial
+				istg = -1
+				dstg = -1
+				sqor = -1
+				sepI = -1
+				sidx = -1
+				attm = 1
+				mass = 1.0
+				shielded = False
+				temp = 293
+				tempExt = 293
+				expt = 0.5
+				state = 1
+				attached = True
+				autostrutMode = Grandparent
+				rigidAttachment = False
+				flag = Squad/Flags/default
+				modCost = 0
+				modMass = 0
+				srfN = srfAttach, 4
+				MODULE
+				{
+					name = ModuleDeployableRadiator
+					animationName = Deploy
+					showStatus = false
+					retractable = true
+					pivotName = Pivot
+					raycastTransformName = Panel_006
+					windResistance = 2.5
+					trackingSpeed = 0.1
+					sunAlignmentOffset = 0
+					extendActionName = Extend <<1>>
+					retractActionName = Retract <<1>>
+					extendpanelsActionName = Toggle <<1>>
+					isEnabled = True
+					deployState = RETRACTED
+				}
+				MODULE
+				{
+					name = ModuleActiveRadiator
+					maxEnergyTransfer = 50000
+					overcoolFactor = 0.25
+					isCoreRadiator = true
+					isEnabled = True
+					RESOURCE
+					{
+						name = ElectricCharge
+						rate = 0.5
+					}
+				}
+			}
+			ACTIONGROUPS
+			{
+			}
+			FLIGHTPLAN
+			{
+			}
+			CTRLSTATE
+			{
+				mainThrottle = 0
+			}
+			VESSELMODULES
+			{
+			}
+		}
+	}
+	ROSTER
+	{
+		KERBAL
+		{
+			name = Hamish Kerman
+			type = Crew
+			trait = Pilot
+			brave = 0.6
+			dumb = 0.3
+			badS = False
+			veteran = True
+			tour = False
+			state = Assigned
+			seatIdx = 0
+			inactive = False
+			inactiveTimeEnd = 0
+			gExperienced = 0
+			experience = 16
+			experienceLevel = 3
+			CAREER_LOG
+			{
+				flight = 0
+			}
+			FLIGHT_LOG
+			{
+				flight = 0
+			}
+		}
+		KERBAL
+		{
+			name = Basil Kerman
+			type = Crew
+			trait = Engineer
+			brave = 0.6
+			dumb = 0.3
+			badS = False
+			veteran = True
+			tour = False
+			state = Assigned
+			seatIdx = 1
+			inactive = False
+			inactiveTimeEnd = 0
+			gExperienced = 0
+			experience = 16
+			experienceLevel = 3
+			CAREER_LOG
+			{
+				flight = 0
+			}
+			FLIGHT_LOG
+			{
+				flight = 0
+			}
+		}
+		KERBAL
+		{
+			name = Ada Kerman
+			type = Crew
+			trait = Scientist
+			brave = 0.6
+			dumb = 0.3
+			badS = False
+			veteran = True
+			tour = False
+			state = Assigned
+			seatIdx = 2
+			inactive = False
+			inactiveTimeEnd = 0
+			gExperienced = 0
+			experience = 16
+			experienceLevel = 3
+			CAREER_LOG
+			{
+				flight = 0
+			}
+			FLIGHT_LOG
+			{
+				flight = 0
+			}
+		}
+		KERBAL
+		{
+			name = Vikram Kerman
+			type = Crew
+			trait = Engineer
+			brave = 0.6
+			dumb = 0.3
+			badS = False
+			veteran = True
+			tour = False
+			state = Assigned
+			seatIdx = 3
+			inactive = False
+			inactiveTimeEnd = 0
+			gExperienced = 0
+			experience = 16
+			experienceLevel = 3
+			CAREER_LOG
+			{
+				flight = 0
+			}
+			FLIGHT_LOG
+			{
+				flight = 0
+			}
+		}
+	}
+}

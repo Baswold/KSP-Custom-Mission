@@ -1,0 +1,15 @@
+{
+  "save": "MegaCrew Practice",
+  "orbit_altitude_m": 150000,
+  "sma_m": 750000,
+  "period_seconds": 2171.6308839761837,
+  "crew": [
+    "Hamish Kerman",
+    "Basil Kerman",
+    "Ada Kerman",
+    "Vikram Kerman"
+  ],
+  "parts": 17,
+  "part_names_match_cache": true,
+  "in_game_load_verified": false
+}

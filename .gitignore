@@ -1,2 +1,13 @@
 __pycache__/
 *.pyc
+.DS_Store
+work/
+*.log
+*.loadmeta
+*.sln
+*.user
+KSP.app/
+KSP_x64*
+Universe/
+Config/
+*password*
