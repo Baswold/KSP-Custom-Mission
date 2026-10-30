@@ -1,6 +1,7 @@
 """Generate a stock vacuum lander and a Hermes external docking cradle candidate."""
 import argparse
 import copy
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -49,7 +50,11 @@ def parent_first(root):
     root.children=ordered+[n for n in root.children if n.name!='PART']
 
 
-def generate(game,repo):
+def sha256(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+def generate(game,repo,output_root=None):
+    output_root=Path(output_root) if output_root is not None else repo
     catalog={}
     for f in (game/'GameData/Squad/Parts').rglob('*.cfg'):
         text=f.read_text(errors='replace')
@@ -88,10 +93,11 @@ def generate(game,repo):
     root=Node('ROOT')
     for k,v in [('ship','Hermes Finch Vacuum Lander'),('version','1.12.5'),('description','Two-crew vacuum lander candidate for Mun/Minmus low-orbit sorties. No atmosphere, launch booster or Kerbin recovery. Flight qualification pending.'),('type','VAB'),('size','5,6,5'),('persistentId',base),('rot','0,0,0,1'),('missionFlag','Squad/Flags/default'),('vesselType','Lander')]:root.add(k,v)
     root.children=parts
-    out=repo/'Ships/VAB';out.mkdir(parents=True,exist_ok=True)
-    (out/'Hermes Finch Vacuum Lander.craft').write_text(output(root))
+    out=output_root/'Ships/VAB';out.mkdir(parents=True,exist_ok=True)
+    lander_path=out/'Hermes Finch Vacuum Lander.craft'
+    lander_path.write_text(output(root))
     # External cradle leaves the existing walking route intact.
-    carrier=parse((out/'Hermes Walkthrough v2.craft').read_text())
+    carrier=parse((repo/'Ships/VAB'/'Hermes Walkthrough v2.craft').read_text())
     carrier.set('ship','Hermes Finch Docking Cradle')
     carrier.set('description','External single-lander docking cradle prototype; no enclosing bay. Keep centrifuge stopped. Clearance and docking qualification pending.')
     mother=next(n for n in carrier.nodes('PART') if n.get('part').startswith('sspx-tube-375-1_'))
@@ -118,9 +124,11 @@ def generate(game,repo):
     dry=sum(float(catalog[n.get('part').rsplit('_',1)[0].replace('.','_')].get('mass','0')) for n in parts)+2*.09375
     prop=4.0;mono=.16;wet=dry+prop+mono
     dv=345*9.80665*math.log(wet/(dry+mono))
-    report={'parts':len(parts),'crew_capacity':2,'dry_with_crew_t':dry,'wet_with_crew_t':wet,'lf_ox_propellant_t':prop,'vacuum_isp_s':345,'ideal_delta_v_m_s':dv,'mun_surface_twr':60/(wet*1.63),'minmus_surface_twr':60/(wet*.491),'scope':'Mun/Minmus low-orbit vacuum sortie candidate; no atmospheric capability or flight qualification','runtime_verified':False}
-    (repo/'docs/Finch-Design.json').write_text(json.dumps(report,indent=2)+'\n')
+    cradle_path=out/'Hermes Finch Docking Cradle.craft'
+    report={'parts':len(parts),'crew_capacity':2,'dry_with_crew_t':dry,'wet_with_crew_t':wet,'lf_ox_propellant_t':prop,'vacuum_isp_s':345,'ideal_delta_v_m_s':dv,'mun_surface_twr':60/(wet*1.63),'minmus_surface_twr':60/(wet*.491),'scope':'Mun/Minmus low-orbit vacuum sortie candidate; no atmospheric capability or flight qualification','runtime_verified':False,'candidate_craft_sha256':{'Hermes Finch Vacuum Lander.craft':sha256(lander_path),'Hermes Finch Docking Cradle.craft':sha256(cradle_path)},'historical_loader_evidence':{'path':'docs/Finch-Loader-Evidence.json','reference_base':'repository root (the evidence file is not copied to --output-root)','scope':'prior candidate only; exact runtime-loaded craft hash was not recorded'}}
+    design_path=output_root/'docs/Finch-Design.json';design_path.parent.mkdir(parents=True,exist_ok=True)
+    design_path.write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--ksp-root',required=True,type=Path);a=p.parse_args();generate(a.ksp_root,Path(__file__).resolve().parents[1])
+    p=argparse.ArgumentParser();p.add_argument('--ksp-root',required=True,type=Path);p.add_argument('--output-root',type=Path,help='write generated craft and design report here (base Hermes Walkthrough craft remains read from the repository)');a=p.parse_args();generate(a.ksp_root,Path(__file__).resolve().parents[1],a.output_root)

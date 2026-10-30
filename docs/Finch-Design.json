@@ -10,18 +10,13 @@
   "minmus_surface_twr": 16.642777346683616,
   "scope": "Mun/Minmus low-orbit vacuum sortie candidate; no atmospheric capability or flight qualification",
   "runtime_verified": false,
-  "loader_test": {
-    "ksp_build": "1.12.5.03190",
-    "lander_parts": 17,
-    "lander_uncrewed_loaded_mass_t": 6.96700006909668,
-    "lander_seats": 2,
-    "cradle_parts": 35,
-    "cradle_docking_modules": 2,
-    "cradle_root_observed": true,
-    "scene": "main menu ShipConstruction.LoadShip",
-    "flight_verified": false,
-    "cradle_root": "sspx-core-375-1",
-    "dock_parent_identity_verified": true,
-    "dock_state_at_main_menu": "Ready (both); flight state unverified"
+  "candidate_craft_sha256": {
+    "Hermes Finch Vacuum Lander.craft": "b5da5c8ef75b9c2459b1c04f4ea38311ac7078867331469035e13be6ca93b185",
+    "Hermes Finch Docking Cradle.craft": "2eddd59356cc092a060ae3ff2fa6b2ba07ed16928486454716174e36b1a38cc6"
+  },
+  "historical_loader_evidence": {
+    "path": "docs/Finch-Loader-Evidence.json",
+    "reference_base": "repository root (the evidence file is not copied to --output-root)",
+    "scope": "prior candidate only; exact runtime-loaded craft hash was not recorded"
   }
 }

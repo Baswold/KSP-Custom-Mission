@@ -15,9 +15,12 @@ Hermes trainer. Neither craft includes a launch booster.
   This is an open cradle, not a shielded cargo bay. The interior route is retained.
 
 Use `tools/build_landers.py --ksp-root '/path/to/KSP'` to regenerate from local
-stock part definitions. No stock assets are redistributed. The generator uses
-stock node positions and serializes resources; prefab defaults supply modules.
-The cradle uses existing SSPX/DeepFreeze dependencies from the trainer.
+stock part definitions. Add `--output-root '/path/to/temp/output'` to write the
+generated craft files and design report elsewhere; the base Hermes Walkthrough
+craft is still read from this repository. No stock assets are redistributed.
+The generator uses stock node positions and serializes resources; prefab
+defaults supply modules. The cradle uses existing SSPX/DeepFreeze dependencies
+from the trainer.
 
 ## Mission envelope and provisional budget
 
@@ -57,14 +60,20 @@ for docking and keep adequate battery reserves through eclipse.
 
 ## Evidence and outstanding gates
 
-Nine Python tests pass, including craft graph connectivity/acyclicity, unique IDs,
-finite transforms, normalized rotations, opposed/coincident docking faces, four
-legs/RCS blocks and explicit fuel resources. These checks are structural and do
-not prove collider clearance, leg deployment, flight stability or docking behavior.
-`docs/Finch-Design.json` records the design figures and runtime status.
+The lander-craft tests pass, including graph connectivity/acyclicity, unique
+IDs, finite transforms, normalized rotations, opposed/coincident docking faces,
+four legs/RCS blocks and explicit fuel resources. Regeneration tests also verify
+that historical evidence is left untouched, output is deterministic, and the
+current craft hashes in the design report match generated files. These checks are
+structural and do not prove collider clearance, leg deployment, flight stability
+or docking behavior. `docs/Finch-Design.json` contains current calculated design
+figures and generated craft SHA-256 values; `runtime_verified` remains false.
+Historical main-menu observations are kept separately in
+`docs/Finch-Loader-Evidence.json` and are explicitly scoped to a prior candidate.
 
 Native KSP loading is checked with a temporary disposable probe, separate from the
-production mod. Results will be recorded here after observation. Flight load,
+production mod. Historical main-menu observations are recorded in
+`docs/Finch-Loader-Evidence.json`; no flight result is established. Flight load,
 storage/release clearance, landing, EVA access, re-ascent, redocking and reload
 persistence must all pass before these candidates can be called usable landers.
 
@@ -81,7 +90,12 @@ It is not included in the production MegaCrew DLL.
 
 ### Native loader result
 
-The corrected files were loaded with `ShipConstruction.LoadShip` in the separate
+These are retained historical main-menu observations for a prior, pre-reorder
+candidate. The exact craft bytes loaded by the probe were not recorded, so the
+source-reference hashes in `docs/Finch-Loader-Evidence.json` are provenance
+only. They do not qualify the current parent-first candidate.
+
+The then-current files were loaded with `ShipConstruction.LoadShip` in the separate
 KSP 1.12.5 test copy. The Finch loader returned 17 parts, two seats, one docking
 module and one engine; the loader reported 6.967 t with resources and no crew.
 The cradle returned 35 parts, 32 total seats, two docking modules and two engines.
@@ -192,10 +206,14 @@ materialized 18 parts and then hit `ProtoPartSnapshot.Load` at that forward
 reference. The generator now emits a stable parent-before-child ordering for the
 cradle, and a regression asserts every parent precedes its child. The snapshot
 probe locates docking modules by module name rather than obsolete part indices.
-Nine structural/setup tests pass and the probe compiles. This addresses a
+The structural/setup tests pass and the probe compiles. This addresses a
 concrete serialization defect, but the corrected order has not been tested in
-KSP; earlier loader/mass measurements in Finch-Design.json describe the prior
-candidate. Nighttime runtime restrictions remain respected.
+KSP; earlier loader/mass measurements are preserved in
+`docs/Finch-Loader-Evidence.json` and describe prior-candidate observations.
+The exact craft bytes used by those probes were not recorded. Hashes in that
+file identify a pre-reorder source snapshot for provenance only and must not be
+read as proof that those exact bytes were loaded. Nighttime runtime restrictions
+remain respected.
 
 
 ### Read-only saved-vessel audit
