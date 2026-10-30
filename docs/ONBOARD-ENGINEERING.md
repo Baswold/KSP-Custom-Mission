@@ -3,7 +3,8 @@
 The engineering panel operates individual stock deployable solar panels and
 radiators on the active ship. Open it from flight or IVA with **Ctrl+Alt+E**
 (Control+Option+E on Mac), or the **ENGINEERING** button near the bottom left.
-An engineer must be in the vessel's actual crew roster. The panel is available
+Select an Engineer from the vessel's actual crew roster; the shared duty query
+must also confirm eligibility at dispatch. The panel is available
 only in saves whose names begin `MegaCrew`, and excludes EVA vessels.
 
 Each device shows its part title, flight ID and deployment state. **Deploy** and
@@ -15,8 +16,8 @@ operating it. The existing practice objective still observes actual deployment.
 The panel includes total vessel ElectricCharge. It does not predict net power,
 cooling capacity or clearance. It can be used in IVA without opening an external
 part menu, but is a screen overlay rather than a physical clickable interior prop.
-It requires an engineer aboard, without claiming which player occupies a station
-or consulting MegaCrew's simulated injury records. It has no multiplayer authority
+It consults the campaign's awake/fit/injury policy for the selected Engineer,
+without claiming which player occupies a station. It has no multiplayer authority
 or networking and must not be used as proof of synchronized LMP engineering.
 
 ## Build and verify
@@ -43,3 +44,9 @@ In the isolated practice save:
 The build is a review candidate pending these runtime checks. The existing ZIP
 continues to contain 0.2.0 without the new panel; use the checked-out source/DLL
 for this candidate. Do not extract the old ZIP over this checkout after building.
+
+
+The current source requires explicit Engineer selection and the shared 0.3.6
+crew-duty query immediately before deploy/stow dispatch. Missing or denied
+shared readiness blocks the command without choosing another operator. See
+[DUTY-GATED-STATIONS.md](DUTY-GATED-STATIONS.md) for current scope and live gates.

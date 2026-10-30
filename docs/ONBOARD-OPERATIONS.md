@@ -6,9 +6,9 @@ Only MegaCrew-prefixed saves and non-EVA vessels expose the panel.
 | Station | Implemented behavior |
 | --- | --- |
 | Pilot | Altitude, surface/vertical speed, apsides, inclination, time to apsides, existing maneuver node time/delta-v |
-| Flight controls | SAS on/off and stock-supported stability/prograde/retrograde/normal/radial/maneuver modes, requiring a roster pilot; disabled during pause/warp |
+| Flight controls | SAS on/off and stock-supported stability/prograde/retrograde/normal/radial/maneuver modes, requiring a selected Pilot and shared duty readiness; disabled during pause/warp |
 | Rendezvous | Internal same-body vessel selection, synchronized-epoch range/closing/relative-speed readouts and a bounded 60-second linear projection |
-| Science | Run fitted stock ModuleScienceExperiment modules, show experiment ID/deployment status and stored data from science containers; roster scientist required |
+| Science | Run fitted stock ModuleScienceExperiment modules, show experiment ID/deployment status and stored data from science containers; selected Scientist and shared readiness required for the panel Run action |
 | Supplies | Actual EC/Food/Water/Glykerol totals, low-reserve labels, two-second net rates and depletion estimates |
 | Cryo checks | Orbit situation, crew roster count, reserve charge, Glykerol total and DeepFreeze connection; manual readiness sign-off |
 | Log | Orbit survey and station actions recorded with UT and vessel name, last 100 entries retained per save |
@@ -19,9 +19,10 @@ room panel. Existing upstream crew needs and room controls remain available on I
 ## Limits
 
 This is a local single-player overlay; no LMP synchronization, physical interior
-prop binding or new trajectory planner is included. Role checks require a roster
-member, not a player physically seated at that station. The I panel owns simulated
-needs and room occupancy. Do not treat a roster check as proof of fitness for duty.
+prop binding or new trajectory planner is included. Normal commands require a selected roster operator and the shared local duty
+query. Physical room occupancy and authenticated player identity remain separate
+requirements. The campaign owns needs/recovery; this addon does not duplicate
+its fitness thresholds.
 
 Science uses the stock deploy routine/result dialog and its ordinary restrictions;
 no results are fabricated, discarded or automatically transmitted. Stock science
@@ -96,3 +97,13 @@ listing. A current stock science context label helps the crew identify the
 situation being discussed. See [science observations](SCIENCE-OBSERVATIONS.md)
 for interpretation, provider limitations and pending flight checks. Changes in
 retained data do not certify experiment completion or science rewards.
+
+
+## Shared duty query integration
+
+Normal Pilot/Scientist actions now select a named operator and consult the
+campaign's shared readiness both for display and dispatch. Read-only observations
+remain trait-neutral. See [duty-gated stations](DUTY-GATED-STATIONS.md) for the
+current 0.3.6 recipe and pending live refusal/recovery checks. Earlier trait-only
+notes above describe the previous candidate; they no longer authorize these
+mutating commands when the shared API is unavailable.

@@ -11,6 +11,9 @@ namespace MegaCrew
         Rect window = new Rect(40, 100, 560, 480);
         Vector2 scroll;
         string notice = "Select an individual array or radiator to operate it.";
+        string selectedEngineer = "";
+        Guid selectionVesselId;
+        string selectionSave = "";
         const string LockName = "MegaCrew.OnboardEngineering";
 
         bool Mission(Vessel vessel)
@@ -19,12 +22,28 @@ namespace MegaCrew
                 (HighLogic.SaveFolder ?? "").StartsWith("MegaCrew", StringComparison.OrdinalIgnoreCase);
         }
 
-        bool Engineer(Vessel vessel)
+        bool HasRole(Vessel vessel, string name, string role)
         {
-            if (!Mission(vessel)) return false;
+            if (vessel == null || String.IsNullOrWhiteSpace(name)) return false;
             foreach (var member in vessel.GetVesselCrew())
-                if (member.experienceTrait != null && member.experienceTrait.TypeName == "Engineer") return true;
+                if (member != null && member.name == name && member.experienceTrait != null && member.experienceTrait.TypeName == role) return true;
             return false;
+        }
+
+        bool ContextReady(Vessel vessel, out string reason)
+        {
+            reason = "";
+            if (!Mission(vessel) || vessel != FlightGlobals.ActiveVessel || selectionVesselId != vessel.id || selectionSave != HighLogic.SaveFolder) reason = "Active mission vessel or save changed.";
+            else if (FlightDriver.Pause) reason = "Duty controls are unavailable while paused.";
+            else if (TimeWarp.CurrentRateIndex != 0) reason = "Duty controls are unavailable during time warp.";
+            return reason.Length == 0;
+        }
+
+        bool DutyReady(Vessel vessel, string name, string role, out string reason)
+        {
+            if (!ContextReady(vessel, out reason)) return false;
+            if (!HasRole(vessel, name, role)) { reason = "The selected " + role.ToLowerInvariant() + " is no longer aboard with that trait."; return false; }
+            return DutyReadinessBridge.CanPerformDuty(name, vessel.id, out reason);
         }
 
         void Update()
@@ -32,7 +51,14 @@ namespace MegaCrew
             if (Input.GetKeyDown(KeyCode.E) &&
                 (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
                 (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))) visible = !visible;
-            if (!Mission(FlightGlobals.ActiveVessel)) visible = false;
+            var vessel = FlightGlobals.ActiveVessel;
+            if (!Mission(vessel)) visible = false;
+            if (selectionVesselId != Guid.Empty && (vessel == null || selectionVesselId != vessel.id))
+            {
+                selectionVesselId = vessel == null ? Guid.Empty : vessel.id;
+                selectedEngineer = "";
+                selectionSave = HighLogic.SaveFolder ?? "";
+            }
             if (!visible) InputLockManager.RemoveControlLock(LockName);
         }
 
@@ -57,16 +83,17 @@ namespace MegaCrew
             if (GUILayout.Button("Close")) visible = false;
             var vessel = FlightGlobals.ActiveVessel;
             if (!Mission(vessel)) return;
+            if (selectionVesselId != vessel.id || selectionSave != HighLogic.SaveFolder) { selectionVesselId = vessel.id; selectionSave = HighLogic.SaveFolder ?? ""; selectedEngineer = ""; }
             GUILayout.Label(vessel.vesselName + " | power and cooling");
-            bool engineer = Engineer(vessel);
-            GUILayout.Label(engineer ? "Engineer aboard: controls available." : "An engineer must be aboard to operate this station.");
+            bool engineerReady = OperatorPicker(vessel);
+            string operatorName = selectedEngineer;
             double ec = 0, capacity = 0;
             foreach (var part in vessel.parts)
                 foreach (PartResource resource in part.Resources)
                     if (resource.resourceName == "ElectricCharge") { ec += resource.amount; capacity += resource.maxAmount; }
             GUILayout.Label("ElectricCharge: " + ec.ToString("F0") + " / " + capacity.ToString("F0"));
             GUILayout.Label("Individual controls operate actual hardware; check clearance before deployment.");
-            scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(290));
+            scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(250));
             int count = 0;
             foreach (var part in vessel.parts)
                 foreach (PartModule module in part.Modules)
@@ -77,8 +104,8 @@ namespace MegaCrew
                     var state = module.GetType().GetField("deployState");
                     GUILayout.Label(part.partInfo.title + " [" + part.flightID + "] | " +
                         (state == null ? "State unavailable" : Convert.ToString(state.GetValue(module))));
-                    DrawCommand(vessel, module, "Extend", "Deploy", engineer);
-                    DrawCommand(vessel, module, "Retract", "Stow", engineer);
+                    DrawCommand(vessel, module, "Extend", "Deploy", engineerReady, operatorName);
+                    DrawCommand(vessel, module, "Retract", "Stow", engineerReady, operatorName);
                     GUILayout.EndVertical();
                 }
             if (count == 0) GUILayout.Label("No supported deployable solar arrays or radiators on this vessel.");
@@ -88,18 +115,39 @@ namespace MegaCrew
             GUI.DragWindow(new Rect(0, 0, 10000, 24));
         }
 
-        void DrawCommand(Vessel vessel, PartModule module, string name, string label, bool engineer)
+        bool OperatorPicker(Vessel vessel)
         {
-            var command = module.Events[name];
-            GUI.enabled = engineer && command != null && command.active;
+            GUILayout.Label("Selected Engineer: " + (String.IsNullOrEmpty(selectedEngineer) ? "none" : selectedEngineer));
+            string reason;
+            bool ready = DutyReady(vessel, selectedEngineer, "Engineer", out reason);
+            GUILayout.Label(ready ? "Duty readiness: available." : "Duty readiness: " + reason);
+            foreach (var member in vessel.GetVesselCrew())
+                if (member != null && member.experienceTrait != null && member.experienceTrait.TypeName == "Engineer")
+                    if (GUILayout.Button((member.name == selectedEngineer ? "Selected: " : "Select: ") + member.name))
+                    {
+                        if (vessel != FlightGlobals.ActiveVessel || !Mission(vessel)) notice = "Selection refused: active vessel changed.";
+                        else { selectedEngineer = member.name; notice = "Selected Engineer: " + selectedEngineer; }
+                    }
+            if (GUILayout.Button("Clear Engineer selection")) selectedEngineer = "";
+            return ready;
+        }
+
+        void DrawCommand(Vessel vessel, PartModule module, string name, string label, bool engineerReady, string operatorName)
+        {
+            var command = module == null || module.Events == null ? null : module.Events[name];
+            bool enabled = engineerReady && module != null && module.vessel == vessel && command != null && command.active;
+            GUI.enabled = enabled;
             if (GUILayout.Button(label))
             {
-                // Revalidate at dispatch; never operate another vessel after switching.
-                if (vessel != FlightGlobals.ActiveVessel || !Engineer(vessel) || module.vessel != vessel ||
-                    command == null || !command.active) notice = "Command refused: vessel, crew or hardware state changed.";
+                string reason;
+                // Check captured operator and hardware first; shared live readiness is the final gate.
+                if (selectedEngineer != operatorName) notice = "Command refused: selected Engineer changed.";
+                else if (vessel != FlightGlobals.ActiveVessel || !Mission(vessel) || FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0 || module == null || module.vessel != vessel || module.Events == null || module.Events[name] == null || !module.Events[name].active)
+                    notice = "Command refused: vessel, context or hardware state changed.";
+                else if (!DutyReady(vessel, operatorName, "Engineer", out reason)) notice = "Command refused: " + reason;
                 else
                 {
-                    try { command.Invoke(); notice = label + " requested. Verify the hardware state above."; }
+                    try { module.Events[name].Invoke(); notice = label + " requested. Verify the hardware state above."; }
                     catch (Exception ex) { notice = "Hardware command failed; see KSP.log."; Debug.LogError("[MegaCrew Engineering] " + ex); }
                 }
             }

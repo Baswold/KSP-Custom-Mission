@@ -18,6 +18,9 @@ namespace MegaCrew
         Vector2 scroll;
         bool visible;
         int tab;
+        string selectedPilot = "", selectedScientist = "";
+        Guid operatorVesselId;
+        string operatorSave = "";
         Guid vesselId;
         string save = "", status = "", loadedPath = "";
         double nextSample;
@@ -30,6 +33,7 @@ namespace MegaCrew
             if (save != HighLogic.SaveFolder || vesselId != Ship.id)
             {
                 save = HighLogic.SaveFolder; vesselId = Ship.id; trends.Clear(); nextSample = 0;
+                if (operatorVesselId != Ship.id || operatorSave != HighLogic.SaveFolder) { operatorVesselId = Ship.id; operatorSave = HighLogic.SaveFolder ?? ""; selectedPilot = selectedScientist = ""; }
                 foreach (var name in resources) trends[name] = new ResourceTrend();
                 if (loadedPath != PathName) { log.Clear(); loadedPath = PathName; LoadLog(); }
             }
@@ -46,11 +50,40 @@ namespace MegaCrew
             if (!visible) InputLockManager.RemoveControlLock(Lock);
         }
         void OnDestroy() { InputLockManager.RemoveControlLock(Lock); }
-        bool Role(string role)
+        bool HasRole(Vessel vessel, string name, string role)
         {
-            if (!Allowed || FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0) return false;
-            foreach (var member in Ship.GetVesselCrew()) if (member.experienceTrait != null && member.experienceTrait.TypeName == role) return true;
+            if (vessel == null || String.IsNullOrWhiteSpace(name)) return false;
+            foreach (var member in vessel.GetVesselCrew())
+                if (member != null && member.name == name && member.experienceTrait != null && member.experienceTrait.TypeName == role) return true;
             return false;
+        }
+        bool DutyReady(Vessel vessel, string name, string role, out string reason)
+        {
+            reason = "";
+            if (!Allowed || vessel == null || vessel != FlightGlobals.ActiveVessel) reason = "Active mission vessel changed.";
+            else if (operatorVesselId != vessel.id || operatorSave != HighLogic.SaveFolder) reason = "Operator selection belongs to a different vessel or save.";
+            else if (FlightDriver.Pause) reason = "Duty controls are unavailable while paused.";
+            else if (TimeWarp.CurrentRateIndex != 0) reason = "Duty controls are unavailable during time warp.";
+            else if (!HasRole(vessel, name, role)) reason = "The selected " + role.ToLowerInvariant() + " is no longer aboard with that trait.";
+            if (reason.Length != 0) return false;
+            return DutyReadinessBridge.CanPerformDuty(name, vessel.id, out reason);
+        }
+        bool OperatorPicker(Vessel vessel, string role, ref string selected)
+        {
+            if (operatorVesselId != vessel.id || operatorSave != HighLogic.SaveFolder) { operatorVesselId = vessel.id; operatorSave = HighLogic.SaveFolder ?? ""; selectedPilot = selectedScientist = ""; }
+            GUILayout.Label("Selected " + role + ": " + (String.IsNullOrEmpty(selected) ? "none" : selected));
+            string reason;
+            bool ready = DutyReady(vessel, selected, role, out reason);
+            GUILayout.Label(ready ? "Duty readiness: available." : "Duty readiness: " + reason);
+            foreach (var member in vessel.GetVesselCrew())
+                if (member != null && member.experienceTrait != null && member.experienceTrait.TypeName == role)
+                    if (GUILayout.Button((member.name == selected ? "Selected: " : "Select: ") + member.name))
+                    {
+                        if (vessel != FlightGlobals.ActiveVessel || !Allowed) status = "Selection refused: active vessel changed.";
+                        else { selected = member.name; status = "Selected " + role + ": " + selected; }
+                    }
+            if (GUILayout.Button("Clear " + role + " selection")) selected = "";
+            return ready;
         }
         void Resource(string name, out double amount, out double cap)
         {
@@ -78,7 +111,7 @@ namespace MegaCrew
             if (tab == 0) Pilot(); else if (tab == 1) rendezvous.Draw(Ship); else if (tab == 2) Science(); else if (tab == 3) Supplies(); else if (tab == 4) Cryo(); else Journal();
             GUILayout.EndScrollView();
             GUILayout.Label(status);
-            GUILayout.Label("Local ship controls. Crew roles require a roster member; room occupancy and needs are handled by the I panel.");
+            GUILayout.Label("Selected crew and shared duty readiness govern station commands. Physical room occupancy and player identity remain separate.");
             GUI.DragWindow(new Rect(0, 0, 10000, 24));
         }
         void Pilot()
@@ -87,12 +120,29 @@ namespace MegaCrew
             GUILayout.Label("Altitude " + v.altitude.ToString("F0") + " m | surface speed " + v.srfSpeed.ToString("F1") + " m/s | vertical " + v.verticalSpeed.ToString("F1") + " m/s");
             GUILayout.Label("Pe " + (o.PeA / 1000).ToString("F1") + " km | Ap " + (o.ApA / 1000).ToString("F1") + " km | inclination " + o.inclination.ToString("F2") + " deg");
             GUILayout.Label("Time to Pe " + o.timeToPe.ToString("F0") + " s | time to Ap " + o.timeToAp.ToString("F0") + " s");
-            GUI.enabled = Role("Pilot");
-            if (GUILayout.Button(v.ActionGroups[KSPActionGroup.SAS] ? "Disable SAS" : "Enable SAS")) { v.ActionGroups.ToggleGroup(KSPActionGroup.SAS); Record("Pilot toggled SAS"); }
+            bool pilotReady = OperatorPicker(v, "Pilot", ref selectedPilot);
+            Vessel commandVessel = v;
+            string pilotName = selectedPilot;
+            bool sasHardware = v.ActionGroups != null && v.Autopilot != null;
+            GUI.enabled = pilotReady && sasHardware;
+            if (GUILayout.Button(sasHardware && v.ActionGroups[KSPActionGroup.SAS] ? "Disable SAS" : "Enable SAS"))
+            {
+                string reason;
+                if (selectedPilot != pilotName || commandVessel != FlightGlobals.ActiveVessel || !Allowed || FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0 || commandVessel.ActionGroups == null || commandVessel.Autopilot == null) status = "SAS command refused: selection, vessel, context or control hardware changed.";
+                else if (!DutyReady(commandVessel, pilotName, "Pilot", out reason)) status = "SAS command refused: " + reason;
+                else { commandVessel.ActionGroups.ToggleGroup(KSPActionGroup.SAS); Record("Pilot " + pilotName + " toggled SAS"); }
+            }
             foreach (var mode in new[] { VesselAutopilot.AutopilotMode.StabilityAssist, VesselAutopilot.AutopilotMode.Prograde, VesselAutopilot.AutopilotMode.Retrograde, VesselAutopilot.AutopilotMode.Normal, VesselAutopilot.AutopilotMode.Antinormal, VesselAutopilot.AutopilotMode.RadialIn, VesselAutopilot.AutopilotMode.RadialOut, VesselAutopilot.AutopilotMode.Maneuver })
             {
-                GUI.enabled = Role("Pilot") && v.ActionGroups[KSPActionGroup.SAS] && v.Autopilot.CanSetMode(mode);
-                if (GUILayout.Button("SAS: " + mode)) { v.Autopilot.SetMode(mode); Record("SAS mode " + mode); }
+                bool modeAvailable = v.ActionGroups != null && v.Autopilot != null && v.ActionGroups[KSPActionGroup.SAS] && v.Autopilot.CanSetMode(mode);
+                GUI.enabled = pilotReady && modeAvailable;
+                if (GUILayout.Button("SAS: " + mode))
+                {
+                    string reason;
+                    if (selectedPilot != pilotName || commandVessel != FlightGlobals.ActiveVessel || !Allowed || FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0 || commandVessel.ActionGroups == null || commandVessel.Autopilot == null || !commandVessel.ActionGroups[KSPActionGroup.SAS] || !commandVessel.Autopilot.CanSetMode(mode)) status = "SAS mode refused: selection, vessel, context or control hardware changed.";
+                    else if (!DutyReady(commandVessel, pilotName, "Pilot", out reason)) status = "SAS mode refused: " + reason;
+                    else { commandVessel.Autopilot.SetMode(mode); Record("Pilot " + pilotName + " set SAS mode " + mode); }
+                }
             }
             GUI.enabled = true;
             if (v.patchedConicSolver != null)
@@ -101,6 +151,9 @@ namespace MegaCrew
         }
         void Science()
         {
+            Vessel scienceVessel = Ship;
+            bool scientistReady = OperatorPicker(scienceVessel, "Scientist", ref selectedScientist);
+            string scientistName = selectedScientist;
             bool found = false;
             foreach (var part in Ship.parts) foreach (PartModule module in part.Modules)
             {
@@ -132,11 +185,18 @@ namespace MegaCrew
                 {
                     found = true;
                     GUILayout.Label(partTitle + " #" + part.flightID + " | " + experiment.experimentID + " | stored results " + (inventoryAvailable ? (stored == null ? "0" : stored.Length.ToString()) : "unavailable"));
-                    GUI.enabled = Role("Scientist") && !experiment.Inoperable && !experiment.Deployed;
+                    bool experimentAvailable = !experiment.Inoperable && !experiment.Deployed;
+                    GUI.enabled = scientistReady && experimentAvailable;
                     if (GUILayout.Button("Run experiment"))
                     {
-                        try { experiment.DeployExperiment(); Record("Science requested: " + experiment.experimentID); }
-                        catch (Exception ex) { status = "Experiment refused: " + ex.Message; }
+                        string reason;
+                        if (selectedScientist != scientistName || scienceVessel != FlightGlobals.ActiveVessel || !Allowed || FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0 || experiment.vessel != scienceVessel || experiment.Inoperable || experiment.Deployed) status = "Experiment refused: selection, vessel, context or experiment state changed.";
+                        else if (!DutyReady(scienceVessel, scientistName, "Scientist", out reason)) status = "Experiment refused: " + reason;
+                        else
+                        {
+                            try { experiment.DeployExperiment(); Record("Scientist " + scientistName + " requested: " + experiment.experimentID); }
+                            catch (Exception ex) { status = "Experiment refused: " + ex.Message; }
+                        }
                     }
                     GUI.enabled = true;
                 }
