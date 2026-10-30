@@ -54,6 +54,15 @@ OPERATIONS_TEST_PATHS = (
     "tests/PowerSurveyModelTests.cs",
     "tests/run_power_survey_model_tests.py",
 )
+DOCKING_GROUP_PATHS = (
+    "Source/DockingGeometryModel.cs",
+    "Source/OnboardDockingInstruments.cs",
+    "tests/DockingGeometryModelTests.cs",
+    "tests/run_docking_geometry_model_tests.py",
+    "tests/DockingInstrumentControllerTests.cs",
+    "tests/DockingInstrumentControllerFakes.cs",
+    "tests/run_docking_instrument_controller_tests.py",
+)
 PATCH_SEQUENCE = (
     {
         "ref": "f76e437",
@@ -185,6 +194,29 @@ def git_blob(repo, commit, path):
         raise BuildError("Missing Git object {}:{} ({})".format(commit, path, exc.stderr.decode(errors="replace").strip()))
 
 
+def git_file_mode(repo, commit, path):
+    """Return mode for an exact tracked path, or None when absent."""
+    listing = _git(repo, "ls-tree", commit, "--", path).decode("utf-8").splitlines()
+    for line in listing:
+        metadata, separator, listed_path = line.partition("\t")
+        if not separator or listed_path != path:
+            continue
+        fields = metadata.split()
+        if len(fields) >= 2:
+            return fields[0], fields[1]
+    return None
+
+
+def require_regular_git_file(repo, commit, path, label):
+    entry = git_file_mode(repo, commit, path)
+    if entry is None:
+        raise BuildError("Missing Git object {}:{} (path not found)".format(commit, path))
+    mode, object_type = entry
+    if object_type != "blob" or mode not in ("100644", "100755"):
+        raise BuildError("{} is not a regular tracked file: {}:{}".format(label, commit, path))
+    return git_blob(repo, commit, path)
+
+
 def navigation_sources(repo, commit):
     listing = _git(repo, "ls-tree", "-r", "--name-only", commit, "--", NAV_ROOT).decode().splitlines()
     paths = [p for p in listing if p.startswith(NAV_ROOT + "/") and p.endswith(".cs")]
@@ -206,7 +238,7 @@ def fixed_git_files(repo, commit, paths, label):
         rel = PurePosixPath(path)
         if rel.is_absolute() or ".." in rel.parts or "\\" in path:
             raise BuildError("Unsafe {} path: {!r}".format(label, path))
-        result[path] = git_blob(repo, commit, path)
+        result[path] = require_regular_git_file(repo, commit, path, label)
     return result
 
 
@@ -215,10 +247,26 @@ def navigation_tests(repo, commit):
 
 
 def operations_files(repo, commit):
-    return {
+    base = {
         "sources": fixed_git_files(repo, commit, OPERATIONS_SOURCE_PATHS, "operations source"),
         "tests": fixed_git_files(repo, commit, OPERATIONS_TEST_PATHS, "operations test"),
     }
+    present = []
+    for path in DOCKING_GROUP_PATHS:
+        entry = git_file_mode(repo, commit, path)
+        if entry is not None:
+            mode, object_type = entry
+            if object_type != "blob" or mode not in ("100644", "100755"):
+                raise BuildError("Docking group path is not a regular tracked file: {}:{}".format(
+                    commit, path))
+            present.append(path)
+    if present and len(present) != len(DOCKING_GROUP_PATHS):
+        missing = sorted(set(DOCKING_GROUP_PATHS) - set(present))
+        raise BuildError("Incomplete optional docking group in operations ref; missing: {}".format(
+            ", ".join(missing)))
+    base["docking"] = (fixed_git_files(repo, commit, DOCKING_GROUP_PATHS, "docking group")
+                       if present else None)
+    return base
 
 
 def apply_patch_once(root, patch_bytes, patch_label, sequence_number):
@@ -417,6 +465,8 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
                 ("Operations source", inputs["operations"]["sources"]),
                 ("Operations tests", inputs["operations"]["tests"]),
             ])
+            if inputs["operations"]["docking"] is not None:
+                overlay_groups.append(("Docking instruments", inputs["operations"]["docking"]))
         overlay_files(output, overlay_groups)
         compiled = False
         compiler_inputs = None
@@ -455,6 +505,15 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
                                    if inputs["operations"] is not None else None),
             "operations_tests": ({path: sha256(data) for path, data in sorted(inputs["operations"]["tests"].items())}
                                  if inputs["operations"] is not None else None),
+            "docking_group": {
+                "status": ("present" if inputs["operations"] is not None and
+                           inputs["operations"]["docking"] is not None else "absent"),
+                "ref": inputs["operations_ref"],
+                "commit": inputs["operations_commit"],
+                "files": ({path: sha256(data) for path, data in sorted(inputs["operations"]["docking"].items())}
+                          if inputs["operations"] is not None and
+                          inputs["operations"]["docking"] is not None else None),
+            },
             "compiled": compiled,
             "compiler_language_version": "7.3" if compiled else None,
             "compiler_inputs": compiler_inputs,

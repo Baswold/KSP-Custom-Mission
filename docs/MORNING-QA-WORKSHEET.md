@@ -72,3 +72,22 @@ Record screenshots/brief readings and context. If the second vessel, experiment 
 ## Evidence record
 
 For each gate write: date/time, QA root/save, candidate plugin SHA, probe SHA where applicable, marker transition, result status, and a short focused log excerpt or UI note. Keep raw logs local and redact them before sharing. Keep a failed or incomplete one-shot report for diagnosis; do not rerun the same copy by deleting markers. Source tests/builds are recorded separately from runtime evidence.
+
+### 31 October morning attempt: INCONCLUSIVE
+
+After 09:00 Sydney, the desktop was unlocked and no other KSP process was
+running. A fresh manual profile used the exact stable 36-source candidate
+`2d6fd46d…`, original BackgroundResources provider, pristine QA fixture, and no
+probe or automation marker. Its log reached `MAINMENU` at 10:21:17 local and
+reported launcher GUI ready at 10:21:19. Computer control exposed an icon-sized
+image and no usable game UI after focus/raise/window recovery attempts. No
+flight was loaded and no cryo refusal was observed. The QA process was closed;
+local logs and provenance were preserved. The cause of the capture/presentation
+problem remains undetermined. Menu startup is not a passed cryo gate.
+
+The separate automated patched-provider profile is prepared but has not been
+launched. Keep manual refusal checks first. The new docking instruments in
+operations ref `2a2a91f` are excluded from this stable cryo candidate; they need
+a separately identified candidate and stock-port runtime checks after the
+earlier gates. No personal save, normal-play installation or server data was
+modified.

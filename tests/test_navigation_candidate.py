@@ -205,6 +205,22 @@ diff --git a/README.md b/README.md
                 stdout=subprocess.PIPE, text=True,
             ).stdout.strip()
 
+            old_ops_args = type("Args", (), {
+                "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "operations_ref": fixture_ref, "output": temp / "old-operations-ref",
+                "prepare_only": True, "managed": None, "csc": None,
+            })()
+            old_ops = builder.build(old_ops_args,
+                                    patch_sequence=({
+                                        "ref": fixture_ref, "path": "stage.patch",
+                                        "expected_sha256": builder.sha256((repo / "stage.patch").read_bytes()),
+                                    },),
+                                    expected_zip_sha256=builder.sha256(archive))
+            old_manifest = json.loads((old_ops / "manifest.json").read_text())
+            self.assertEqual(old_manifest["docking_group"]["status"], "absent")
+            self.assertIsNone(old_manifest["docking_group"]["files"])
+            self.assertFalse((old_ops / "Source/OnboardDockingInstruments.cs").exists())
+
             empty_ref_args = type("Args", (), {
                 "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
                 "operations_ref": "", "output": temp / "empty-operations-ref",
@@ -298,6 +314,10 @@ diff --git a/README.md b/README.md
                 target = repo / rel
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text("// operations fixture: " + rel + "\n")
+            for rel in builder.DOCKING_GROUP_PATHS:
+                target = repo / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("// docking fixture: " + rel + "\n")
             # The source ref contains a different core file, but the operations
             # allowlist must never copy it over the published package.
             (repo / "Source" / "MegaCrew.cs").write_text("untrusted core from operations ref\n")
@@ -352,10 +372,16 @@ diff --git a/README.md b/README.md
             self.assertEqual(manifest["operations_commit"], fixture_ref)
             self.assertEqual(set(manifest["operations_sources"]), set(builder.OPERATIONS_SOURCE_PATHS))
             self.assertEqual(set(manifest["operations_tests"]), set(builder.OPERATIONS_TEST_PATHS))
+            self.assertEqual(manifest["docking_group"]["status"], "present")
+            self.assertEqual(manifest["docking_group"]["ref"], fixture_ref)
+            self.assertEqual(manifest["docking_group"]["commit"], fixture_ref)
+            self.assertEqual(set(manifest["docking_group"]["files"]), set(builder.DOCKING_GROUP_PATHS))
             self.assertEqual(set(manifest["navigation_tests"]["files"]), set(builder.NAVIGATION_TEST_PATHS))
             self.assertEqual((built / "Source" / "MegaCrew.cs").read_text(), "published core\n")
             for rel in builder.OPERATIONS_SOURCE_PATHS + builder.OPERATIONS_TEST_PATHS:
                 self.assertEqual((built / rel).read_text(), "// operations fixture: " + rel + "\n")
+            for rel in builder.DOCKING_GROUP_PATHS:
+                self.assertEqual((built / rel).read_text(), "// docking fixture: " + rel + "\n")
             for rel in builder.NAVIGATION_TEST_PATHS:
                 self.assertEqual((built / rel).read_text(), "// nav test fixture: " + rel + "\n")
             nav_only_args = type("Args", (), {
@@ -372,6 +398,28 @@ diff --git a/README.md b/README.md
             self.assertFalse((nav_only / "Source/OnboardOperations.cs").exists())
             self.assertTrue((built / "provenance" / "first.patch").is_file())
             self.assertTrue((built / "provenance" / "second.patch").is_file())
+
+            # A ref with only six of the seven optional paths is not treated as
+            # an older operations ref and fails before creating its output.
+            (repo / builder.DOCKING_GROUP_PATHS[0]).unlink()
+            subprocess.run(["git", "-C", str(repo), "add", "-u"], check=True)
+            subprocess.run([
+                "git", "-C", str(repo), "-c", "commit.gpgsign=false",
+                "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "partial docking group",
+            ], check=True)
+            partial_ref = subprocess.run(
+                ["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+                stdout=subprocess.PIPE, text=True,
+            ).stdout.strip()
+            partial_args = type("Args", (), {
+                "repo": repo, "upstream_ref": fixture_ref, "navigation_ref": fixture_ref,
+                "operations_ref": partial_ref, "output": temp / "partial-docking",
+                "prepare_only": True, "managed": None, "csc": None,
+            })()
+            with self.assertRaisesRegex(builder.BuildError, "Incomplete optional docking group"):
+                builder.build(partial_args, patch_sequence=patch_sequence,
+                              expected_zip_sha256=builder.sha256(archive))
+            self.assertFalse(partial_args.output.exists())
             repo_status = subprocess.run(
                 ["git", "-C", str(repo), "status", "--porcelain"], check=True,
                 stdout=subprocess.PIPE, text=True,

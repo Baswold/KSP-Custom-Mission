@@ -22,6 +22,16 @@ navigation and operations source/test refs and file hashes are written to the
 manifest. Existing candidate paths are rejected; overlays are collision-checked
 as a group and never overwrite files.
 
+The seven docking-instrument files form an optional fixed group at the operations
+ref: `Source/DockingGeometryModel.cs`, `Source/OnboardDockingInstruments.cs`,
+`tests/DockingGeometryModelTests.cs`, `tests/run_docking_geometry_model_tests.py`,
+`tests/DockingInstrumentControllerTests.cs`,
+`tests/DockingInstrumentControllerFakes.cs`, and
+`tests/run_docking_instrument_controller_tests.py`. The group is included only
+when all seven paths exist. If none exist, older operations refs remain valid;
+if only a subset exists, preparation fails before an output directory is
+created. The manifest records the group status and each file's SHA-256.
+
 Examples (from repository root):
 
 ```sh
@@ -48,8 +58,8 @@ as C# 7.3 against the supplied local KSP assemblies.
 The safety tests cover unsafe ZIP members, traversal and symlink defense,
 artifact hashes, existing destinations, relative output paths, ordered
 cumulative patch application, missing operations blobs, collision/no-overwrite
-behavior, core-source preservation, and both navigation-only and combined
-synthetic candidate preparation.
+behavior, core-source preservation, and navigation-only, pre-docking combined,
+and full/absent/partial seven-file docking groups in synthetic candidates.
 
 
 Rebuild a combined candidate with this script into a new output directory. The
