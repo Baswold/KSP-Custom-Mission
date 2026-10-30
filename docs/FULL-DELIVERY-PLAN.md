@@ -175,3 +175,36 @@
 ## Status summary at review time
 
 Source/model and compilation work has progressed: 0.3.4 source-only campaign/care/accounting/cryo audit candidates; PR #5 single-player onboard overlay candidate; PR #6 craft loader evidence; PR #8 bounded orbital math and approval/timing candidates. Runtime/high-warp/pod-power/lander flight qualification remains explicitly pending in upstream updates. LMP, synchronized custom state, two-human approval, physical EVA maintenance and authored playable stories remain future acceptance gates. The bedtime request is treated conservatively as no KSP runtime tests before 09:00 Australia/Sydney on 2026-10-31; source/model work continues. No emergency schedule is reproduced here.
+
+
+## Source progress ledger — overnight development pass
+
+This ledger supplements the baseline above; it does not advance any runtime gate.
+
+- **Gate 3 / PR #8, `e85e0dd`:** detached KSP orbit preview for a near-circular
+  lower-periapsis retrograde impulse; requires active vessel/patch, future UT,
+  no existing nodes, finite body/state vectors and a predicted PeA within the
+  requested tolerance. Handles FINAL patches without assuming an EndUT sentinel.
+  It creates no node or burn. Updated disposable QA compares this prediction with
+  the circular model and stock next-patch orbit when it is eventually run. Plugin
+  and probe compile against KSP assemblies; runtime comparison remains pending.
+- **Gate 7 / PR #8, same commit:** positive-delta-v consumption/duration underflow
+  now rejects; insufficient fuel no longer receives a tolerance clamp. Default
+  interval structs reject at containment checks. Reviewer intervals must be
+  refreshed at approval and dispatch. Full navigation runner passes, including
+  2,000 randomized two-body cases, 37 estimator assertions and 27 coverage cases.
+- **Gate 4 / PR #6, `c0e6d24`:** a read-only serialized-vessel validator checks
+  IDs, parent tree/order, attachment and symmetry indices. Eleven portable tests
+  plus nine existing structural/setup checks pass. The prior saved 35-part QA
+  fixture reports only the cabin's forward parent (18 -> 21). Its surface links
+  are valid. The preceding generator reorder still requires a new native load;
+  the validator does not establish docking or flight readiness.
+- **Gate 10 / PR #8:** added a routine post-burn handover coda to The Burn Brief,
+  using observed orbit/fuel and a player-written record. It claims no automatic
+  post-burn verification, synchronized log or animation.
+
+**Next bounded work:** after the runtime restriction clears, compare detached
+preview, stock node next patch and observed orbit in a disposable fixture; load
+the reordered 35-part cradle and require loaded/unpacked full part count before
+examining release. Until then, source integration and provider/coast audit work
+can continue. Do not install these branch builds over the newer campaign package.
