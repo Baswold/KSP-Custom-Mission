@@ -208,3 +208,28 @@ preview, stock node next patch and observed orbit in a disposable fixture; load
 the reordered 35-part cradle and require loaded/unpacked full part count before
 examining release. Until then, source integration and provider/coast audit work
 can continue. Do not install these branch builds over the newer campaign package.
+
+
+### Read-only station and source reconciliation checkpoint
+
+PR #8 commit `11f757e` adds the separate onboard navigation-preview toolbar
+panel, with target/lead input, current orbit, detached predicted Pe and signed
+prograde delta-v. It invalidates changed/expired inputs and physical orbit state,
+handles propagation errors, and manages ship-control locks around input. It
+creates no node, burn, warp or approval. Toolbar/IVA visibility, click isolation,
+lock cleanup and prediction stability remain pending runtime checks in
+`docs/NAVIGATION-PREVIEW-VALIDATION.md` on that branch.
+
+The same commit rejects impossible approval requests: replies must arrive
+strictly before both ignition and the exclusive expiry. The navigation runner
+passes including the new boundary cases. `tools/build.py --output` now permits
+compilation directly to temporary output without overwriting a generated DLL.
+
+A disposable source integration applies the pinned cumulative 0.3.4 patch once
+to the published 0.3.0 ZIP and overlays the nine navigation source files. All
+22 combined C# files compile against KSP 1.12.5 assemblies. Package preflight,
+needs and campaign tests pass. Exact input/source/output hashes and reproduction
+steps are recorded in `docs/NAVIGATION-INTEGRATION-AUDIT.md` on #8. No campaign
+source ownership changed, no provider was installed and no game was launched.
+The Burn Brief gains a short routine planning dialogue; it assumes no automatic
+maneuver, animated handoff or extra emergency.
