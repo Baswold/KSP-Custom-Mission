@@ -81,3 +81,12 @@ identity. This class does not authenticate, communicate, persist, create nodes o
 execute a burn. It is not connected to the shift system or multiplayer yet.
 Single-player rehearsal requires a separately identified rehearsal path and must
 never be presented as two authenticated people.
+
+Following Luna review, the guard rejects reused request IDs for the current
+session, enforces a trusted configured minimum delay and expires at the exact
+window boundary. `PlanFingerprint` hashes vessel, node, body, target, frame,
+burn time and all three components. The caller must recompute it from the live
+node, observe every mutation and include any additional mission-specific
+constraints. IDs and identity canonicalization remain the trusted adapter's
+responsibility; the current guard is in-memory and is not a replay-proof
+persistent protocol across process restarts.

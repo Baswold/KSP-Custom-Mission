@@ -54,16 +54,28 @@ class MissionControlMathTests
         var er=new Vector3d(4,0,0);var ev=new Vector3d(3,4,2);var edv=new Vector3d(-8.2,.75,5.4);
         Yes((NodeFrame.Reconstruct(er,ev,NodeFrame.Decompose(er,ev,edv))-edv).Magnitude<1e-12);
         try { NodeFrame.Decompose(new Vector3d(1,0,0),new Vector3d(2,0,0),impulse); throw new Exception("parallel vectors accepted"); } catch(ArgumentException) {}
-        var approvals=new BurnApprovals((id,role)=>(id=="h"&&role=="Hamish")||(id=="b"&&role=="Basil"));
+        var fp=PlanFingerprint.Compute("v","n","Kerbin","target","rnp",1000,1,2,3);
+        Yes(fp!=PlanFingerprint.Compute("v2","n","Kerbin","target","rnp",1000,1,2,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n2","Kerbin","target","rnp",1000,1,2,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n","Mun","target","rnp",1000,1,2,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n","Kerbin","other","rnp",1000,1,2,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n","Kerbin","target","other",1000,1,2,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n","Kerbin","target","rnp",1001,1,2,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n","Kerbin","target","rnp",1000,4,2,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n","Kerbin","target","rnp",1000,1,4,3));
+        Yes(fp!=PlanFingerprint.Compute("v","n","Kerbin","target","rnp",1000,1,2,4));
+        var approvals=new BurnApprovals((id,role)=>(id=="h"&&role=="Hamish")||(id=="b"&&role=="Basil"),1);
         approvals.Connection(true);approvals.Revise("plan-A",1000);approvals.Request("req",100,2,30);
         Yes(!approvals.Approve("h","Hamish","req",1,"plan-A",101));
         Yes(approvals.Approve("h","Hamish","req",1,"plan-A",102));
         Yes(!approvals.Approve("h","Basil","req",1,"plan-A",102));
         Yes(approvals.Approve("b","Basil","req",1,"plan-A",103));Yes(approvals.Ready("plan-A",104));
-        Yes(!approvals.Ready("changed",104));Yes(!approvals.Ready("plan-A",104));Yes(!approvals.Ready("plan-A",131));
+        Yes(!approvals.Ready("changed",104));Yes(!approvals.Ready("plan-A",104));Yes(!approvals.Ready("plan-A",130));
         approvals.Revise("plan-B",1001);Yes(!approvals.Ready("plan-B",104));
-        approvals.Request("req2",105,0,30);Yes(approvals.Approve("h","Hamish","req2",2,"plan-B",106));
+        approvals.Request("req2",105,1,30);Yes(approvals.Approve("h","Hamish","req2",2,"plan-B",106));
         approvals.Connection(false);approvals.Connection(true);Yes(!approvals.Approve("b","Basil","req2",2,"plan-B",106));
+        try { approvals.Request("req2",107,1,30); throw new Exception("reused request accepted"); } catch(InvalidOperationException) {}
+        try { approvals.Request("req3",107,0,30); throw new Exception("delay floor bypassed"); } catch(ArgumentException) {}
         Console.WriteLine("PASS: light time, periapsis reconstruction, circular Lambert and independent RK4 propagation.");
     }
 }
