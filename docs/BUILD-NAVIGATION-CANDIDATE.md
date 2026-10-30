@@ -41,7 +41,7 @@ python3 tools/build_navigation_candidate.py \
 
 An output directory must be new and outside the source checkout. Inputs are
 resolved and verified before the output is created. The builder does not
-install the plugin, access saves or a server, download inputs, or modify the
+install the plugin, access personal saves or a server, download inputs, or modify the
 checkout. With `--managed` and `--csc`, it compiles every candidate plugin source
 as C# 7.3 against the supplied local KSP assemblies.
 
