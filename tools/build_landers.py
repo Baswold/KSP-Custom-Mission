@@ -33,6 +33,22 @@ def output(root):return ''.join(k+' = '+v+'\n' for k,v in root.values)+''.join(n
 def vector(v):return tuple(map(float,v.split(',')))
 def fmt(v):return ','.join(format(x,'.9g') for x in v)
 
+def parent_first(root):
+    """KSP ProtoPartSnapshot loads parents before children; preserve a stable order."""
+    parts=root.nodes('PART'); parents={}
+    for part in parts:
+        for key,value in part.values:
+            if key=='link':
+                if value in parents:raise ValueError('Multiple parents: '+value)
+                parents[value]=part.get('part')
+    pending=list(parts);ordered=[];placed=set()
+    while pending:
+        ready=[n for n in pending if n.get('part') not in parents or parents[n.get('part')] in placed]
+        if not ready:raise ValueError('Cyclic or missing-parent craft')
+        for node in ready:ordered.append(node);placed.add(node.get('part'));pending.remove(node)
+    root.children=ordered+[n for n in root.children if n.name!='PART']
+
+
 def generate(game,repo):
     catalog={}
     for f in (game/'GameData/Squad/Parts').rglob('*.cfg'):
@@ -96,6 +112,7 @@ def generate(game,repo):
     stored_dock.add('link',cabin_key);stored_dock.add('attN','top,'+port_key+'_0|0|0')
     port.add('link',dock_key);port.add('attN','top,'+dock_key+'_0|0|0')
     carrier.children.extend(stored)
+    parent_first(carrier)
     (out/'Hermes Finch Docking Cradle.craft').write_text(output(carrier))
     # Conservative ideal budget includes two crew at 0.09375 t each and full monoprop.
     dry=sum(float(catalog[n.get('part').rsplit('_',1)[0].replace('.','_')].get('mass','0')) for n in parts)+2*.09375

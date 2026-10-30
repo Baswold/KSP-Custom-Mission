@@ -1851,588 +1851,6 @@ PART
 }
 PART
 {
-	part = CRY-2300Freezer_930000006
-	partName = Part
-	persistentId = 940000006
-	pos = 0.0,13.585167599999995,0.0
-	attPos = 0,0,0
-	attPos0 = 0.0,13.585167599999995,0.0
-	rot = 0,0,0,1
-	attRot = 0,0,0,1
-	attRot0 = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Grandparent
-	rigidAttachment = False
-	istg = -1
-	dstg = -1
-	sidx = -1
-	sqor = -1
-	sepI = -1
-	attm = 0
-	modCost = 0
-	modMass = 0
-	link = batteryBankLarge_930000007
-	attN = top,sspx-adapter-25-375-2_930000005_0|1.830905|0
-	attN = bottom,batteryBankLarge_930000007_0|-1.830905|0
-	INTERNAL
-	{
-		name = Cry-2300Internals
-	}
-	RESOURCE
-	{
-		name = Glykerol
-		amount = 50
-		maxAmount = 50
-	}
-	MODULE
-	{
-		name = DeepFreezer
-		FreezerSize = 10
-		ChargeRequired = 3000
-		GlykerolRequired = 5
-		ChargeRate = 30
-		FrznChargeRequired = 10
-		isPartAnimated = True
-		cryopodstateclosedstring = True, True, True, True, True, True, True, True, True, True
-	}
-	MODULE
-	{
-		name = ModuleFreeIva
-	}
-}
-PART
-{
-	part = batteryBankLarge_930000007
-	partName = Part
-	persistentId = 940000007
-	pos = 0.0,11.644262599999994,0.0
-	attPos = 0,0,0
-	attPos0 = 0.0,11.644262599999994,0.0
-	rot = 0,0,0,1
-	attRot = 0,0,0,1
-	attRot0 = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Grandparent
-	rigidAttachment = False
-	istg = -1
-	dstg = -1
-	sidx = -1
-	sqor = -1
-	sepI = -1
-	attm = 0
-	modCost = 0
-	modMass = 0
-	link = Rockomax32.BW_930000008
-	attN = top,CRY-2300Freezer_930000006_0|0.11|0
-	attN = bottom,Rockomax32.BW_930000008_0|-0.142|0
-	RESOURCE
-	{
-		name = ElectricCharge
-		amount = 4000
-		maxAmount = 4000
-	}
-	MODULE
-	{
-		name = ModuleCargoPart
-		stackableQuantity = 1
-		packedVolume = -1
-	}
-	MODULE
-	{
-		name = ModuleFreeIva
-		passThroughNodeA = top
-		passThroughNodeB = bottom
-	}
-}
-PART
-{
-	part = Rockomax32.BW_930000008
-	partName = Part
-	persistentId = 940000008
-	pos = 0.0,9.642262599999995,0.0
-	attPos = 0,0,0
-	attPos0 = 0.0,9.642262599999995,0.0
-	rot = 0,0,0,1
-	attRot = 0,0,0,1
-	attRot0 = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Grandparent
-	rigidAttachment = False
-	istg = -1
-	dstg = -1
-	sidx = -1
-	sqor = -1
-	sepI = -1
-	attm = 0
-	modCost = 0
-	modMass = 0
-	link = largeAdapter2_930000009
-	attN = top,batteryBankLarge_930000007_0|1.86|0
-	attN = bottom,largeAdapter2_930000009_0|-1.86|0
-	RESOURCE
-	{
-		name = LiquidFuel
-		amount = 1440
-		maxAmount = 1440
-	}
-	RESOURCE
-	{
-		name = Oxidizer
-		amount = 1760
-		maxAmount = 1760
-	}
-	MODULE
-	{
-		name = ModulePartVariants
-		baseVariant = BlackAndWhite
-		VARIANT
-		{
-			name = BlackAndWhite
-			displayName = Black and White
-			themeName = White
-			primaryColor = #ffffff
-			secondaryColor = #000000
-			GAMEOBJECTS
-			{
-				Rockomax_32_White = true
-				Rockomax_32_Orange = false
-				Rockomax_32_ESA = false
-			}
-		}
-		VARIANT
-		{
-			name = Orange
-			displayName = Orange
-			themeName = Orange
-			primaryColor = #f49841
-			secondaryColor = #4c4f47
-			GAMEOBJECTS
-			{
-				Rockomax_32_White = false
-				Rockomax_32_Orange = true
-				Rockomax_32_ESA = false
-			}
-			TEXTURE
-			{
-				mainTextureURL = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_16 [AlbedoM] O
-				_BumpMap = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_16 [Normal]O
-			}
-		}
-		VARIANT
-		{
-			name = ESA
-			displayName = ESA
-			description = European Space Agency
-			primaryColor = #ffffff
-			secondaryColor = #124d7f
-			GAMEOBJECTS
-			{
-				Rockomax_32_White = false
-				Rockomax_32_Orange = false
-				Rockomax_32_ESA = true
-			}
-			TEXTURE
-			{
-				mainTextureURL = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_32 [AlbedoM] ESA
-				_BumpMap = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_32 [Normal]ESA
-			}
-		}
-	}
-	MODULE
-	{
-		name = ModuleB9PartSwitch
-		moduleID = FreeIva_fuelSwitch
-		baseVolume = 3200
-		SUBTYPE
-		{
-			name = LFOX
-			tankType = FreeIva_LFOX
-			addedMass = -2
-			addedCost = -1468.8
-		}
-	}
-	MODULE
-	{
-		name = ModuleFreeIva
-		partInfo = This part can be traversible in IVA with a penalty of 25% of its tank volume.
-	}
-	MODULE
-	{
-		name = ModuleB9PartSwitch
-		switcherDescription = FreeIva
-		moduleID = FreeIvaSwitch
-		parentID = FreeIva_fuelSwitch
-		SUBTYPE
-		{
-			name = Blocked
-			title = Blocked
-		}
-		SUBTYPE
-		{
-			name = Passable
-			title = Passable
-			volumeAddedToParent = -800
-			addedMass = 1.2
-			addedCost = 400
-			MODULE
-			{
-				IDENTIFIER
-				{
-					name = ModuleFreeIva
-				}
-				DATA
-				{
-					passThroughNodeA = top
-					passThroughNodeB = bottom
-				}
-			}
-		}
-	}
-	MODULE
-	{
-		name = ModuleB9PartInfo
-	}
-}
-PART
-{
-	part = largeAdapter2_930000009
-	partName = Part
-	persistentId = 940000009
-	pos = 0.0,7.5930462999999975,0.0
-	attPos = 0,0,0
-	attPos0 = 0.0,7.5930462999999975,0.0
-	rot = 0,0,0,1
-	attRot = 0,0,0,1
-	attRot0 = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Grandparent
-	rigidAttachment = False
-	istg = -1
-	dstg = -1
-	sidx = -1
-	sqor = -1
-	sepI = -1
-	attm = 0
-	modCost = 0
-	modMass = 0
-	link = nuclearEngine_930000010
-	attN = top,Rockomax32.BW_930000008_0|0.1892163|0
-	attN = bottom,nuclearEngine_930000010_0|-0.1892163|0
-	MODULE
-	{
-		name = ModulePartVariants
-		baseVariant = BlackAndWhite
-		useMultipleDragCubes = false
-		VARIANT
-		{
-			name = BlackAndWhite
-			displayName = Black and White
-			themeName = White
-			primaryColor = #ffffff
-			secondaryColor = #000000
-		}
-		VARIANT
-		{
-			name = Orange
-			displayName = Orange
-			themeName = Orange
-			primaryColor = #ffffff
-			secondaryColor = #f49841
-			TEXTURE
-			{
-				mainTextureURL = Squad/Parts/Utility/rockomaxAdapters/Assets/Rockomax_Adapters_diffuse_O
-				_BumpMap = Squad/Parts/Utility/rockomaxAdapters/Assets/Rockomax_Adapters_normal_O
-			}
-		}
-	}
-	MODULE
-	{
-		name = ModuleCargoPart
-		packedVolume = -1
-	}
-	MODULE
-	{
-		name = ModuleFreeIva
-		passThroughNodeA = top
-		passThroughNodeB = bottom
-	}
-}
-PART
-{
-	part = nuclearEngine_930000010
-	partName = Part
-	persistentId = 940000010
-	pos = 0.0,6.0,0.0
-	attPos = 0,0,0
-	attPos0 = 0.0,6.0,0.0
-	rot = 0,0,0,1
-	attRot = 0,0,0,1
-	attRot0 = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Grandparent
-	rigidAttachment = False
-	istg = 0
-	dstg = 0
-	sidx = -1
-	sqor = -1
-	sepI = -1
-	attm = 0
-	modCost = 0
-	modMass = 0
-	attN = top,largeAdapter2_930000009_0|1.40383|0
-	MODULE
-	{
-		name = ModuleEngines
-		thrustVectorTransformName = thrustTransform
-		exhaustDamage = True
-		ignitionThreshold = 0.1
-		minThrust = 0
-		maxThrust = 60
-		heatProduction = 250
-		fxOffset = 0, 0, 1
-		EngineType = Nuclear
-		exhaustDamageDistanceOffset = 1.86
-		PROPELLANT
-		{
-			name = LiquidFuel
-			ratio = 0.9
-			DrawGauge = True
-		}
-		atmosphereCurve
-		{
-			key = 0 800
-			key = 1 185
-			key = 2 0.001
-		}
-	}
-	MODULE
-	{
-		name = ModuleJettison
-		jettisonName = fairingL
-		bottomNodeName = bottom
-		isFairing = False
-		jettisonedObjectMass = 0.1
-		jettisonForce = 1
-		jettisonDirection = 1 0 0
-		actionSuffix = L
-		useProceduralDragCubes = true
-	}
-	MODULE
-	{
-		name = ModuleJettison
-		jettisonName = fairingR
-		bottomNodeName = bottom
-		isFairing = False
-		jettisonedObjectMass = 0.1
-		jettisonForce = 1
-		jettisonDirection = -1 0 0
-		actionSuffix = R
-		useProceduralDragCubes = true
-	}
-	MODULE
-	{
-		name = ModuleAnimateHeat
-		ThermalAnim = overheat
-	}
-	MODULE
-	{
-		name = ModuleAlternator
-		RESOURCE
-		{
-			name = ElectricCharge
-			rate = 5.0
-		}
-	}
-	MODULE
-	{
-		name = ModuleTestSubject
-		useStaging = True
-		useEvent = True
-		situationMask = 121
-		CONSTRAINT
-		{
-			type = REPEATABILITY
-			value = ALWAYS
-			prestige = Trivial
-		}
-		CONSTRAINT
-		{
-			type = REPEATABILITY
-			value = BODYANDSITUATION
-			prestige = Significant
-		}
-		CONSTRAINT
-		{
-			type = REPEATABILITY
-			value = ONCEPERPART
-			prestige = Exceptional
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDEENV
-			test = GT
-			value = 4000
-			prestige = Trivial
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDEENV
-			test = LT
-			value = 8000
-			prestige = Trivial
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDEENV
-			test = GT
-			value = 2000
-			prestige = Significant
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDEENV
-			test = LT
-			value = 4000
-			prestige = Significant
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDEENV
-			test = GT
-			value = 1000
-			prestige = Exceptional
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDEENV
-			test = LT
-			value = 2000
-			prestige = Exceptional
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDE
-			test = LT
-			value = 300000
-			situationMask = 16
-			body = _NotSun
-		}
-		CONSTRAINT
-		{
-			type = ALTITUDE
-			test = LT
-			value = 600000
-			situationMask = 32
-			body = _NotSun
-		}
-		CONSTRAINT
-		{
-			type = SPEED
-			test = GT
-			value = 0
-			situationMask = 8
-			prestige = Trivial
-		}
-		CONSTRAINT
-		{
-			type = SPEED
-			test = LT
-			value = 600
-			situationMask = 8
-			prestige = Trivial
-		}
-		CONSTRAINT
-		{
-			type = SPEED
-			test = GT
-			value = 300
-			situationMask = 8
-			prestige = Significant
-		}
-		CONSTRAINT
-		{
-			type = SPEED
-			test = LT
-			value = 1200
-			situationMask = 8
-			prestige = Significant
-		}
-		CONSTRAINT
-		{
-			type = SPEED
-			test = GT
-			value = 600
-			situationMask = 8
-			prestige = Exceptional
-		}
-		CONSTRAINT
-		{
-			type = SPEED
-			test = LT
-			value = 2500
-			situationMask = 8
-			prestige = Exceptional
-		}
-		CONSTRAINT
-		{
-			type = SPEEDENV
-			test = LT
-			value = 200
-			prestige = Trivial
-		}
-		CONSTRAINT
-		{
-			type = SPEEDENV
-			test = GT
-			value = 100
-			prestige = Trivial
-		}
-		CONSTRAINT
-		{
-			type = SPEEDENV
-			test = LT
-			value = 100
-			prestige = Significant
-		}
-		CONSTRAINT
-		{
-			type = SPEEDENV
-			test = GT
-			value = 50
-			prestige = Significant
-		}
-		CONSTRAINT
-		{
-			type = SPEEDENV
-			test = LT
-			value = 50
-			prestige = Exceptional
-		}
-		CONSTRAINT
-		{
-			type = SPEEDENV
-			test = GT
-			value = 20
-			prestige = Exceptional
-		}
-	}
-	MODULE
-	{
-		name = ModuleSurfaceFX
-		thrustProviderModuleIndex = 0
-		fxMax = 0.7
-		maxDistance = 50
-		falloff = 2.5
-		thrustTransformName = thrustTransform
-	}
-}
-PART
-{
 	part = largeSolarPanel_930000011
 	partName = Part
 	persistentId = 940000011
@@ -2732,6 +2150,128 @@ PART
 }
 PART
 {
+	part = CRY-2300Freezer_930000006
+	partName = Part
+	persistentId = 940000006
+	pos = 0.0,13.585167599999995,0.0
+	attPos = 0,0,0
+	attPos0 = 0.0,13.585167599999995,0.0
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Grandparent
+	rigidAttachment = False
+	istg = -1
+	dstg = -1
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	modCost = 0
+	modMass = 0
+	link = batteryBankLarge_930000007
+	attN = top,sspx-adapter-25-375-2_930000005_0|1.830905|0
+	attN = bottom,batteryBankLarge_930000007_0|-1.830905|0
+	INTERNAL
+	{
+		name = Cry-2300Internals
+	}
+	RESOURCE
+	{
+		name = Glykerol
+		amount = 50
+		maxAmount = 50
+	}
+	MODULE
+	{
+		name = DeepFreezer
+		FreezerSize = 10
+		ChargeRequired = 3000
+		GlykerolRequired = 5
+		ChargeRate = 30
+		FrznChargeRequired = 10
+		isPartAnimated = True
+		cryopodstateclosedstring = True, True, True, True, True, True, True, True, True, True
+	}
+	MODULE
+	{
+		name = ModuleFreeIva
+	}
+}
+PART
+{
+	part = dockingPort2_970000003
+	partName = Part
+	persistentId = 970001003
+	attPos = 0,0,0
+	attRot = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 0
+	attN = bottom,mk2LanderCabin.v2_970000000_0|0|0
+	pos = 2.4657664,17.2,0
+	attPos0 = 2.4657664,17.2,0
+	rot = 0,0,0.707106781,0.707106781
+	attRot0 = 0,0,0.707106781,0.707106781
+	link = mk2LanderCabin.v2_970000000
+	attN = top,dockingPort2_979000000_0|0|0
+}
+PART
+{
+	part = batteryBankLarge_930000007
+	partName = Part
+	persistentId = 940000007
+	pos = 0.0,11.644262599999994,0.0
+	attPos = 0,0,0
+	attPos0 = 0.0,11.644262599999994,0.0
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Grandparent
+	rigidAttachment = False
+	istg = -1
+	dstg = -1
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	modCost = 0
+	modMass = 0
+	link = Rockomax32.BW_930000008
+	attN = top,CRY-2300Freezer_930000006_0|0.11|0
+	attN = bottom,Rockomax32.BW_930000008_0|-0.142|0
+	RESOURCE
+	{
+		name = ElectricCharge
+		amount = 4000
+		maxAmount = 4000
+	}
+	MODULE
+	{
+		name = ModuleCargoPart
+		stackableQuantity = 1
+		packedVolume = -1
+	}
+	MODULE
+	{
+		name = ModuleFreeIva
+		passThroughNodeA = top
+		passThroughNodeB = bottom
+	}
+}
+PART
+{
 	part = mk2LanderCabin.v2_970000000
 	partName = Part
 	persistentId = 970001000
@@ -2783,6 +2323,156 @@ PART
 }
 PART
 {
+	part = Rockomax32.BW_930000008
+	partName = Part
+	persistentId = 940000008
+	pos = 0.0,9.642262599999995,0.0
+	attPos = 0,0,0
+	attPos0 = 0.0,9.642262599999995,0.0
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Grandparent
+	rigidAttachment = False
+	istg = -1
+	dstg = -1
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	modCost = 0
+	modMass = 0
+	link = largeAdapter2_930000009
+	attN = top,batteryBankLarge_930000007_0|1.86|0
+	attN = bottom,largeAdapter2_930000009_0|-1.86|0
+	RESOURCE
+	{
+		name = LiquidFuel
+		amount = 1440
+		maxAmount = 1440
+	}
+	RESOURCE
+	{
+		name = Oxidizer
+		amount = 1760
+		maxAmount = 1760
+	}
+	MODULE
+	{
+		name = ModulePartVariants
+		baseVariant = BlackAndWhite
+		VARIANT
+		{
+			name = BlackAndWhite
+			displayName = Black and White
+			themeName = White
+			primaryColor = #ffffff
+			secondaryColor = #000000
+			GAMEOBJECTS
+			{
+				Rockomax_32_White = true
+				Rockomax_32_Orange = false
+				Rockomax_32_ESA = false
+			}
+		}
+		VARIANT
+		{
+			name = Orange
+			displayName = Orange
+			themeName = Orange
+			primaryColor = #f49841
+			secondaryColor = #4c4f47
+			GAMEOBJECTS
+			{
+				Rockomax_32_White = false
+				Rockomax_32_Orange = true
+				Rockomax_32_ESA = false
+			}
+			TEXTURE
+			{
+				mainTextureURL = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_16 [AlbedoM] O
+				_BumpMap = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_16 [Normal]O
+			}
+		}
+		VARIANT
+		{
+			name = ESA
+			displayName = ESA
+			description = European Space Agency
+			primaryColor = #ffffff
+			secondaryColor = #124d7f
+			GAMEOBJECTS
+			{
+				Rockomax_32_White = false
+				Rockomax_32_Orange = false
+				Rockomax_32_ESA = true
+			}
+			TEXTURE
+			{
+				mainTextureURL = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_32 [AlbedoM] ESA
+				_BumpMap = Squad/Parts/FuelTank/RockomaxTanks/Assets/rockomax_32 [Normal]ESA
+			}
+		}
+	}
+	MODULE
+	{
+		name = ModuleB9PartSwitch
+		moduleID = FreeIva_fuelSwitch
+		baseVolume = 3200
+		SUBTYPE
+		{
+			name = LFOX
+			tankType = FreeIva_LFOX
+			addedMass = -2
+			addedCost = -1468.8
+		}
+	}
+	MODULE
+	{
+		name = ModuleFreeIva
+		partInfo = This part can be traversible in IVA with a penalty of 25% of its tank volume.
+	}
+	MODULE
+	{
+		name = ModuleB9PartSwitch
+		switcherDescription = FreeIva
+		moduleID = FreeIvaSwitch
+		parentID = FreeIva_fuelSwitch
+		SUBTYPE
+		{
+			name = Blocked
+			title = Blocked
+		}
+		SUBTYPE
+		{
+			name = Passable
+			title = Passable
+			volumeAddedToParent = -800
+			addedMass = 1.2
+			addedCost = 400
+			MODULE
+			{
+				IDENTIFIER
+				{
+					name = ModuleFreeIva
+				}
+				DATA
+				{
+					passThroughNodeA = top
+					passThroughNodeB = bottom
+				}
+			}
+		}
+	}
+	MODULE
+	{
+		name = ModuleB9PartInfo
+	}
+}
+PART
+{
 	part = Rockomax8BW_970000001
 	partName = Part
 	persistentId = 970001001
@@ -2821,77 +2511,6 @@ PART
 		amount = 440
 		maxAmount = 440
 	}
-}
-PART
-{
-	part = liquidEngine3.v2_970000002
-	partName = Part
-	persistentId = 970001002
-	attPos = 0,0,0
-	attRot = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Off
-	rigidAttachment = False
-	istg = 0
-	dstg = 0
-	sidx = 0
-	sqor = -1
-	sepI = -1
-	attm = 0
-	attN = top,Rockomax8BW_970000001_0|0|0
-	pos = 4.5312694,17.2,0
-	attPos0 = 4.5312694,17.2,0
-	rot = 0,0,0.707106781,0.707106781
-	attRot0 = 0,0,0.707106781,0.707106781
-}
-PART
-{
-	part = dockingPort2_970000003
-	partName = Part
-	persistentId = 970001003
-	attPos = 0,0,0
-	attRot = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Off
-	rigidAttachment = False
-	istg = -1
-	dstg = 0
-	sidx = 0
-	sqor = -1
-	sepI = -1
-	attm = 0
-	attN = bottom,mk2LanderCabin.v2_970000000_0|0|0
-	pos = 2.4657664,17.2,0
-	attPos0 = 2.4657664,17.2,0
-	rot = 0,0,0.707106781,0.707106781
-	attRot0 = 0,0,0.707106781,0.707106781
-	link = mk2LanderCabin.v2_970000000
-	attN = top,dockingPort2_979000000_0|0|0
-}
-PART
-{
-	part = landingLeg1-2_970000004
-	partName = Part
-	persistentId = 970001004
-	attPos = 0,0,0
-	attRot = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Off
-	rigidAttachment = False
-	istg = -1
-	dstg = 0
-	sidx = 0
-	sqor = -1
-	sepI = -1
-	attm = 1
-	srfN = srfAttach,Rockomax8BW_970000001
-	pos = 4.2262694,17.2,1.25
-	attPos0 = 4.2262694,17.2,1.25
-	rot = 0,0,0.707106781,0.707106781
-	attRot0 = 0,0,0.707106781,0.707106781
 }
 PART
 {
@@ -2941,29 +2560,6 @@ PART
 }
 PART
 {
-	part = landingLeg1-2_970000007
-	partName = Part
-	persistentId = 970001007
-	attPos = 0,0,0
-	attRot = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Off
-	rigidAttachment = False
-	istg = -1
-	dstg = 0
-	sidx = 0
-	sqor = -1
-	sepI = -1
-	attm = 1
-	srfN = srfAttach,Rockomax8BW_970000001
-	pos = 4.2262694,18.45,7.65404249e-17
-	attPos0 = 4.2262694,18.45,7.65404249e-17
-	rot = -0.5,0.5,0.5,0.5
-	attRot0 = -0.5,0.5,0.5,0.5
-}
-PART
-{
 	part = RCSBlock.v2_970000008
 	partName = Part
 	persistentId = 970001008
@@ -3010,29 +2606,6 @@ PART
 }
 PART
 {
-	part = landingLeg1-2_970000010
-	partName = Part
-	persistentId = 970001010
-	attPos = 0,0,0
-	attRot = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Off
-	rigidAttachment = False
-	istg = -1
-	dstg = 0
-	sidx = 0
-	sqor = -1
-	sepI = -1
-	attm = 1
-	srfN = srfAttach,Rockomax8BW_970000001
-	pos = 4.2262694,17.2,-1.25
-	attPos0 = 4.2262694,17.2,-1.25
-	rot = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
-	attRot0 = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
-}
-PART
-{
 	part = RCSBlock.v2_970000011
 	partName = Part
 	persistentId = 970001011
@@ -3076,29 +2649,6 @@ PART
 	attPos0 = 2.8676954,17.2,-1.27
 	rot = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
 	attRot0 = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
-}
-PART
-{
-	part = landingLeg1-2_970000013
-	partName = Part
-	persistentId = 970001013
-	attPos = 0,0,0
-	attRot = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Off
-	rigidAttachment = False
-	istg = -1
-	dstg = 0
-	sidx = 0
-	sqor = -1
-	sepI = -1
-	attm = 1
-	srfN = srfAttach,Rockomax8BW_970000001
-	pos = 4.2262694,15.95,-2.29621275e-16
-	attPos0 = 4.2262694,15.95,-2.29621275e-16
-	rot = -0.5,0.5,-0.5,-0.5
-	attRot0 = -0.5,0.5,-0.5,-0.5
 }
 PART
 {
@@ -3173,5 +2723,455 @@ PART
 		name = ElectricCharge
 		amount = 200
 		maxAmount = 200
+	}
+}
+PART
+{
+	part = largeAdapter2_930000009
+	partName = Part
+	persistentId = 940000009
+	pos = 0.0,7.5930462999999975,0.0
+	attPos = 0,0,0
+	attPos0 = 0.0,7.5930462999999975,0.0
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Grandparent
+	rigidAttachment = False
+	istg = -1
+	dstg = -1
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	modCost = 0
+	modMass = 0
+	link = nuclearEngine_930000010
+	attN = top,Rockomax32.BW_930000008_0|0.1892163|0
+	attN = bottom,nuclearEngine_930000010_0|-0.1892163|0
+	MODULE
+	{
+		name = ModulePartVariants
+		baseVariant = BlackAndWhite
+		useMultipleDragCubes = false
+		VARIANT
+		{
+			name = BlackAndWhite
+			displayName = Black and White
+			themeName = White
+			primaryColor = #ffffff
+			secondaryColor = #000000
+		}
+		VARIANT
+		{
+			name = Orange
+			displayName = Orange
+			themeName = Orange
+			primaryColor = #ffffff
+			secondaryColor = #f49841
+			TEXTURE
+			{
+				mainTextureURL = Squad/Parts/Utility/rockomaxAdapters/Assets/Rockomax_Adapters_diffuse_O
+				_BumpMap = Squad/Parts/Utility/rockomaxAdapters/Assets/Rockomax_Adapters_normal_O
+			}
+		}
+	}
+	MODULE
+	{
+		name = ModuleCargoPart
+		packedVolume = -1
+	}
+	MODULE
+	{
+		name = ModuleFreeIva
+		passThroughNodeA = top
+		passThroughNodeB = bottom
+	}
+}
+PART
+{
+	part = liquidEngine3.v2_970000002
+	partName = Part
+	persistentId = 970001002
+	attPos = 0,0,0
+	attRot = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 0
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 0
+	attN = top,Rockomax8BW_970000001_0|0|0
+	pos = 4.5312694,17.2,0
+	attPos0 = 4.5312694,17.2,0
+	rot = 0,0,0.707106781,0.707106781
+	attRot0 = 0,0,0.707106781,0.707106781
+}
+PART
+{
+	part = landingLeg1-2_970000004
+	partName = Part
+	persistentId = 970001004
+	attPos = 0,0,0
+	attRot = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 1
+	srfN = srfAttach,Rockomax8BW_970000001
+	pos = 4.2262694,17.2,1.25
+	attPos0 = 4.2262694,17.2,1.25
+	rot = 0,0,0.707106781,0.707106781
+	attRot0 = 0,0,0.707106781,0.707106781
+}
+PART
+{
+	part = landingLeg1-2_970000007
+	partName = Part
+	persistentId = 970001007
+	attPos = 0,0,0
+	attRot = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 1
+	srfN = srfAttach,Rockomax8BW_970000001
+	pos = 4.2262694,18.45,7.65404249e-17
+	attPos0 = 4.2262694,18.45,7.65404249e-17
+	rot = -0.5,0.5,0.5,0.5
+	attRot0 = -0.5,0.5,0.5,0.5
+}
+PART
+{
+	part = landingLeg1-2_970000010
+	partName = Part
+	persistentId = 970001010
+	attPos = 0,0,0
+	attRot = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 1
+	srfN = srfAttach,Rockomax8BW_970000001
+	pos = 4.2262694,17.2,-1.25
+	attPos0 = 4.2262694,17.2,-1.25
+	rot = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
+	attRot0 = -0.707106781,0.707106781,4.32978028e-17,4.32978028e-17
+}
+PART
+{
+	part = landingLeg1-2_970000013
+	partName = Part
+	persistentId = 970001013
+	attPos = 0,0,0
+	attRot = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 1
+	srfN = srfAttach,Rockomax8BW_970000001
+	pos = 4.2262694,15.95,-2.29621275e-16
+	attPos0 = 4.2262694,15.95,-2.29621275e-16
+	rot = -0.5,0.5,-0.5,-0.5
+	attRot0 = -0.5,0.5,-0.5,-0.5
+}
+PART
+{
+	part = nuclearEngine_930000010
+	partName = Part
+	persistentId = 940000010
+	pos = 0.0,6.0,0.0
+	attPos = 0,0,0
+	attPos0 = 0.0,6.0,0.0
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Grandparent
+	rigidAttachment = False
+	istg = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	modCost = 0
+	modMass = 0
+	attN = top,largeAdapter2_930000009_0|1.40383|0
+	MODULE
+	{
+		name = ModuleEngines
+		thrustVectorTransformName = thrustTransform
+		exhaustDamage = True
+		ignitionThreshold = 0.1
+		minThrust = 0
+		maxThrust = 60
+		heatProduction = 250
+		fxOffset = 0, 0, 1
+		EngineType = Nuclear
+		exhaustDamageDistanceOffset = 1.86
+		PROPELLANT
+		{
+			name = LiquidFuel
+			ratio = 0.9
+			DrawGauge = True
+		}
+		atmosphereCurve
+		{
+			key = 0 800
+			key = 1 185
+			key = 2 0.001
+		}
+	}
+	MODULE
+	{
+		name = ModuleJettison
+		jettisonName = fairingL
+		bottomNodeName = bottom
+		isFairing = False
+		jettisonedObjectMass = 0.1
+		jettisonForce = 1
+		jettisonDirection = 1 0 0
+		actionSuffix = L
+		useProceduralDragCubes = true
+	}
+	MODULE
+	{
+		name = ModuleJettison
+		jettisonName = fairingR
+		bottomNodeName = bottom
+		isFairing = False
+		jettisonedObjectMass = 0.1
+		jettisonForce = 1
+		jettisonDirection = -1 0 0
+		actionSuffix = R
+		useProceduralDragCubes = true
+	}
+	MODULE
+	{
+		name = ModuleAnimateHeat
+		ThermalAnim = overheat
+	}
+	MODULE
+	{
+		name = ModuleAlternator
+		RESOURCE
+		{
+			name = ElectricCharge
+			rate = 5.0
+		}
+	}
+	MODULE
+	{
+		name = ModuleTestSubject
+		useStaging = True
+		useEvent = True
+		situationMask = 121
+		CONSTRAINT
+		{
+			type = REPEATABILITY
+			value = ALWAYS
+			prestige = Trivial
+		}
+		CONSTRAINT
+		{
+			type = REPEATABILITY
+			value = BODYANDSITUATION
+			prestige = Significant
+		}
+		CONSTRAINT
+		{
+			type = REPEATABILITY
+			value = ONCEPERPART
+			prestige = Exceptional
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDEENV
+			test = GT
+			value = 4000
+			prestige = Trivial
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDEENV
+			test = LT
+			value = 8000
+			prestige = Trivial
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDEENV
+			test = GT
+			value = 2000
+			prestige = Significant
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDEENV
+			test = LT
+			value = 4000
+			prestige = Significant
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDEENV
+			test = GT
+			value = 1000
+			prestige = Exceptional
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDEENV
+			test = LT
+			value = 2000
+			prestige = Exceptional
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDE
+			test = LT
+			value = 300000
+			situationMask = 16
+			body = _NotSun
+		}
+		CONSTRAINT
+		{
+			type = ALTITUDE
+			test = LT
+			value = 600000
+			situationMask = 32
+			body = _NotSun
+		}
+		CONSTRAINT
+		{
+			type = SPEED
+			test = GT
+			value = 0
+			situationMask = 8
+			prestige = Trivial
+		}
+		CONSTRAINT
+		{
+			type = SPEED
+			test = LT
+			value = 600
+			situationMask = 8
+			prestige = Trivial
+		}
+		CONSTRAINT
+		{
+			type = SPEED
+			test = GT
+			value = 300
+			situationMask = 8
+			prestige = Significant
+		}
+		CONSTRAINT
+		{
+			type = SPEED
+			test = LT
+			value = 1200
+			situationMask = 8
+			prestige = Significant
+		}
+		CONSTRAINT
+		{
+			type = SPEED
+			test = GT
+			value = 600
+			situationMask = 8
+			prestige = Exceptional
+		}
+		CONSTRAINT
+		{
+			type = SPEED
+			test = LT
+			value = 2500
+			situationMask = 8
+			prestige = Exceptional
+		}
+		CONSTRAINT
+		{
+			type = SPEEDENV
+			test = LT
+			value = 200
+			prestige = Trivial
+		}
+		CONSTRAINT
+		{
+			type = SPEEDENV
+			test = GT
+			value = 100
+			prestige = Trivial
+		}
+		CONSTRAINT
+		{
+			type = SPEEDENV
+			test = LT
+			value = 100
+			prestige = Significant
+		}
+		CONSTRAINT
+		{
+			type = SPEEDENV
+			test = GT
+			value = 50
+			prestige = Significant
+		}
+		CONSTRAINT
+		{
+			type = SPEEDENV
+			test = LT
+			value = 50
+			prestige = Exceptional
+		}
+		CONSTRAINT
+		{
+			type = SPEEDENV
+			test = GT
+			value = 20
+			prestige = Exceptional
+		}
+	}
+	MODULE
+	{
+		name = ModuleSurfaceFX
+		thrustProviderModuleIndex = 0
+		fxMax = 0.7
+		maxDistance = 50
+		falloff = 2.5
+		thrustTransformName = thrustTransform
 	}
 }

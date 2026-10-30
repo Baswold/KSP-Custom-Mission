@@ -35,6 +35,7 @@ class LanderCraftTests(unittest.TestCase):
             walk(roots[0]);self.assertEqual(visited,set(p))
             for k,n in p.items():
                 self.assertLessEqual(len(parents[k]),1)
+                if parents[k]:self.assertLess(list(p).index(parents[k][0]),list(p).index(k))
                 for key,v in n.values:
                     if key in ('attN','srfN'):self.assertIn(v.split(',')[1].split('_0|')[0],p)
                 self.assertTrue(all(math.isfinite(x) for x in m.vector(n.get('pos'))))

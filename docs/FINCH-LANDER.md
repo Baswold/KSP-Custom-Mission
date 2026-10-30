@@ -183,3 +183,16 @@ with a bounded timeout, reports live and snapshot counts, and marks the test
 inconclusive if the load gate does not pass. This corrected probe compiles against
 KSP 1.12.5; no new runtime pass is claimed. The prior results remain as diagnostic
 history rather than evidence of an operational or defective cradle.
+
+### Source correction: parent-before-child serialization
+
+The cradle's editor attachment graph was connected, but its serialized order
+listed the cabin before the docking port that parents it. The failed runtime
+materialized 18 parts and then hit `ProtoPartSnapshot.Load` at that forward
+reference. The generator now emits a stable parent-before-child ordering for the
+cradle, and a regression asserts every parent precedes its child. The snapshot
+probe locates docking modules by module name rather than obsolete part indices.
+Nine structural/setup tests pass and the probe compiles. This addresses a
+concrete serialization defect, but the corrected order has not been tested in
+KSP; earlier loader/mass measurements in Finch-Design.json describe the prior
+candidate. Nighttime runtime restrictions remain respected.

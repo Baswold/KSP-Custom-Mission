@@ -50,7 +50,7 @@ public sealed class FinchOrbitCheck : MonoBehaviour
             // ShipConstruct snapshots are editor-state: KSP has not yet initialized
             // the two mated ports. Reproduce the stock launched "PreAttached"
             // state in this test-only fixture, then verify actual flight behavior.
-            foreach(int idx in new[]{17,21})foreach(var module in nodes[idx].GetNodes("MODULE"))
+            foreach(var partNode in nodes)foreach(var module in partNode.GetNodes("MODULE"))
                 if(module.GetValue("name")=="ModuleDockingNode")module.SetValue("state","PreAttached",true);
             var orbit=new Orbit(0,0,900000,0,0,0,Planetarium.GetUniversalTime(),FlightGlobals.GetHomeBody());
             var node=ProtoVessel.CreateVesselNode("Finch Orbit QA",VesselType.Station,orbit,0,nodes);
