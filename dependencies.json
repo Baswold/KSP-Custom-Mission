@@ -1,0 +1,26 @@
+[
+  {
+    "name": "SSPX",
+    "version": "2.0.11",
+    "url": "https://github.com/post-kerbin-mining-corporation/StationPartsExpansionRedux/releases/download/2.0.11/StationPartsExpansionRedux_2_0_11.zip",
+    "sha256": "280645b70c3a93dd62ec8874608904e16fc5e2a3309452a096f1a88b103962c3"
+  },
+  {
+    "name": "FreeIVA",
+    "version": "0.2.20.2",
+    "url": "https://github.com/FirstPersonKSP/FreeIva/releases/download/0.2.20.2/FreeIva-0.2.20.2.zip",
+    "sha256": "d5c2efb437dd2c05095d34adb6df33485d6dce15a66b79f2d012fb8af3133f73"
+  },
+  {
+    "name": "DeepFreeze",
+    "version": "0.31.0.0",
+    "url": "https://github.com/JPLRepo/DeepFreeze/releases/download/v0.31.0.0/DeepFreeze_V0.31.0.0.zip",
+    "sha256": "9f8f102d56532f43133b83a888be674947b2c6d4a0963be7853f81fbf859af7a"
+  },
+  {
+    "name": "EasyVesselSwitch",
+    "version": "2.3",
+    "url": "https://github.com/ihsoft/EasyVesselSwitch/releases/download/2.3/EasyVesselSwitch_v2.3.zip",
+    "sha256": "420576178a60c8259f4d147cb3de2e483a0800fdcc2e663e9b5a3583d7bb9ed4"
+  }
+]

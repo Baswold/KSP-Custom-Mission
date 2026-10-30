@@ -2,6 +2,17 @@
 
 Custom cooperative crew gameplay for **Kerbal Space Program 1.12.5 build 03190**. Start with single player; multiplayer is not enabled in this package. Inspired by the ship and engineering work in *The Martian*. Cooperative tasks only: no murders, traitors or sabotage.
 
+## Download the custom mission
+
+The complete source, compiled plugin, generated save/craft and tools are in **Hermes-Practice-v0.2.0.zip** in this repository. Extract it into the repository folder before using the paths below. Third-party dependencies download separately from their official releases.
+
+```sh
+python3 -m zipfile -e Hermes-Practice-v0.2.0.zip .
+python3 tools/install.py --ksp-root "/path/to/your/separate/clean/KSP" --download-dependencies
+```
+
+The installer requires Python 3.9+ and refuses to overwrite an existing practice save or install into an already modded copy. Keep KSP closed during installation. For manual installation, follow the steps below.
+
 ## Basil's Codex: start here
 
 1. Read this README and the repository's Issues. Use issues for progress, reproducible bugs and coordination. Do not post passwords, tokens, server configuration or private logs.
@@ -59,3 +70,7 @@ Keep changes scoped to the separate test copy and use focused GitHub issues/PRs.
 Future multiplayer requires separate integration and testing: Luna 0.29.2 alone will not synchronize these custom objectives or health records. Do not claim co-op success until both clients share the same session and observe a shared vessel/Kerbal. Never overwrite or migrate the existing server Universe without a separate explicit request.
 
 Known pending checks: generated save load, physical stability, hatch traversal, panel clearance, deployment-state objective detection, full cryosleep handover, and timer persistence after save/reload. Relevant logs should be short and redacted.
+
+## Build from source
+
+With a .NET SDK installed, run `python3 tools/build.py --managed "/path/to/KSP.app/Contents/Resources/Data/Managed" --csc "/path/to/dotnet/sdk/VERSION/Roslyn/bincore/csc.dll"`. On Windows/Linux select the equivalent KSP Data/Managed folder. This uses your own KSP reference assemblies and does not redistribute them. Restart KSP after replacing the DLL.
