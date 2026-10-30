@@ -51,3 +51,10 @@ noncircular transfer at 300, 1200 and 3000 seconds, verified with independent
 20,000-step Runge–Kutta propagation. These are finite examples, not a full
 accuracy guarantee. Before use for node creation, add broader geometry/time
 coverage and compare the candidate against KSP's actual patched-conic trajectory.
+
+An independent Luna subagent supplied a deterministic randomized propagation
+regression: 2,000 short-way cases with nondimensional radii 0.8–1.2 and flight
+times from about 0.2 to 10 characteristic periods. Independent fixed-step RK4
+propagation reported no position or velocity relative error above 1e-5; the
+worst observed was about 1.2e-10. This does not cover SOI transitions,
+near-collinear cases or extreme radius ratios and does not validate KSP frames.

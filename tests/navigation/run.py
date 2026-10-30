@@ -12,3 +12,6 @@ with tempfile.TemporaryDirectory() as t:
     (out/'args.rsp').write_text('\n'.join(args));subprocess.run(['dotnet',str(csc),'@'+str(out/'args.rsp')],check=True)
     (out/'Tests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':runtime.name}}}))
     subprocess.run(['dotnet',str(out/'Tests.dll')],check=True)
+    args[-1]=f'"{root}/tests/navigation/LambertRandomizedTests.cs"'
+    (out/'args.rsp').write_text('\n'.join(args));subprocess.run(['dotnet',str(csc),'@'+str(out/'args.rsp')],check=True)
+    subprocess.run(['dotnet',str(out/'Tests.dll')],check=True)
