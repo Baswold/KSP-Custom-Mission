@@ -86,3 +86,13 @@ files with the newest campaign source; do not replace newer campaign/needs code
 with this branch's older expanded baseline. Assembly compilation is source-level
 evidence; IVA controls, target readouts and cache invalidation require a
 disposable flight run before release.
+
+
+## Retained-science observation candidate
+
+The Science tab now supports a transient before/after observation of actual
+stored reports, alongside the existing stock experiment controls and inventory
+listing. A current stock science context label helps the crew identify the
+situation being discussed. See [science observations](SCIENCE-OBSERVATIONS.md)
+for interpretation, provider limitations and pending flight checks. Changes in
+retained data do not certify experiment completion or science rewards.

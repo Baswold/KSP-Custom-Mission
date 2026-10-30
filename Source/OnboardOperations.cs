@@ -13,6 +13,7 @@ namespace MegaCrew
         readonly Dictionary<string, ResourceTrend> trends = new Dictionary<string, ResourceTrend>();
         readonly List<string> log = new List<string>();
         readonly OnboardRendezvous rendezvous = new OnboardRendezvous();
+        readonly OnboardScienceObservation scienceObservation = new OnboardScienceObservation();
         Rect window = new Rect(610, 100, 590, 560);
         Vector2 scroll;
         bool visible;
@@ -25,7 +26,7 @@ namespace MegaCrew
         string PathName { get { return Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "MegaCrewOperations.cfg"); } }
         void Update()
         {
-            if (!Allowed) { visible = false; rendezvous.Reset(); InputLockManager.RemoveControlLock(Lock); return; }
+            if (!Allowed) { visible = false; rendezvous.Reset(); scienceObservation.Reset(); InputLockManager.RemoveControlLock(Lock); return; }
             if (save != HighLogic.SaveFolder || vesselId != Ship.id)
             {
                 save = HighLogic.SaveFolder; vesselId = Ship.id; trends.Clear(); nextSample = 0;
@@ -35,6 +36,7 @@ namespace MegaCrew
             if (Input.GetKeyDown(KeyCode.O) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))) visible = !visible;
             double now = Planetarium.GetUniversalTime();
             rendezvous.Update(Ship, save, now, FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0);
+            scienceObservation.UpdateContext(Ship, save, HighLogic.CurrentGame, now);
             if (now < nextSample - 2) { foreach (var trend in trends.Values) trend.Reset(); nextSample = now; }
             if (now >= nextSample)
             {
@@ -102,11 +104,34 @@ namespace MegaCrew
             bool found = false;
             foreach (var part in Ship.parts) foreach (PartModule module in part.Modules)
             {
+                string partTitle = part.partInfo == null ? "Unknown part" : (part.partInfo.title ?? "Unknown part");
+                var container = module as IScienceDataContainer;
+                ScienceData[] stored = null;
+                bool inventoryAvailable = container != null;
+                if (container != null)
+                {
+                    try
+                    {
+                        stored = container.GetData();
+                        if (stored != null)
+                            foreach (ScienceData data in stored)
+                            {
+                                if (data == null) { GUILayout.Label("Stored report unavailable on " + partTitle + "."); continue; }
+                                GUILayout.Label("Reported inventory: " + partTitle + " #" + part.flightID + " | " + data.title + " | " + data.dataAmount.ToString("G6") + " data units");
+                            }
+                    }
+                    catch (Exception ex)
+                    {
+                        inventoryAvailable = false;
+                        GUILayout.Label("Stored reports unavailable on " + partTitle + ".");
+                        Debug.LogWarning("[MegaCrew Science] " + module.GetType().Name + ": " + ex.Message);
+                    }
+                }
                 var experiment = module as ModuleScienceExperiment;
                 if (experiment != null)
                 {
                     found = true;
-                    GUILayout.Label(part.partInfo.title + " #" + part.flightID + " | " + experiment.experimentID + " | stored results " + experiment.GetData().Length);
+                    GUILayout.Label(partTitle + " #" + part.flightID + " | " + experiment.experimentID + " | stored results " + (inventoryAvailable ? (stored == null ? "0" : stored.Length.ToString()) : "unavailable"));
                     GUI.enabled = Role("Scientist") && !experiment.Inoperable && !experiment.Deployed;
                     if (GUILayout.Button("Run experiment"))
                     {
@@ -115,10 +140,10 @@ namespace MegaCrew
                     }
                     GUI.enabled = true;
                 }
-                var container = module as IScienceDataContainer;
-                if (container != null) foreach (var data in container.GetData()) GUILayout.Label("Stored: " + data.title + " | " + data.dataAmount.ToString("F1") + " data units");
             }
             if (!found) GUILayout.Label("Fit a stock science experiment to this vessel to operate it here.");
+            GUILayout.Label("Reported inventory lists currently retained reports by container. Repeated views do not necessarily represent new progress or unique reports.");
+            scienceObservation.Draw(Ship, HighLogic.SaveFolder, HighLogic.CurrentGame, Planetarium.GetUniversalTime(), Role("Scientist"), FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0);
             GUILayout.Label("Run uses the stock experiment and its result dialog. No science points are fabricated; results are never automatically discarded or transmitted.");
         }
         void Supplies()
