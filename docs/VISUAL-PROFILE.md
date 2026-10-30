@@ -66,3 +66,9 @@ and VaporCones assemblies. Rendering checks remain pending. Startup includes
 ADDON BINDER resolution warnings for EVEManager/Utils and the pre-existing EVS
 utility, plus a missing Firefly Apollo white texture; do not equate assembly
 loading with successful visual operation.
+
+The test copy subsequently reached the main menu with cloud cover visible over
+Kerbin and the MegaCrew console visible. NativeParallax logged Metal compute
+online on Apple M5, terrain shader supported=True, OpenGLCore backend and five
+configured bodies. This verifies startup and menu cloud rendering only; it does
+not establish surface scatter quality, flight cloud behavior or atmospheric FX.
