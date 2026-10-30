@@ -1,0 +1,258 @@
+diff --git a/tests/ksp/HermesCryoProbe.cs b/tests/ksp/HermesCryoProbe.cs
+--- a/tests/ksp/HermesCryoProbe.cs
++++ b/tests/ksp/HermesCryoProbe.cs
+@@ -11,23 +11,35 @@
+ public sealed class HermesCryoProbe : MonoBehaviour
+ {
+     const string SaveName="MegaCrew Background QA";
+-    string root;ConfigNode report=new ConfigNode("HERMES_CRYO_QA");bool scoped;
++    string root;ConfigNode report=new ConfigNode("HERMES_CRYO_QA");bool scoped,fixtureLoaded;Guid intendedVessel;
+     IEnumerator Start()
+     {
+         root=KSPUtil.ApplicationRootPath;
+         var scope=Path.Combine(root,"HermesCryoQA.scope");var marker=Path.Combine(root,"HermesCryoQA.enable");
+         if(new DirectoryInfo(root).Name!="KSP-Hermes-QA"||!File.Exists(scope)||File.ReadAllText(scope).Trim()!="MEGACREW_DISPOSABLE_CRYO_QA_V1"||!File.Exists(marker))yield break;
++        foreach(var suffix in new[]{"running","done"})
++            if(File.Exists(Path.Combine(root,"HermesCryoQA."+suffix)))yield break;
++        if(File.Exists(Path.Combine(root,"HermesCryoQA-result.cfg")))yield break;
+         scoped=true;DontDestroyOnLoad(this);
+         File.Move(marker,Path.Combine(root,"HermesCryoQA.running"));
+         var steps=Run();
+         while(true)
+         {
+             object next=null;bool more=false;Exception failure=null;
+-            try{more=steps.MoveNext();if(more)next=steps.Current;}catch(Exception e){failure=e;}
++            try{ValidateContext();more=steps.MoveNext();if(more)next=steps.Current;}catch(Exception e){failure=e;}
+             if(failure!=null){Record("failure",failure.GetType().Name+": "+failure.Message);Finish(false);yield break;}
+             if(!more){Finish(true);yield break;}
+             yield return next;
+         }
++    }
++    void ValidateContext()
++    {
++        if(!fixtureLoaded)return;
++        if(HighLogic.SaveFolder!=SaveName)throw new Exception("QA save context changed; test aborted before next action");
++        if(TimeWarp.CurrentRateIndex!=0)throw new Exception("QA requires uninterrupted actual 1x progression");
++        if(HighLogic.LoadedSceneIsFlight&&FlightDriver.Pause)throw new Exception("QA paused; observation is inconclusive");
++        if(HighLogic.LoadedSceneIsFlight&&FlightGlobals.ready&&FlightGlobals.ActiveVessel!=null&&FlightGlobals.ActiveVessel.id!=intendedVessel)
++            throw new Exception("QA active vessel changed; test aborted before next action");
+     }
+     void Record(string key,object value)
+     {
+@@ -37,6 +49,7 @@
+     }
+     void Finish(bool complete)
+     {
++        Record("run_state",complete?"completed":"failed");
+         Record("probe_completed",complete);Record("flight_qualification",false);
+         var marker=Path.Combine(root,"HermesCryoQA.running");
+         if(File.Exists(marker))File.Move(marker,Path.Combine(root,"HermesCryoQA.done"));
+@@ -49,6 +62,7 @@
+     {DF.KerbalInfo info;return DF.DeepFreeze.Instance!=null&&DF.DeepFreeze.Instance.FrozenKerbals.TryGetValue("Ada Kerman",out info)&&info.vesselID==vessel;}
+     IEnumerator Run()
+     {
++        Record("schema",1);Record("probe_completed",false);Record("flight_qualification",false);Record("run_state","running");Record("stage","initializing");
+         yield return new WaitForSecondsRealtime(5);
+         var variant=File.ReadAllText(Path.Combine(root,"HermesCryoQA.variant")).Trim();Record("variant",variant);if(variant!="original"&&variant!="patched")throw new Exception("Unknown QA variant");
+         var path=Path.Combine(root,"GameData/REPOSoftTech/BackgroundResources/BackgroundResources.dll");
+@@ -58,10 +72,11 @@
+         if(hash!=expected)throw new Exception("Provider hash mismatch");
+         var game=GamePersistence.LoadGame("persistent",SaveName,true,false);
+         if(game==null||game.flightState.protoVessels.Count!=1)throw new Exception("Expected one pristine QA vessel");
+-        HighLogic.SaveFolder=SaveName;HighLogic.CurrentGame=game;
++        intendedVessel=game.flightState.protoVessels[0].vesselID;
++        HighLogic.SaveFolder=SaveName;HighLogic.CurrentGame=game;fixtureLoaded=true;Record("stage","loading_flight");
+         FlightDriver.StartAndFocusVessel(game,0);
+         double deadline=Time.realtimeSinceStartup+180;
+-        while(!HighLogic.LoadedSceneIsFlight||!FlightGlobals.ready||FlightGlobals.ActiveVessel==null)
++        while(!HighLogic.LoadedSceneIsFlight||!FlightGlobals.ready||FlightGlobals.ActiveVessel==null||!FlightGlobals.ActiveVessel.loaded||FlightGlobals.ActiveVessel.packed)
+         {if(Time.realtimeSinceStartup>deadline)throw new Exception("Flight initialization timeout");yield return new WaitForSecondsRealtime(1);}
+         yield return new WaitForSecondsRealtime(12);
+         var v=FlightGlobals.ActiveVessel;Guid vesselId=v.id;
+@@ -76,7 +91,7 @@
+             foreach(var person in part.protoModuleCrew)if(person.name=="Ada Kerman"){ada=person;origin=part;}
+         }
+         if(freezer==null||origin==null||ada==null||Charge(v)<3300)throw new Exception("Missing pod/crew or insufficient freeze reserve");
+-        uint podId=freezer.flightID;
++        uint podId=freezer.flightID;Record("stage","transferring_crew");
+         // Actual stock part crew transfer, followed by the real DeepFreeze API.
+         origin.RemoveCrewmember(ada);freezer.AddCrewmember(ada);
+         GameEvents.onCrewTransferred.Fire(new GameEvents.HostedFromToAction<ProtoCrewMember,Part>(ada,origin,freezer));
+@@ -88,6 +103,7 @@
+         while(!DF.DeepFreeze.APIReady||actualPod.DFIcrewXferTOActive||actualPod.DFIcrewXferFROMActive)
+         {if(Time.realtimeSinceStartup>deadline)throw new Exception("Stock transfer/pod readiness timeout");yield return new WaitForSecondsRealtime(1);}
+         yield return new WaitForSecondsRealtime(2);
++        Record("stage","freezing_crew");
+         if(!freezer.protoModuleCrew.Contains(ada)||!CryoBridge.Freeze("Ada Kerman"))throw new Exception("Real freeze request rejected");
+         deadline=Time.realtimeSinceStartup+240;
+         while(!Frozen(vesselId)){if(Time.realtimeSinceStartup>deadline)throw new Exception("Actual freeze timeout");yield return new WaitForSecondsRealtime(1);}
+@@ -100,6 +116,7 @@
+         }
+         Record("actual_frozen_before_unload",true);Record("ec_after_freeze",Charge(v));
+         GamePersistence.SaveGame("persistent",SaveName,SaveMode.OVERWRITE);
++        Record("stage","unloading_vessel");
+         HighLogic.LoadScene(GameScenes.TRACKSTATION);
+         yield return new WaitForSecondsRealtime(12);
+         v=FlightGlobals.Vessels.Find(x=>x.id==vesselId);
+@@ -108,6 +125,7 @@
+         DF.PartInfo pod;
+         if(!DF.DeepFreeze.Instance.KnownFreezerParts.TryGetValue(podId,out pod))throw new Exception("Missing real pod ledger");
+         double before,capacity;BackgroundResources.UnloadedResourceProcessing.GetResourceTotals(v.protoVessel,"ElectricCharge",out before,out capacity);
++        Record("stage","observing_unloaded_power");
+         double startUT=Planetarium.GetUniversalTime(),last=pod.timeLastElectricity;
+         Record("unloaded_before_ec",before);Record("unloaded_before_ut",startUT);Record("unloaded_before_pod_stamp",last);
+         yield return new WaitForSecondsRealtime(45);
+@@ -119,25 +137,29 @@
+         Record("actual_frozen_after_unload",Frozen(vesselId));
+         if(!Frozen(vesselId))throw new Exception("Frozen crew lost during unloaded interval");
+         GamePersistence.SaveGame("persistent",SaveName,SaveMode.OVERWRITE);
++        Record("stage","reloading_frozen_crew");
+         var restored=GamePersistence.LoadGame("persistent",SaveName,true,false);
+         HighLogic.CurrentGame=restored;HighLogic.SaveFolder=SaveName;FlightDriver.StartAndFocusVessel(restored,0);
+         deadline=Time.realtimeSinceStartup+180;
+-        while(!HighLogic.LoadedSceneIsFlight||FlightGlobals.ActiveVessel==null||!FlightGlobals.ready)
++        while(!HighLogic.LoadedSceneIsFlight||FlightGlobals.ActiveVessel==null||!FlightGlobals.ready||!FlightGlobals.ActiveVessel.loaded||FlightGlobals.ActiveVessel.packed)
+         {if(Time.realtimeSinceStartup>deadline)throw new Exception("Reload flight timeout");yield return new WaitForSecondsRealtime(1);}
+         yield return new WaitForSecondsRealtime(12);v=FlightGlobals.ActiveVessel;
+         Record("frozen_after_reload",Frozen(vesselId));Record("awake_after_reload",v.GetCrewCount());
+         if(!Frozen(vesselId)||v.GetCrewCount()!=3)throw new Exception("Freeze persistence failed");
++        Record("stage","recharging_from_solar");
+         // Refill through actual solar generation; never inject EC or skip UT.
+         foreach(var part in v.parts)foreach(PartModule m in part.Modules)
+             if(m.moduleName=="ModuleDeployableSolarPanel"&&m.Events["Extend"]!=null&&m.Events["Extend"].active)m.Events["Extend"].Invoke();
+         deadline=Time.realtimeSinceStartup+2400;
+         while(Charge(v)<3300){if(Time.realtimeSinceStartup>deadline)throw new Exception("Solar recharge timeout");yield return new WaitForSecondsRealtime(5);}
++        Record("stage","thawing_crew");
+         if(!CryoBridge.Thaw("Ada Kerman"))throw new Exception("Real thaw request rejected");
+         deadline=Time.realtimeSinceStartup+240;
+         while(Frozen(vesselId)){if(Time.realtimeSinceStartup>deadline)throw new Exception("Actual thaw timeout");yield return new WaitForSecondsRealtime(1);}
+         Record("actual_thaw_complete",true);Record("final_awake_crew",v.GetCrewCount());
+         if(v.GetCrewCount()!=4)throw new Exception("Crew count did not recover after thaw");
+         GamePersistence.SaveGame("persistent",SaveName,SaveMode.OVERWRITE);
++        Record("stage","procedure_finished");
+         Record("note","Single-pod 1x probe only; multiple pods, depletion/settings, high warp and thermal behavior still unqualified.");
+     }
+ }
+diff --git a/tools/inspect_cryo_qa.py b/tools/inspect_cryo_qa.py
+new file mode 100644
+--- /dev/null
++++ b/tools/inspect_cryo_qa.py
+@@ -0,0 +1,55 @@
++"""Read-only procedural evidence check. Never certifies flight or enables warp."""
++import argparse,json,math,pathlib
++SCOPE='MEGACREW_DISPOSABLE_CRYO_QA_V1'
++HASHES={'original':'ed956b9ec2cc5f414586a52a9086423e4c9125fa72097bce2721ea41eb075bc9','patched':'d2c1ab678a0891246dc7b16e66e180ced7e8ad55db8bb9971cc742224dfee45a'}
++def parse(text):
++ lines=[x.strip() for x in text.splitlines() if x.strip()]
++ if len(lines)<3 or lines[:2]!=['HERMES_CRYO_QA','{'] or lines[-1]!='}':raise ValueError('Invalid report structure')
++ result={}
++ for line in lines[2:-1]:
++  if '=' not in line:raise ValueError('Invalid report field')
++  key,value=map(str.strip,line.split('=',1))
++  if not key or key in result:raise ValueError('Duplicate or empty report key')
++  result[key]=value
++ return result
++
++def inspect(root):
++ root=pathlib.Path(root)
++ result={'status':'incomplete','procedure_complete':False,'flight_qualified':False,'problems':[]}
++ try:
++  if root.name!='KSP-Hermes-QA' or (root/'HermesCryoQA.scope').read_text().strip()!=SCOPE:raise ValueError('Not a marked disposable QA root')
++  path=root/'HermesCryoQA-result.cfg'
++  if not path.exists():result['problems'].append('No runtime report exists');return result
++  data=parse(path.read_text());result['stage']=data.get('stage','unknown')
++  if 'failure' in data or data.get('run_state')=='failed':
++   result['status']='failed';result['problems'].append(data.get('failure','Probe recorded failure'));return result
++  if data.get('probe_completed','').lower()!='true' or data.get('run_state')!='completed':
++   result['problems'].append('Run has not recorded procedural completion');return result
++  if not (root/'HermesCryoQA.done').is_file() or any((root/('HermesCryoQA.'+x)).exists() for x in ['enable','running']):raise ValueError('Completion markers disagree with report')
++  if data.get('schema')!='1' or data.get('stage')!='procedure_finished':raise ValueError('Unsupported schema or unfinished stage')
++  if data.get('flight_qualification','').lower()!='false':raise ValueError('Unexpected flight-qualification claim')
++  variant=data.get('variant')
++  if variant not in HASHES or data.get('provider_sha256')!=HASHES[variant]:raise ValueError('Provider identity mismatch')
++  if (root/'HermesCryoQA.variant').read_text().strip()!=variant:raise ValueError('Variant marker mismatch')
++  for key in ['actual_frozen_before_unload','actual_frozen_after_unload','frozen_after_reload','actual_thaw_complete']:
++   if data.get(key,'').lower()!='true':raise ValueError('Missing actual-state evidence: '+key)
++  for key,expected in [('initial_parts',17),('initial_awake_crew',4),('awake_after_reload',3),('final_awake_crew',4)]:
++   if float(data.get(key,'nan'))!=expected:raise ValueError('Unexpected '+key)
++  values={key:float(data.get(key,'nan')) for key in ['unloaded_before_ec','unloaded_after_ec','unloaded_elapsed_ut','pod_accounted_seconds','pod_expected_ec','observed_ec_delta']}
++  if not all(math.isfinite(v) for v in values.values()):raise ValueError('Nonfinite or missing power evidence')
++  for key in ['unloaded_elapsed_ut','pod_accounted_seconds','pod_expected_ec']:
++   if values[key]<=0:raise ValueError('No positive interval/demand evidence: '+key)
++  if min(values['unloaded_before_ec'],values['unloaded_after_ec'])<0:raise ValueError('Negative battery amount')
++  delta=values['unloaded_after_ec']-values['unloaded_before_ec']
++  if not math.isclose(delta,values['observed_ec_delta'],rel_tol=1e-9,abs_tol=1e-6):raise ValueError('Battery delta is inconsistent')
++  if variant=='patched' and delta>=0:raise ValueError('Patched single-pod observation has no net EC draw')
++  result.update(status='procedure_complete',procedure_complete=True,variant=variant)
++  result['problems'].append('Single-pod 1x evidence only; no high-rate, thermal, failure-policy or multiple-pod qualification')
++ except (OSError,ValueError) as e:
++  result['status']='invalid';result['problems'].append(str(e))
++ return result
++
++def main():
++ p=argparse.ArgumentParser();p.add_argument('qa_root',type=pathlib.Path);a=p.parse_args();result=inspect(a.qa_root);print(json.dumps(result,indent=2))
++ return 0 if result['status']=='procedure_complete' else 2 if result['status']=='incomplete' else 1
++if __name__=='__main__':raise SystemExit(main())
+diff --git a/tests/test_cryo_qa_report.py b/tests/test_cryo_qa_report.py
+new file mode 100644
+--- /dev/null
++++ b/tests/test_cryo_qa_report.py
+@@ -0,0 +1,27 @@
++import importlib.util,pathlib,tempfile,unittest
++ROOT=pathlib.Path(__file__).resolve().parents[1]
++spec=importlib.util.spec_from_file_location('cryo_report',ROOT/'tools/inspect_cryo_qa.py');report=importlib.util.module_from_spec(spec);spec.loader.exec_module(report)
++class CryoReportTests(unittest.TestCase):
++ def fixture(self,root):
++  # Synthetic test data, not real game evidence.
++  (root/'HermesCryoQA.scope').write_text(report.SCOPE);(root/'HermesCryoQA.variant').write_text('patched');(root/'HermesCryoQA.done').touch()
++  return dict(schema='1',stage='procedure_finished',run_state='completed',probe_completed='True',flight_qualification='False',variant='patched',provider_sha256=report.HASHES['patched'],actual_frozen_before_unload='True',actual_frozen_after_unload='True',frozen_after_reload='True',actual_thaw_complete='True',initial_parts='17',initial_awake_crew='4',awake_after_reload='3',final_awake_crew='4',unloaded_before_ec='1000',unloaded_after_ec='990',unloaded_elapsed_ut='45',pod_accounted_seconds='45',pod_expected_ec='10',observed_ec_delta='-10')
++ def write(self,root,data):
++  (root/'HermesCryoQA-result.cfg').write_text('HERMES_CRYO_QA\n{\n'+''.join(' '+k+' = '+v+'\n' for k,v in data.items())+'}\n')
++ def test_absent_report_is_incomplete(self):
++  with tempfile.TemporaryDirectory() as d:
++   root=pathlib.Path(d)/'KSP-Hermes-QA';root.mkdir();self.fixture(root);self.assertEqual(report.inspect(root)['status'],'incomplete')
++ def test_synthetic_complete_never_certifies_flight(self):
++  with tempfile.TemporaryDirectory() as d:
++   root=pathlib.Path(d)/'KSP-Hermes-QA';root.mkdir();self.write(root,self.fixture(root));result=report.inspect(root);self.assertTrue(result['procedure_complete']);self.assertFalse(result['flight_qualified'])
++ def test_corrupt_or_contradictory_evidence_cannot_complete(self):
++  cases=[('observed_ec_delta','-9'),('unloaded_elapsed_ut','nan'),('pod_accounted_seconds','0'),('provider_sha256','wrong'),('flight_qualification','True'),('actual_thaw_complete','False'),('final_awake_crew','3'),('stage','thawing_crew')]
++  for key,value in cases:
++   with self.subTest(key=key),tempfile.TemporaryDirectory() as d:
++    root=pathlib.Path(d)/'KSP-Hermes-QA';root.mkdir();data=self.fixture(root);data[key]=value;self.write(root,data);result=report.inspect(root);self.assertEqual(result['status'],'invalid');self.assertFalse(result['procedure_complete'])
++ def test_failure_and_stale_markers_are_not_success(self):
++  with tempfile.TemporaryDirectory() as d:
++   root=pathlib.Path(d)/'KSP-Hermes-QA';root.mkdir();data=self.fixture(root);data['failure']='Freeze timeout';self.write(root,data);self.assertEqual(report.inspect(root)['status'],'failed');del data['failure'];self.write(root,data);(root/'HermesCryoQA.running').touch();self.assertEqual(report.inspect(root)['status'],'invalid')
++ def test_duplicate_keys_rejected(self):
++  with self.assertRaises(ValueError):report.parse('HERMES_CRYO_QA\n{\nprobe_completed = False\nprobe_completed = True\n}\n')
++if __name__=='__main__':unittest.main()
+diff --git a/docs/CRYO-QA.md b/docs/CRYO-QA.md
+--- a/docs/CRYO-QA.md
++++ b/docs/CRYO-QA.md
+@@ -42,3 +42,27 @@
+ BackgroundResources and MegaCrew APIs; preparation/guard tests pass. The marked
+ QA copy and patched provider are prepared. Launch was blocked by the locked Mac;
+ no runtime report exists yet. Play-copy provider and original saves are unchanged.
++
++## Guard/report follow-up
++
++Apply Hermes-Cryo-QA-guards.patch after Hermes-Cryo-QA-probe.patch. The probe
++now refuses old result/running/done markers, writes incomplete/nonqualified
++state before game actions, records progress stages, and aborts on save context,
++active-vessel, pause or rate changes. Both flight loads await loaded/unpacked
++state. The one-shot done marker means the attempt ended, including failures.
++
++Read the report without launching or modifying KSP:
++
++```
++python3 tools/inspect_cryo_qa.py /path/to/KSP-Hermes-QA
++```
++
++Exit 0 means internally consistent single-pod procedural evidence, never
++flight qualification. Exit 2 means incomplete (including no report). Exit 1
++means failed or invalid. The reader rejects duplicate keys, contradictory
++markers, missing actual-state evidence, nonfinite intervals and inconsistent
++battery deltas. It does not substitute for review of raw measurements/logs or
++validate high-rate/thermal/failure-policy behavior. Its unit-test complete
++fixtures are synthetic and are not live gameplay evidence. Current host output
++is incomplete: no runtime report exists. The 19 Python checks and updated probe
++compile pass; no live run is claimed.
