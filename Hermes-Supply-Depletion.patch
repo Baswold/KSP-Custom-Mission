@@ -1,0 +1,190 @@
+diff --git a/Source/Campaign.cs b/Source/Campaign.cs
+--- a/Source/Campaign.cs
++++ b/Source/Campaign.cs
+@@ -14,7 +14,7 @@
+         public double EpochUT;
+         public Guid VesselId;
+         public string LoadError="";
+-        public bool RationsEnabled, DailyRoutineEnabled;
++        public bool RationsEnabled, DailyRoutineEnabled, SupplyDepleted;
+         public int UnfrozenMask=15;
+         public double SupplyUT, FoodUsed, WaterUsed, FoodMissing, WaterMissing;
+         public int PreviousUnfrozen;
+@@ -29,6 +29,7 @@
+             node.AddValue("epochUT",EpochUT.ToString("R",CultureInfo.InvariantCulture));
+             node.AddValue("vesselID",VesselId.ToString());
+             node.AddValue("dailyRoutineEnabled",DailyRoutineEnabled);node.AddValue("unfrozenMask",UnfrozenMask);
++            node.AddValue("supplyDepleted",SupplyDepleted);
+             node.AddValue("rationsEnabled",RationsEnabled);node.AddValue("supplyError",SupplyError);
+             node.AddValue("supplyUT",SupplyUT.ToString("R",CultureInfo.InvariantCulture));
+             node.AddValue("foodUsed",FoodUsed.ToString("R",CultureInfo.InvariantCulture));
+@@ -40,7 +41,7 @@
+         }
+         public override void OnLoad(ConfigNode node)
+         {
+-            base.OnLoad(node);CrewSnapshot=null;Started=false;LoadError="";RationsEnabled=false;DailyRoutineEnabled=false;UnfrozenMask=15;SupplyError="";
++            base.OnLoad(node);CrewSnapshot=null;Started=false;LoadError="";RationsEnabled=false;DailyRoutineEnabled=false;UnfrozenMask=15;SupplyError="";SupplyDepleted=false;
+             bool requested;
+             if(!bool.TryParse(node.GetValue("started"),out requested)||!requested)return;
+             int schema;double epoch;Guid vessel;
+@@ -61,6 +62,12 @@
+                 if(node.HasValue("unfrozenMask")&&(!int.TryParse(node.GetValue("unfrozenMask"),out UnfrozenMask)||UnfrozenMask<0||UnfrozenMask>15))
+                     SupplyError="Invalid saved crew history; coast blocked.";
+                 if(SupplyError.Length==0)SupplyError=node.GetValue("supplyError")??"";
++                // Old candidates used depletion as a permanent error. Preserve
++                // their recorded shortfall, but resume only observed intervals.
++                if(SupplyError=="Routine rations depleted. Unmet supply demand recorded; coast blocked.")
++                {SupplyError="";SupplyDepleted=true;}
++                if(node.HasValue("supplyDepleted")&&!bool.TryParse(node.GetValue("supplyDepleted"),out SupplyDepleted))
++                    SupplyError="Invalid saved depletion state; coast blocked.";
+                 if(!ReadAmount(node,"supplyUT",out SupplyUT)||SupplyUT<EpochUT||
+                    !ReadAmount(node,"foodUsed",out FoodUsed)||!ReadAmount(node,"waterUsed",out WaterUsed)||
+                    !ReadAmount(node,"foodMissing",out FoodMissing)||!ReadAmount(node,"waterMissing",out WaterMissing)||
+diff --git a/Source/CampaignSupplies.cs b/Source/CampaignSupplies.cs
+--- a/Source/CampaignSupplies.cs
++++ b/Source/CampaignSupplies.cs
+@@ -59,7 +59,10 @@
+                 for(int i=0;i<crew.Count;i++)DailyRoutine.Advance(crew[i],c.EpochUT,c.SupplyUT,now,i,(observedMask&(1<<i))==0,(observedMask&(1<<(i^1)))!=0,foodFraction,waterFraction);
+             }
+             c.SupplyUT=now;c.PreviousUnfrozen=awake;c.UnfrozenMask=mask;
+-            if(c.FoodMissing>1e-8||c.WaterMissing>1e-8)c.SupplyError="Routine rations depleted. Unmet supply demand recorded; coast blocked.";
++            // Shortage is a known observed state, not missing history. Keep
++            // accounting and physiology alive; never synthesize a meal or repay
++            // old unmet demand by silently taking extra stores after resupply.
++            c.SupplyDepleted=food-c.LastTakenFood>1e-8||water-c.LastTakenWater>1e-8;
+         }
+         double ConsumeCampaignSupply(string name,double demand)
+         {
+@@ -88,7 +91,8 @@
+             }
+             if(c.DailyRoutineEnabled&&GUILayout.Button("Suspend daily routine for manual operations")){c.DailyRoutineEnabled=false;message="Automatic daily routine suspended; campaign clock continues. Wake crew manually as required. Routine rations remain finite.";}
+             if(c.DailyRoutineEnabled)GUILayout.Label("Daily routine active: each unfrozen crew rests eight hours per standard day, staggered within the pair. Modeled hygiene uses an extra 0.25 Water per crew/day; exercise/social care require time and awake coverage. No maintenance repairs are automatic.");
+-            GUILayout.Label("Routine used: Food "+c.FoodUsed.ToString("F3")+", Water "+c.WaterUsed.ToString("F3")+" | Unmet: "+c.FoodMissing.ToString("F3")+" / "+c.WaterMissing.ToString("F3"));
++            GUILayout.Label("Routine used: Food "+c.FoodUsed.ToString("F3")+", Water "+c.WaterUsed.ToString("F3")+" | Cumulative unmet: "+c.FoodMissing.ToString("F3")+" / "+c.WaterMissing.ToString("F3"));
++            if(c.SupplyDepleted)GUILayout.Label("Routine rations depleted. Observed needs and cumulative unmet demand continue; restore accessible supplies. Past shortfalls remain in the log. Coast blocked.");
+             if(c.SupplyError.Length>0)GUILayout.Label(c.SupplyError);
+             GUILayout.Label("24-month baseline with two unfrozen crew: 2160 Food + 1080 Water (1440 Water with daily hygiene), before reserve, handovers and extra meals. Existing small pantry alone is insufficient. No free provisions are added by this plan.");
+         }
+diff --git a/tests/CampaignSupplyAdapterTests.cs b/tests/CampaignSupplyAdapterTests.cs
+--- a/tests/CampaignSupplyAdapterTests.cs
++++ b/tests/CampaignSupplyAdapterTests.cs
+@@ -16,7 +16,7 @@
+ {
+     public class HermesCampaign
+     {
+-        public bool Started=true,RationsEnabled=true,DailyRoutineEnabled;
++        public bool Started=true,RationsEnabled=true,DailyRoutineEnabled,SupplyDepleted;
+         public double EpochUT;public int UnfrozenMask=15;
+         public Guid VesselId;
+         public double SupplyUT,FoodUsed,WaterUsed,FoodMissing,WaterMissing,LastTakenFood,LastTakenWater;
+@@ -59,8 +59,9 @@
+         Planetarium.UT=90;console.Step(30);Eq(state.FoodUsed,2*demand); // all genuinely frozen
+         CryoBridge.Frozen.Clear();Planetarium.UT=120;console.Step(30);Eq(state.FoodUsed,4*demand);
+         food.amount=0;water.amount=0;Planetarium.UT=150;console.Step(30);
+-        Yes(state.FoodMissing>0&&state.WaterMissing>0);Eq(food.amount,0);Eq(water.amount,0);Yes(state.SupplyError.Length>0);
+-        double used=state.FoodUsed;Planetarium.UT=180;console.Step(30);Eq(state.FoodUsed,used); // no repeated debt charges after failure
++        Yes(state.FoodMissing>0&&state.WaterMissing>0);Eq(food.amount,0);Eq(water.amount,0);Yes(state.SupplyDepleted);Yes(state.SupplyError=="");
++        double used=state.FoodUsed,missing=state.FoodMissing;Planetarium.UT=180;console.Step(30);Eq(state.FoodUsed,used);Yes(state.FoodMissing>missing);Eq(state.SupplyUT,180); // observed depletion is still accounted
++        food.amount=5;water.amount=5;missing=state.FoodMissing;Planetarium.UT=210;console.Step(30);Yes(!state.SupplyDepleted);Eq(state.FoodMissing,missing);Eq(state.FoodUsed,used+2*demand); // four crew, no retroactive extra charge
+         state.SupplyError="";state.SupplyUT=180;Planetarium.UT=300;console.Step(120);Yes(state.SupplyError.Contains("Unobserved"));Eq(state.SupplyUT,180);
+         state.SupplyError="";Planetarium.UT=170;console.Step(-10);Yes(state.SupplyError.Contains("regressed"));
+         state.SupplyError="";state.SupplyUT=300;Planetarium.UT=330;CryoBridge.Verified=false;console.Step(30);Yes(state.SupplyError.Contains("unavailable"));Eq(state.SupplyUT,300);
+@@ -72,6 +73,13 @@
+         Yes(daily.GetCrew(0).Resting);Yes(!daily.GetCrew(1).Resting);Yes(!daily.GetCrew(2).Resting);
+         Eq(dailyState.WaterUsed,30.0*2/86400);Eq(water.amount,5-dailyState.WaterUsed);Yes(dailyState.SupplyError=="");
+         double unchanged=daily.GetCrew(0).Hunger;daily.Step(0);Eq(daily.GetCrew(0).Hunger,unchanged);
++        food.amount=0;water.amount=0;Planetarium.UT=390;daily.Step(30);
++        Yes(dailyState.SupplyDepleted);Yes(dailyState.SupplyError=="");
++        double hunger=daily.GetCrew(0).Hunger,thirst=daily.GetCrew(0).Thirst,debt=dailyState.FoodMissing;
++        Planetarium.UT=420;daily.Step(30);Yes(daily.GetCrew(0).Hunger>hunger);Yes(daily.GetCrew(0).Thirst>thirst);Yes(dailyState.FoodMissing>debt);Eq(dailyState.SupplyUT,420);
++        food.amount=5;water.amount=5;hunger=daily.GetCrew(0).Hunger;debt=dailyState.FoodMissing;Planetarium.UT=450;daily.Step(30);
++        Yes(!dailyState.SupplyDepleted);Yes(daily.GetCrew(0).Hunger<hunger);Eq(dailyState.FoodMissing,debt); // finite meals recover gradually, history retained
++        double priorUT=dailyState.SupplyUT;hunger=daily.GetCrew(0).Hunger;dailyState.SupplyError="Unknown history";Planetarium.UT=480;daily.Step(30);Eq(dailyState.SupplyUT,priorUT);Eq(daily.GetCrew(0).Hunger,hunger); // unknown intervals remain quarantined
+         Console.WriteLine("PASS: production supply adapter transactions, locked stores, duplicate UT, freeze/thaw transitions, depletion, unknown intervals and API failure (KSP stubs; runtime still required).");
+     }
+ }
+diff --git a/tests/CampaignPersistenceTests.cs b/tests/CampaignPersistenceTests.cs
+new file mode 100644
+--- /dev/null
++++ b/tests/CampaignPersistenceTests.cs
+@@ -0,0 +1,29 @@
++using System;
++using MegaCrew;
++public class ScenarioModule{public virtual void OnLoad(ConfigNode n){}public virtual void OnSave(ConfigNode n){}}
++public class ConfigNode {
++ public System.Collections.Generic.Dictionary<string,string> Values=new System.Collections.Generic.Dictionary<string,string>();
++ System.Collections.Generic.List<ConfigNode> nodes=new System.Collections.Generic.List<ConfigNode>();string name;
++ public void AddValue(string key,object value){Values[key]=value.ToString();}
++ public string GetValue(string key){return Values.ContainsKey(key)?Values[key]:null;}
++ public bool HasValue(string key){return Values.ContainsKey(key);}
++ public bool HasNode(string key){return GetNodes(key).Length>0;}
++ public ConfigNode AddNode(string key){var n=new ConfigNode{name=key};nodes.Add(n);return n;}
++ public ConfigNode[] GetNodes(string key){return nodes.FindAll(n=>n.name==key).ToArray();}
++}
++class CampaignPersistenceTests {
++ static void Yes(bool x){if(!x)throw new Exception("Persistence assertion failed");}
++ static ConfigNode Save(){var c=new HermesCampaign{Started=true,EpochUT=100,VesselId=Guid.NewGuid(),RationsEnabled=true,DailyRoutineEnabled=true,SupplyUT=130,FoodUsed=2.25,WaterUsed=1.5,FoodMissing=0.5,WaterMissing=0.25,SupplyDepleted=true,PreviousUnfrozen=2,UnfrozenMask=3};var n=new ConfigNode();c.OnSave(n);return n;}
++ static HermesCampaign Load(ConfigNode n){var c=new HermesCampaign();c.OnLoad(n);return c;}
++ public static void Main(){
++  var n=Save();var c=Load(n);Yes(c.Started&&c.SupplyDepleted&&c.DailyRoutineEnabled&&c.SupplyError=="");Yes(c.FoodMissing==0.5&&c.FoodUsed==2.25&&c.SupplyUT==130);
++  // A KSP reload restores recorded shortages without treating them as a new meal.
++  n.Values.Remove("supplyDepleted");n.Values["supplyError"]="Routine rations depleted. Unmet supply demand recorded; coast blocked.";c=Load(n);Yes(c.SupplyDepleted&&c.SupplyError==""&&c.FoodMissing==0.5);
++  n.Values["supplyError"]="Unobserved supply interval";c=Load(n);Yes(c.SupplyError=="Unobserved supply interval");
++  n=Save();n.Values["supplyDepleted"]="garbled";Yes(Load(n).SupplyError.Length>0);
++  n=Save();n.Values["foodMissing"]="NaN";Yes(Load(n).SupplyError.Length>0);
++  n=Save();n.Values["supplyUT"]="99";Yes(Load(n).SupplyError.Length>0);
++  n=Save();n.Values["schema"]="99";c=Load(n);Yes(!c.Started&&c.LoadError.Length>0);
++  Console.WriteLine("PASS: production scenario save/load depletion round-trip, legacy migration, retained unmet totals and malformed history rejection (ConfigNode/ScenarioModule doubles).");
++ }
++}
+diff --git a/tests/run_campaign_tests.py b/tests/run_campaign_tests.py
+--- a/tests/run_campaign_tests.py
++++ b/tests/run_campaign_tests.py
+@@ -26,3 +26,14 @@
+  subprocess.run(['dotnet',str(a.csc),'@'+str(d/'args.rsp')],check=True)
+  (d/'AdapterTests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+a.runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':a.runtime.name}}}))
+  subprocess.run(['dotnet',str(d/'AdapterTests.dll')],check=True)
++
++# Save/load the production ScenarioModule logic, including legacy shortage state.
++with tempfile.TemporaryDirectory() as folder:
++ d=pathlib.Path(folder)
++ production='using System;using System.Globalization;using System.Collections.Generic;namespace MegaCrew {'+actual_class(root/'Source/MegaCrew.cs','sealed class CrewRecord')+actual_class(root/'Source/Campaign.cs','sealed class HermesCampaign')+'}'
++ (d/'Scenario.cs').write_text(production)
++ refs=['System.Private.CoreLib.dll','System.Runtime.dll','System.Console.dll','System.Collections.dll','System.Globalization.dll']
++ args=['-nologo','-nostdlib+','-target:exe',f'-out:"{d}/ScenarioTests.dll"']+[f'-reference:"{a.runtime.resolve()/r}"' for r in refs]+[f'"{d}/Scenario.cs"',f'"{root}/Source/CrewStateCodec.cs"',f'"{root}/Source/CampaignTiming.cs"',f'"{root}/tests/CampaignPersistenceTests.cs"']
++ (d/'compile.rsp').write_text('\n'.join(args));subprocess.run(['dotnet',str(a.csc),'@'+str(d/'compile.rsp')],check=True)
++ (d/'ScenarioTests.runtimeconfig.json').write_text(json.dumps({'runtimeOptions':{'tfm':'net'+a.runtime.name.split('.')[0]+'.0','framework':{'name':'Microsoft.NETCore.App','version':a.runtime.name}}}))
++ subprocess.run(['dotnet',str(d/'ScenarioTests.dll')],check=True)
+diff --git a/docs/SUPPLY-DEPLETION.md b/docs/SUPPLY-DEPLETION.md
+new file mode 100644
+--- /dev/null
++++ b/docs/SUPPLY-DEPLETION.md
+@@ -0,0 +1,28 @@
++# Observed depletion and supply reconciliation
++
++Apply Hermes-Supply-Depletion.patch after the cumulative 0.3.4 source patch.
++This focused source change is independent of the console-input and cryo-QA
++patches. It contains no DLL or save and does not enable accelerated coast.
++
++Previously, an observed ration shortage set a permanent supply error while the
++daily routine suppressed the practice needs model. That left hunger, thirst
++and the ledger frozen after the first depleted interval.
++
++A new persisted SupplyDepleted flag now describes an observed shortage. Finite
++food/water transactions, actual-UT routine needs and cumulative unmet demand
++continue over valid observed intervals. Restocking accessible stores supports
++gradual recovery during later funded meals. Historic unmet demand is retained;
++the adapter does not silently take extra supplies to repay old shortages.
++
++Unknown intervals, regressed clocks, missing cryo/crew state and malformed save
++history still quarantine accounting. Depletion is distinct from those errors;
++this change does not guess what happened while the vessel was unobserved.
++Old 0.3.4 depletion-error saves migrate the exact known depletion message into
++the new flag, preserving all totals. The next interval must still satisfy the
++existing observation rules, including the 60-UT-second limit.
++
++Production supply adapter tests cover repeated shortage, rising hunger/thirst,
++finite resupply, gradual recovery and retained history. Production scenario
++save/load tests cover the flag, legacy migration and malformed history. These
++use KSP boundary doubles; actual KSP load, time, resource and DeepFreeze behavior
++remain pending. Full KSP 1.12.5 plugin compile passes. No play copy was updated.
