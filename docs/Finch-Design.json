@@ -1,0 +1,13 @@
+{
+  "parts": 17,
+  "crew_capacity": 2,
+  "dry_with_crew_t": 3.1825,
+  "wet_with_crew_t": 7.3425,
+  "lf_ox_propellant_t": 4.0,
+  "vacuum_isp_s": 345,
+  "ideal_delta_v_m_s": 2662.5184409932513,
+  "mun_surface_twr": 5.013253789706536,
+  "minmus_surface_twr": 16.642777346683616,
+  "scope": "Mun/Minmus low-orbit vacuum sortie candidate; no atmospheric capability or flight qualification",
+  "runtime_verified": false
+}
