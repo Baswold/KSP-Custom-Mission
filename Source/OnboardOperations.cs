@@ -12,6 +12,7 @@ namespace MegaCrew
         readonly string[] resources = { "ElectricCharge", "Food", "Water", "Glykerol" };
         readonly Dictionary<string, ResourceTrend> trends = new Dictionary<string, ResourceTrend>();
         readonly List<string> log = new List<string>();
+        readonly OnboardRendezvous rendezvous = new OnboardRendezvous();
         Rect window = new Rect(610, 100, 590, 560);
         Vector2 scroll;
         bool visible;
@@ -24,7 +25,7 @@ namespace MegaCrew
         string PathName { get { return Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "MegaCrewOperations.cfg"); } }
         void Update()
         {
-            if (!Allowed) { visible = false; InputLockManager.RemoveControlLock(Lock); return; }
+            if (!Allowed) { visible = false; rendezvous.Reset(); InputLockManager.RemoveControlLock(Lock); return; }
             if (save != HighLogic.SaveFolder || vesselId != Ship.id)
             {
                 save = HighLogic.SaveFolder; vesselId = Ship.id; trends.Clear(); nextSample = 0;
@@ -33,6 +34,7 @@ namespace MegaCrew
             }
             if (Input.GetKeyDown(KeyCode.O) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))) visible = !visible;
             double now = Planetarium.GetUniversalTime();
+            rendezvous.Update(Ship, save, now, FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0);
             if (now < nextSample - 2) { foreach (var trend in trends.Values) trend.Reset(); nextSample = now; }
             if (now >= nextSample)
             {
@@ -68,10 +70,10 @@ namespace MegaCrew
         void Draw(int id)
         {
             if (GUILayout.Button("Close")) visible = false;
-            tab = GUILayout.Toolbar(tab, new[] { "Pilot", "Science", "Supplies", "Cryo checks", "Log" });
+            tab = GUILayout.Toolbar(tab, new[] { "Pilot", "Rendezvous", "Science", "Supplies", "Cryo checks", "Log" });
             scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(410));
             GUILayout.Label(Ship.vesselName + " | " + Ship.mainBody.bodyName + " | " + Ship.situation);
-            if (tab == 0) Pilot(); else if (tab == 1) Science(); else if (tab == 2) Supplies(); else if (tab == 3) Cryo(); else Journal();
+            if (tab == 0) Pilot(); else if (tab == 1) rendezvous.Draw(Ship); else if (tab == 2) Science(); else if (tab == 3) Supplies(); else if (tab == 4) Cryo(); else Journal();
             GUILayout.EndScrollView();
             GUILayout.Label(status);
             GUILayout.Label("Local ship controls. Crew roles require a roster member; room occupancy and needs are handled by the I panel.");

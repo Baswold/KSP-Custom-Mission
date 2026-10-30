@@ -7,6 +7,7 @@ Only MegaCrew-prefixed saves and non-EVA vessels expose the panel.
 | --- | --- |
 | Pilot | Altitude, surface/vertical speed, apsides, inclination, time to apsides, existing maneuver node time/delta-v |
 | Flight controls | SAS on/off and stock-supported stability/prograde/retrograde/normal/radial/maneuver modes, requiring a roster pilot; disabled during pause/warp |
+| Rendezvous | Internal same-body vessel selection, synchronized-epoch range/closing/relative-speed readouts and a bounded 60-second linear projection |
 | Science | Run fitted stock ModuleScienceExperiment modules, show experiment ID/deployment status and stored data from science containers; roster scientist required |
 | Supplies | Actual EC/Food/Water/Glykerol totals, low-reserve labels, two-second net rates and depletion estimates |
 | Cryo checks | Orbit situation, crew roster count, reserve charge, Glykerol total and DeepFreeze connection; manual readiness sign-off |
@@ -68,3 +69,20 @@ Pending flight checks:
    mouse-over control locks, closing and scene-change cleanup.
 
 No flight pass is claimed for this candidate. Use a disposable test save.
+
+
+## Rendezvous station source candidate
+
+The Rendezvous tab keeps target selection within the Operations overlay; it does
+not set a stock target or command the vessel. See
+[the rendezvous instrument guide](ONBOARD-RENDEZVOUS.md) for sign conventions,
+linear-horizon interpretation and the pending runtime checklist. The geometry
+model uses the same observation epoch for both vessels. Loaded and unloaded
+target state is labelled; the active vessel must be loaded, unpacked and orbiting.
+
+Builds can use `tools/build.py --output /tmp/megacrew-candidate/MegaCrew.dll` to
+avoid overwriting the branch's generated DLL. Integrate only these addon source
+files with the newest campaign source; do not replace newer campaign/needs code
+with this branch's older expanded baseline. Assembly compilation is source-level
+evidence; IVA controls, target readouts and cache invalidation require a
+disposable flight run before release.
