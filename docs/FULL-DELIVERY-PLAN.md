@@ -1,11 +1,20 @@
 # MegaCrew KSP campaign implementation and acceptance plan
 
-**Read-only planning baseline:** upstream `main` at `9574934` and open Issues/PRs checked on 2026-10-30. This plan preserves the complete requested campaign. It is an execution order and evidence map, not a claim that the work is implemented or qualified.
+**Read-only planning baseline:** upstream `main` at `f749068` and open Issues/PRs checked on 2026-10-30. This plan preserves the complete requested campaign. It is an execution order and evidence map, not a claim that the work is implemented or qualified.
+
+
+**Current reconstruction:** pristine published 0.3.0 ZIP → cumulative 0.3.5
+(`4e86cc0`) once → additive epoch planner (`591ca74`) once → reviewed addon
+sources. Historical ledgers below retain their older source refs. High-rate coast
+and all runtime acceptance remain unqualified. First permitted desktop work is
+the scoped cryopod QA and raw evidence review requested upstream, followed by
+manual crew-transfer refusal, input checks, full cradle loading and navigation
+comparison. Do not install an older branch DLL over the combined candidate.
 
 ## Current baseline and operating constraints
 
 - The repository README at this baseline still describes the published 0.3.0 package: single-player only, `MegaCrew*` time warp blocked, no offline simulation, no autonomous NPC maintenance, and no campaign-wide watch or LMP authority. It also marks generated-save load, complete practice, pantry persistence, cryosleep handover, IVA traversal and controls as needing further game verification.
-- The 0.3.1–0.3.4 campaign work is available as source-only patch artifacts and issue updates, not as a published replacement package. Integrate the latest cumulative patch against its documented 0.3.0 base in an isolated review tree; do not stack cumulative patches or overlay an old ZIP/DLL onto newer source. PRs #4–#8 remain drafts; their reports have candidate-level scope and do not establish release acceptance.
+- The 0.3.1–0.3.5 campaign work is available as source-only patch artifacts and issue updates, not as a published replacement package. Integrate the latest cumulative patch against its documented 0.3.0 base in an isolated review tree; do not stack cumulative patches or overlay an old ZIP/DLL onto newer source. PRs #4–#8 remain drafts; their reports have candidate-level scope and do not establish release acceptance.
 - A user update in Issue #9 explicitly asked that KSP not be used until about 9 o'clock, noting that the Mac may lock. Respect that runtime restriction; do not start, automate, or perform KSP testing before the stated window has passed and the machine is available. Source/model work, document review, deterministic tests and build planning can continue. No runtime checks were performed for this plan.
 - Preserve the user's original saves, the Luna server Universe, installed server configuration and backups. Use a separate clean KSP 1.12.5 build 03190 copy, disposable QA saves, pinned dependencies and backups for all runtime gates. Do not post credentials, private paths or raw unredacted logs.
 - Evidence must distinguish source inspection, model/unit tests, successful compilation, KSP main-menu startup, actual single-player flight behavior, save/reload/revert behavior, and two-client LMP observations. A lower tier never substitutes for a higher tier.
@@ -26,7 +35,7 @@
 **Work**
 
 1. Obtain a verified snapshot of upstream `main` and its published 0.3.0 archive; record commit, archive hash, dependency manifest and KSP build.
-2. Apply the newest cumulative campaign patch (v0.3.4 source patch) once to a disposable copy of the documented 0.3.0 source. Verify the patch's included source/docs/tests against the patch manifest and run its packager comparison. Do not apply 0.3.1, 0.3.2 or 0.3.3 cumulatively on top of 0.3.4.
+2. Apply the newest cumulative campaign patch (v0.3.5 source patch) once to a disposable copy of the documented 0.3.0 source. Verify the patch's included source/docs/tests against the patch manifest and run its packager comparison. Do not stack older cumulative packets or the superseded console/supply/QA supplements with 0.3.5. Apply the additive epoch-planner patch once afterward.
 3. Preserve upstream-owned 0.3 files and define one maintainer/merge boundary per subsystem. Keep separate contributions in separate source files until reviewed; reconcile PR #5's exact-source integration with upstream room/needs ownership rather than merging its older compiled DLL.
 4. Maintain a single integration build manifest with source hashes, dependency archive hashes, DLL hash and origin for each test copy. Keep third-party assets and personal server data out of packages.
 
@@ -38,7 +47,7 @@
 
 1. Build the combined current source against KSP 1.12.5 build 03190 assemblies. Check compiler output and ensure the candidate DLL corresponds to this source revision.
 2. In a clean separate game copy, install exact pinned SSPX + IVA extras, B9PartSwitch, NearFutureProps, ModuleManager 4.2.3, FreeIVA 0.2.20.2, DeepFreeze 0.31.0.0, CRP, EVS 2.3, and the agreed EVE/BoulderCo visual set. Validate hashes and avoid duplicate ModuleManager/cloud packs.
-3. Verify startup logs report exact mod/plugin versions. Run the preflight and needs/model suites, campaign state codec, timing, coast decision, supply adapter and 0.3.4 cryo audit tests. Treat DLL compilation and model tests as code evidence only.
+3. Verify startup logs report exact mod/plugin versions. Run the preflight and needs/model suites, campaign state codec, timing, coast decision, supply adapter and 0.3.5 cryo audit tests. Treat DLL compilation and model tests as code evidence only.
 4. After runtime restriction clears, load the generated practice save from the clean copy. Test physical stability, actual vessel and crew manifest, save/reload/revert, room panel interactions, input-lock cleanup and known collider/warning impact. Keep the centrifuge stopped pending its separate qualification.
 
 **Gate 1 evidence**: reproducible install hashes; clean startup with version logs; save load and return-to-flight; no evidence inferred from folder presence or the earlier 0.2 trainer. Record warnings and determine gameplay impact without editing existing saves.
@@ -59,7 +68,7 @@
 
 **Work**
 
-1. Rebase/adapt PR #5's onboard engineering/operations candidate onto current 0.3.4 sources. Preserve its actual-device Extend/Retract events, orbital/node/SAS readouts, stock experiment execution, EC/Food/Water/Glykerol diagnostics and bounded per-save journal. Keep overlays as local UI; they are not shared authority or physically animated stations.
+1. Rebase/adapt PR #5's onboard engineering/operations candidate onto current 0.3.5 sources. Preserve its actual-device Extend/Retract events, orbital/node/SAS readouts, stock experiment execution, EC/Food/Water/Glykerol diagnostics and bounded per-save journal. Keep overlays as local UI; they are not shared authority or physically animated stations.
 2. Perform the PR #5 checklist in a disposable flight save: compare telemetry to stock; test pilot/engineer/scientist gates, unsupported SAS modes, pause/warp disable, actual stock experiment result/data, supply sample resets and journal save/reload/save-folder isolation; test three panels and input-lock cleanup together.
 3. Complete PR #8's numerical trajectory work in layers: pure math/range/property tests; KSP frame mapping to stock `GetBurnVector`; patched-conic patch/transition validity; maneuver node creation on a disposable vessel; orbital prediction comparison to KSP after propagation; invalid/near-collinear/extreme-time/refusal behavior. Extend from two-body Lambert into planet intercept/atmospheric periapsis/docking approach only with KSP-patched-conic validation and robust no-solution output.
 4. Resolve PR #8 review cases: impossible approval window (`now + roundTrip` must leave adequate time before ignition), unique request nonce/generation and stale request rejection, auth role-to-principal binding and canonical principal identity, exact expiry semantics, disconnect/reconnect invalidation, and finite/range checks. Bind approval to complete canonical maneuver data and recompute fingerprint from the live node at dispatch. The caller must not omit UT, vector/frame, reference body, vessel, target or plan revision from the hash.
@@ -167,14 +176,14 @@
 ## Immediate next actions
 
 1. Treat the bedtime request as no KSP runtime tests before 09:00 Australia/Sydney on 2026-10-31 (the next morning after the request). Continue source/model work in the meantime; inspect availability before resuming runtime tests.
-2. Review the source-only v0.3.4 patch and PR #8 pure timing/approval contracts against the exact base without installing a new DLL. Add deterministic coverage for impossible approval windows, request replay/nonce, full burn watch coverage and canonical plan hashes.
+2. Review the source-only v0.3.5 patch and PR #8 pure timing/approval contracts against the exact base without installing a new DLL. Add deterministic coverage for impossible approval windows, request replay/nonce, full burn watch coverage and canonical plan hashes.
 3. Resolve the PR #6 test-fixture state and mass/hierarchy evidence in a disposable environment after runtime is allowed.
 4. Build a test matrix and collect missing single-player evidence for Gates 1–5 before enabling any accelerated coast or declaring lander readiness.
 5. Keep LMP and in-game stories downstream of qualified single-player foundations and lander operations.
 
 ## Status summary at review time
 
-Source/model and compilation work has progressed: 0.3.4 source-only campaign/care/accounting/cryo audit candidates; PR #5 single-player onboard overlay candidate; PR #6 craft loader evidence; PR #8 bounded orbital math and approval/timing candidates. Runtime/high-warp/pod-power/lander flight qualification remains explicitly pending in upstream updates. LMP, synchronized custom state, two-human approval, physical EVA maintenance and authored playable stories remain future acceptance gates. The bedtime request is treated conservatively as no KSP runtime tests before 09:00 Australia/Sydney on 2026-10-31; source/model work continues. No emergency schedule is reproduced here.
+Source/model and compilation work has progressed: 0.3.5 source-only campaign/care/accounting/cryo audit candidates; PR #5 single-player onboard overlay candidate; PR #6 craft loader evidence; PR #8 bounded orbital math and approval/timing candidates. Runtime/high-warp/pod-power/lander flight qualification remains explicitly pending in upstream updates. LMP, synchronized custom state, two-human approval, physical EVA maintenance and authored playable stories remain future acceptance gates. The bedtime request is treated conservatively as no KSP runtime tests before 09:00 Australia/Sydney on 2026-10-31; source/model work continues. No emergency schedule is reproduced here.
 
 
 ## Source progress ledger — overnight development pass
@@ -293,3 +302,41 @@ installed package changed during this pass.
 PR #5 `62ec16c` adds Compare the Epoch, a proposed routine crew briefing about
 reading identity, timestamp and projection horizon together. It awards no
 rendezvous, docking success or new emergency.
+
+
+### 0.3.5 baseline, stored-science observations and identity gates
+
+- **#5 `2e7d806`, `4e1114b`, `7881126`:** retained-science baseline/compare
+  observes actual stored report quantities, deduplicates identical report-object
+  views and keeps distinct cards aggregated by subject. Reordered inventories
+  do not manufacture progress. Read-only capture is trait-neutral for the human
+  pilot/engineer watch; stock Run retains its existing Scientist gate. The
+  original inventory view and stock controls remain. Failed captures clear old
+  comparisons. Context/times identify each temporary observation; no science
+  points or unique discovery is inferred. Pure tests pass and the final 31-source
+  0.3.5 + epoch + operations/science + navigation candidate compiles. Nine
+  underlying model/boundary suites pass; no runtime result is claimed.
+- **Shared readiness release gate:** mutating onboard engineering/science/SAS
+  actions still use roster traits, not the campaign's authoritative awake/fit
+  CrewRecord state. Wire one shared duty query at display and execution; do not
+  duplicate thresholds or treat traits as human identity. Human-watch stock
+  experiment policy also needs reconciliation while Ada is frozen. Read-only
+  data review does not grant command authority.
+- **#8 `0b3342c`:** candidate builder now verifies and applies cumulative 0.3.5
+  then the additive epoch packet, with manifests/provenance for both. Fourteen
+  tests pass, including a dependent two-patch Git fixture; real prepare/build
+  succeeds. Older 0.3.4 reconstruction instructions are historical.
+- **#8 `3ea374b`:** epoch-planner endpoint review found no mismatch with full
+  duty-window coverage. A future selected epoch remains only a pre-start
+  proposal; revalidate at dispatch and initialize actual campaign UT once.
+  Never rebind an active campaign or shift physical burn epochs. Production
+  trajectory/dual-approval integration is still open.
+- **#6 `3b0ffe6`:** orbital QA now validates both original practice and spawned
+  craft GUIDs, expected save/body and loaded/unpacked state across waits. It
+  starts observation explicitly after spawning and requires 35 live/35 snapshot
+  parts before docking diagnostics. Probe compiles; runtime switching/load and
+  release/redocking are pending.
+
+What Stayed Aboard is a proposed routine scene attached to the science feature.
+It distinguishes measured retained reports from requested actions, preserves
+actual stock data and introduces no extra emergency.
