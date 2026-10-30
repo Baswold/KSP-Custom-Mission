@@ -21,6 +21,7 @@
     "scene": "main menu ShipConstruction.LoadShip",
     "flight_verified": false,
     "cradle_root": "sspx-core-375-1",
-    "dock_parent_identity_verified": false
+    "dock_parent_identity_verified": true,
+    "dock_state_at_main_menu": "Ready (both); flight state unverified"
   }
 }

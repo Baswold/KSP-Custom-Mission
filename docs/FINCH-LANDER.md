@@ -104,3 +104,8 @@ not reproducible under separated probe lifetimes. Both docking parts have
 `flightID = 0` in this main-menu context, so the parent log cannot distinguish
 which is the lander-side port. Confirm the two ports' actual attachment and
 release behavior in an editor/flight scene before claiming the cradle works.
+
+The later index-based loader probe confirms cradle part 18 (lander cabin) is
+parented to part 21 (lander port), which is parented to part 17 (carrier port).
+Both docking modules report `Ready` in the main-menu load context; that is not
+proof of their initialized flight docking state or an operational release event.
