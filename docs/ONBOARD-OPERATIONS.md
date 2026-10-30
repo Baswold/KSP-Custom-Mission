@@ -88,6 +88,11 @@ with this branch's older expanded baseline. Assembly compilation is source-level
 evidence; IVA controls, target readouts and cache invalidation require a
 disposable flight run before release.
 
+The read-only docking-port panel selects loaded, same-body ports and displays
+their measured relative geometry. See [onboard docking instruments](ONBOARD-DOCKING-INSTRUMENTS.md)
+for the axis signs, invalidation rules and pending runtime checks. It does not
+recommend or perform a docking maneuver.
+
 
 ## Retained-science observation candidate
 

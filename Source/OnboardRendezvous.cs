@@ -19,8 +19,9 @@ namespace MegaCrew
         bool targetLookupFailed;
         RendezvousEstimate estimate;
         string status = "Choose an orbiting vessel to inspect.";
+        readonly OnboardDockingInstruments dockingInstruments = new OnboardDockingInstruments();
 
-        public void Reset()
+        public void Reset(bool resetDocking = true)
         {
             activeGuid = Guid.Empty;
             selectedGuid = Guid.Empty;
@@ -30,6 +31,7 @@ namespace MegaCrew
             lastObservedUT = 0;
             ClearEstimate();
             status = "Choose an orbiting vessel to inspect.";
+            if (resetDocking) dockingInstruments.Reset();
         }
 
         void ClearEstimate()
@@ -46,6 +48,8 @@ namespace MegaCrew
 
         public void Update(Vessel active, string save, double now, bool paused, bool warped)
         {
+            dockingInstruments.Update(active, save, HighLogic.CurrentGame, now, paused,
+                warped || TimeWarp.CurrentRateIndex != 0 || TimeWarp.CurrentRate != 1.0f);
             if (!Finite(now) || now < 0)
             {
                 ClearEstimate();
@@ -55,7 +59,7 @@ namespace MegaCrew
 
             if (active == null || active.orbit == null || active.orbit.referenceBody == null)
             {
-                Reset();
+                Reset(false);
                 status = "Active vessel orbit is unavailable.";
                 return;
             }
@@ -212,10 +216,11 @@ namespace MegaCrew
             catch (Exception) { }
             if (!contextMatches)
             {
-                Reset();
+                Reset(false);
                 status = "Vessel, body, or save changed; waiting for a fresh snapshot.";
             }
 
+            dockingInstruments.Draw(active, HighLogic.SaveFolder, HighLogic.CurrentGame, Planetarium.GetUniversalTime());
             GUILayout.Label("RENDEZVOUS / READ-ONLY ORBIT SNAPSHOT");
             GUILayout.Label("Select another same-reference-body vessel in orbit. No stock target, controls, or trajectory are changed.");
             List<Vessel> targets = EligibleTargets(active);
