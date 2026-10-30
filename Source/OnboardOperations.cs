@@ -14,6 +14,7 @@ namespace MegaCrew
         readonly List<string> log = new List<string>();
         readonly OnboardRendezvous rendezvous = new OnboardRendezvous();
         readonly OnboardScienceObservation scienceObservation = new OnboardScienceObservation();
+        readonly OnboardPowerSurvey powerSurvey = new OnboardPowerSurvey();
         Rect window = new Rect(610, 100, 590, 560);
         Vector2 scroll;
         bool visible;
@@ -29,7 +30,7 @@ namespace MegaCrew
         string PathName { get { return Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "MegaCrewOperations.cfg"); } }
         void Update()
         {
-            if (!Allowed) { visible = false; rendezvous.Reset(); scienceObservation.Reset(); InputLockManager.RemoveControlLock(Lock); return; }
+            if (!Allowed) { visible = false; rendezvous.Reset(); scienceObservation.Reset(); powerSurvey.Abort("Survey stopped because the active mission vessel became unavailable."); InputLockManager.RemoveControlLock(Lock); return; }
             if (save != HighLogic.SaveFolder || vesselId != Ship.id)
             {
                 save = HighLogic.SaveFolder; vesselId = Ship.id; trends.Clear(); nextSample = 0;
@@ -41,6 +42,7 @@ namespace MegaCrew
             double now = Planetarium.GetUniversalTime();
             rendezvous.Update(Ship, save, now, FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0);
             scienceObservation.UpdateContext(Ship, save, HighLogic.CurrentGame, now);
+            powerSurvey.Update(Ship, save, HighLogic.CurrentGame, now, FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0 || TimeWarp.CurrentRate != 1.0f);
             if (now < nextSample - 2) { foreach (var trend in trends.Values) trend.Reset(); nextSample = now; }
             if (now >= nextSample)
             {
@@ -222,6 +224,7 @@ namespace MegaCrew
                 if (cap > 0 && amount / cap < .2) GUILayout.Label("LOW RESERVE: " + name);
             }
             GUILayout.Label("Rates use two-second samples. Sunlight, equipment, meals and freeze/thaw change demand. These estimates are not guaranteed endurance.");
+            powerSurvey.Draw(Ship, HighLogic.SaveFolder, HighLogic.CurrentGame, Planetarium.GetUniversalTime(), FlightDriver.Pause, TimeWarp.CurrentRateIndex != 0 || TimeWarp.CurrentRate != 1.0f);
         }
         void Cryo()
         {

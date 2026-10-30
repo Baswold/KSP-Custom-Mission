@@ -107,3 +107,11 @@ remain trait-neutral. See [duty-gated stations](DUTY-GATED-STATIONS.md) for the
 current 0.3.6 recipe and pending live refusal/recovery checks. Earlier trait-only
 notes above describe the previous candidate; they no longer authorize these
 mutating commands when the shared API is unavailable.
+
+
+## Observed power survey
+
+Supplies now includes a transient 60-second ElectricCharge survey. It records
+actual samples and stops on gaps or changed vessel context; it forecasts no
+endurance or cryopod readiness. See [power surveys](POWER-SURVEYS.md) for
+measurement interpretation and the pending live checklist.
