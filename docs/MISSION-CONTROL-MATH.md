@@ -35,3 +35,19 @@ A planet intercept needs multi-body patched-conic search and independent
 propagation, not a circular two-body shortcut. Docking rendezvous needs relative
 position and velocity at encounter, collision constraints and approach staging.
 Those remain open work. No automatic burns or time warp are introduced here.
+
+## Two-body Lambert prototype
+
+`Lambert.SolveShortWay` computes a zero-revolution, short-way transfer between
+3D position vectors in one central-body frame. It returns departure and arrival
+velocities; it rejects collinear geometry, invalid inputs and cases where it
+cannot bracket a well-conditioned solution. It does not select a launch window,
+solve long-way or multi-revolution transfers, model sphere-of-influence crossings
+or check collisions. A small internal time residual is not an independent proof
+that the transfer is operationally safe.
+
+The numerical tests cover a circular quarter-orbit analytic benchmark and a
+noncircular transfer at 300, 1200 and 3000 seconds, verified with independent
+20,000-step Runge–Kutta propagation. These are finite examples, not a full
+accuracy guarantee. Before use for node creation, add broader geometry/time
+coverage and compare the candidate against KSP's actual patched-conic trajectory.
