@@ -67,3 +67,14 @@ Native KSP loading is checked with a temporary disposable probe, separate from t
 production mod. Results will be recorded here after observation. Flight load,
 storage/release clearance, landing, EVA access, re-ascent, redocking and reload
 persistence must all pass before these candidates can be called usable landers.
+
+### Loader-probe history
+
+The first native loader attempt rejected both crafts because generated stock part
+names containing underscores were not encoded as KSP's period-separated names.
+The generator and a regression test now enforce this format. A second attempt
+produced no result while using Unity's game-time wait at the main menu. The test
+probe now uses a real-time wait and explicit begin markers, and is being rerun.
+The temporary `tests/ksp/LanderLoaderProbe.cs` is test-only and must not be placed
+in a normal installation: it instantiates and destroys both craft in the main menu.
+It is not included in the production MegaCrew DLL.
