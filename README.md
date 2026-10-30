@@ -74,3 +74,11 @@ Known pending checks: generated save load, physical stability, hatch traversal, 
 ## Build from source
 
 With a .NET SDK installed, run `python3 tools/build.py --managed "/path/to/KSP.app/Contents/Resources/Data/Managed" --csc "/path/to/dotnet/sdk/VERSION/Roslyn/bincore/csc.dll"`. On Windows/Linux select the equivalent KSP Data/Managed folder. This uses your own KSP reference assemblies and does not redistribute them. Restart KSP after replacing the DLL.
+
+## Onboard engineering candidate
+
+The source checkout adds an [engineering panel](docs/ONBOARD-ENGINEERING.md) for
+real solar-array and radiator controls available from IVA. Use **Ctrl+Alt+E**
+(Control+Option+E on Mac) or the ENGINEERING button. It requires an engineer aboard
+and a MegaCrew save. Build validation passed; runtime checks remain pending.
+The older downloadable 0.2.0 ZIP does not contain this candidate.
