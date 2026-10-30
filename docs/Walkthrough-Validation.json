@@ -1,0 +1,53 @@
+{
+  "craft": "Hermes Walkthrough v2",
+  "parts": 17,
+  "connected_tree": true,
+  "lowest_part_center_m": 6.0,
+  "route": [
+    {
+      "part": "sspx-core-375-1",
+      "internal": "sspx-core-375-1-iva",
+      "passThroughNodeA": null,
+      "passThroughNodeB": null
+    },
+    {
+      "part": "sspx-habitation-375-1",
+      "internal": "sspx-habitation-375-1-iva",
+      "passThroughNodeA": null,
+      "passThroughNodeB": null
+    },
+    {
+      "part": "sspx-lab-375-1",
+      "internal": "sspx-lab-375-1-iva",
+      "passThroughNodeA": null,
+      "passThroughNodeB": null
+    },
+    {
+      "part": "sspx-expandable-centrifuge-375-1",
+      "internal": "sspx-expandable-centrifuge-375-1-iva",
+      "passThroughNodeA": null,
+      "passThroughNodeB": null
+    },
+    {
+      "part": "sspx-tube-375-1",
+      "internal": "FreeIva_sspx-tube-375-1-iva",
+      "passThroughNodeA": null,
+      "passThroughNodeB": null
+    },
+    {
+      "part": "sspx-adapter-25-375-2",
+      "internal": "pass-through adapter",
+      "passThroughNodeA": "top",
+      "passThroughNodeB": "bottom"
+    },
+    {
+      "part": "CRY-2300Freezer",
+      "internal": "Cry-2300Internals",
+      "passThroughNodeA": null,
+      "passThroughNodeB": null
+    }
+  ],
+  "in_flight_traversal_tested": false,
+  "all_part_names_match_loaded_parts": true,
+  "part_name_fix": "Rockomax32_BW serialized as Rockomax32.BW, matching KSP runtime and stock craft"
+}
