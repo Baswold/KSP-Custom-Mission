@@ -232,3 +232,20 @@ The reordered generator is still awaiting runtime qualification. Eleven portable
 validator tests include the old forward-parent shape and a reordered passing
 shape, malformed inputs and ID/index failures. No personal save or server data
 is included in those tests.
+
+
+### Identity-bound orbital observations
+
+The test-only orbital probe now records the original practice vessel GUID from
+the explicitly loaded disposable save before flight. It checks that exact
+identity, save and home body, then waits boundedly for loaded/unpacked state
+before spawning. It starts observation explicitly after a successful switch
+rather than relying on another flight-addon startup.
+
+The spawned vessel GUID and body are retained for every observation wait. A
+changed active vessel, save or body produces an inconclusive result. Docking
+diagnostics require the exact target to be loaded/unpacked with both 35 live
+parts and 35 saved snapshots. Names are labels, not identity. Scene teardown
+releases observation ownership so a restarted addon can resume the same target
+without spawning again. Source compiles against KSP 1.12.5; switching timing,
+complete loading and docking/release remain unverified in-game.
