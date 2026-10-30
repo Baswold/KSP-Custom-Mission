@@ -448,3 +448,33 @@ asks the crew to read port labels and sample time aloud before comparing the
 figures. It adds no docking clearance, completed task, animated interaction or
 campaign emergency. Live validation is the next priority once UI observation
 is restored; LMP authority and synchronization remain later gates.
+
+### IVA animation evidence tooling and input recovery
+
+- **#5 `76497fe`:** local 1.12.5 API inspection identifies existing seat/model
+  lookup via `InternalSeat.kerbalRef` and `Kerbal.Animators`. The EVA animation
+  manager is not a seated-IVA gesture API. Asset names alone do not establish
+  playable states. A separate one-shot catalog probe records actual live
+  controllers, clips, layers/state hashes and candidate `HasState` results.
+  Exact disposable root, scope/enable, save, 1x IVA and crew/seat/render identity
+  are checked; unknown cryo state makes results inconclusive. It never plays
+  animations or changes care, seats or camera. Seven builder guard tests and
+  31 recording-harness assertions pass; the actual dedicated builder compiled
+  the probe against KSP assemblies in an ephemeral fixture. Nothing is staged
+  or runtime-qualified. The normal gameplay plugin is unchanged by this commit.
+- A read-only public Social activity snapshot was requested from Hamish's core
+  to provide actor/partner/room/vessel/elapsed context to a future presentation
+  adapter. This API is still requested, not implemented here. Care progression
+  and rewards retain one owner. The full proposed Port Readings scene includes
+  active workload, choices, recoverable mistakes and evidence/persistence gaps;
+  it adds no emergency.
+- **#8 `4e36f51`:** selecting KSP through the native Window menu restored
+  capture. Keyboard navigation reached the sole disposable QA save selector;
+  game-button/save-dialog activation remains unverified. No flight/cryo action
+  occurred, the game was closed, and the pristine save hash is unchanged.
+  Manual refusal and all later runtime gates remain open. The separate
+  automated cryo profile remains unlaunched.
+
+Next animation evidence is a catalog from an actual IVA model, followed only
+then by a separate opt-in gesture/restoration test. A successful catalog alone
+will not qualify animation, animated handover, autonomous NPCs or multiplayer.
