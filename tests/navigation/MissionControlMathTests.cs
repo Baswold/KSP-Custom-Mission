@@ -76,6 +76,22 @@ class MissionControlMathTests
         approvals.Connection(false);approvals.Connection(true);Yes(!approvals.Approve("b","Basil","req2",2,"plan-B",106));
         try { approvals.Request("req2",107,1,30); throw new Exception("reused request accepted"); } catch(InvalidOperationException) {}
         try { approvals.Request("req3",107,0,30); throw new Exception("delay floor bypassed"); } catch(ArgumentException) {}
+        // Exercise boundary gates with a fully approved request, not a previously invalidated one.
+        var gate=new BurnApprovals((id,role)=>(id=="h"&&role=="Hamish")||(id=="b"&&role=="Basil"),2);
+        gate.Connection(true);gate.Revise("exact",200);gate.Request("window",100,2,10);
+        Yes(gate.Approve("h","Hamish","window",1,"exact",102));
+        Yes(gate.Approve("b","Basil","window",1,"exact",102));
+        Yes(gate.Ready("exact",109.999));Yes(!gate.Ready("exact",110));
+        Yes(!gate.Approve("b","Basil","window",1,"exact",110));
+        Yes(!gate.Ready("exact",double.NaN));Yes(!gate.Ready("exact",double.PositiveInfinity));
+        gate.Revise("burn",105);gate.Request("near-burn",100,2,20);
+        Yes(gate.Approve("h","Hamish","near-burn",2,"burn",102));
+        Yes(gate.Approve("b","Basil","near-burn",2,"burn",102));
+        Yes(gate.Ready("burn",104.999));Yes(!gate.Ready("burn",105));
+        var revoked=false;var revocable=new BurnApprovals((id,role)=>!revoked&&((id=="h"&&role=="Hamish")||(id=="b"&&role=="Basil")));
+        revocable.Connection(true);revocable.Revise("r",200);revocable.Request("r1",100,0,20);
+        Yes(revocable.Approve("h","Hamish","r1",1,"r",100));Yes(revocable.Approve("b","Basil","r1",1,"r",100));
+        Yes(revocable.Ready("r",101));revoked=true;Yes(!revocable.Ready("r",101));
         Console.WriteLine("PASS: light time, periapsis reconstruction, circular Lambert and independent RK4 propagation.");
     }
 }
