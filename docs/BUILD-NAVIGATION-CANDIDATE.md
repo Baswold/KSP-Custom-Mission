@@ -50,3 +50,10 @@ artifact hashes, existing destinations, relative output paths, ordered
 cumulative patch application, missing operations blobs, collision/no-overwrite
 behavior, core-source preservation, and both navigation-only and combined
 synthetic candidate preparation.
+
+
+Rebuild a combined candidate with this script into a new output directory. The
+extracted host packet's `tools/build.py` currently scans only flat `Source/*.cs`,
+so it omits nested navigation sources. This builder compiles `Source/**/*.cs`
+recursively. Keep using it for combined builds until the host helper is updated;
+an in-place rebuild with the flat helper would produce a different plugin.
