@@ -135,11 +135,24 @@ public sealed class CryoRefusalProbe : MonoBehaviour
         Record("fixture_vessel_guid", intendedVessel.ToString("D"));
         Record("stage", "loading_exact_fixture");
         RequireFixtureAndStaticInputs();
-        HighLogic.SaveFolder = SaveName;
         HighLogic.CurrentGame = game;
+        GamePersistence.UpdateScenarioModules(game);
+        Record("scenario_module_update_called", true);
+        Record("scenario_module_count_after_update", game.scenarios == null ? -1 : game.scenarios.Count);
+        Record("scenario_module_names_after_update", ScenarioModuleNames(game));
+
+        // This is the ordinary, native save step in KSP's load-game menu pipeline.
+        // The exact disposable clone is the only target; the pristine template hash
+        // was checked above and is intentionally not claimed unchanged afterward.
+        GamePersistence.SaveGame(game, "persistent", SaveName, SaveMode.OVERWRITE);
+        Record("native_lifecycle_save_performed", true);
+        GameEvents.onGameStatePostLoad.Fire(game.config);
+        Record("postload_event_fired", true);
+        HighLogic.SaveFolder = SaveName;
         loadedGame = game;
         fixtureLoaded = true;
-        FlightDriver.StartAndFocusVessel(game, 0);
+        game.Start();
+        Record("game_start_called", true);
 
         float flightDeadline = Time.realtimeSinceStartup + 180f;
         while (!FlightGlobals.ready || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null ||
@@ -427,7 +440,7 @@ public sealed class CryoRefusalProbe : MonoBehaviour
         if (!String.Equals(Path.GetFullPath(KSPUtil.ApplicationRootPath), root, StringComparison.Ordinal) ||
             HighLogic.SaveFolder != SaveName || !System.Object.ReferenceEquals(HighLogic.CurrentGame, loadedGame))
             throw new InconclusiveException("QA root or save context changed.");
-        // Scene load/FlightGlobals.ready may legitimately lag StartAndFocusVessel.
+        // Scene load/FlightGlobals.ready may legitimately lag Game.Start().
         // The dedicated readiness loop has its own timeout; do not reject that transition.
         if (!flightObserved) return;
         if (FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0)
@@ -493,6 +506,16 @@ public sealed class CryoRefusalProbe : MonoBehaviour
         }
         entries.Sort(StringComparer.Ordinal);
         return String.Join("|", entries.ToArray());
+    }
+
+    static string ScenarioModuleNames(Game game)
+    {
+        if (game == null || game.scenarios == null) return "unknown";
+        var types = new List<string>();
+        foreach (ProtoScenarioModule scenario in game.scenarios)
+            types.Add(scenario == null ? "null" : scenario.moduleName ?? "unknown");
+        types.Sort(StringComparer.Ordinal);
+        return String.Join("|", types.ToArray());
     }
 
     static string FreezerPartSnapshot(Vessel vessel)

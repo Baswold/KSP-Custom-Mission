@@ -143,7 +143,7 @@ def main() -> int:
     except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as exc:
         parser.error(str(exc))
     print(f"Built one scoped refusal QA addon: {output}")
-    print("No save, normal MegaCrew plugin, provider DLL, or server file was written.")
+    print("The build wrote only this QA addon; the runtime probe performs its single native lifecycle save in the disposable QA copy.")
     return 0
 
 

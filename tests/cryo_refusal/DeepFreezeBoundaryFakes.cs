@@ -13,8 +13,22 @@ namespace DF
     }
     public static class DeepFreeze
     {
-        public static bool APIReady = true;
-        public static DeepFreezeState Instance = new DeepFreezeState();
+        public static bool APIReady;
+        public static bool InitializeOnNativeGameStart = true;
+        public static DeepFreezeState Instance;
+        static DeepFreeze() { GameEvents.onGameStarted.Add(ObserveNativeGameStart); }
+        public static void ObserveNativeGameStart(Game game)
+        {
+            if (!InitializeOnNativeGameStart || game == null ||
+                !System.Object.ReferenceEquals(HighLogic.CurrentGame, game) ||
+                HighLogic.SaveFolder != "MegaCrew Background QA" ||
+                !GamePersistence.ScenarioModulesUpdated || !GamePersistence.SavedForNativeStart ||
+                !GameEvents.onGameStatePostLoad.WasFired ||
+                !game.scenarios.Exists(s => s != null && s.moduleName == "DeepFreeze")) return;
+            if (Instance == null) Instance = new DeepFreezeState();
+            APIReady = true;
+            LifecycleLog.Add("DeepFreeze.OnLoad/APIReady");
+        }
     }
 }
 

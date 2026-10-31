@@ -57,7 +57,8 @@ static class CryoRefusalProbeTests
         Contains(report, "flight_time_warp_rate_index_at_readiness=0", "flight warp index is sampled after readiness");
         Contains(report, "result=REFUSED_AS_EXPECTED", "normal flight clock allows the refusal observation");
         Contains(report, "freeze_request_called=True", "normal ready flight reaches the one refusal request");
-        Equal(1, FlightDriver.StartCalls, "menu clock state did not prevent starting the scoped fixture");
+        Equal(1, Game.StartCalls, "menu clock state did not prevent native Game.Start");
+        AssertNativeLifecycleOrder();
         Equal(0, FreezeModuleCalls(), "normal ready flight still receives a refusal");
     }
 
@@ -72,7 +73,7 @@ static class CryoRefusalProbeTests
         Contains(report, "flight_pause_at_readiness=True", "paused flight is observed only after readiness");
         Contains(report, "run_state=INCONCLUSIVE", "paused flight fails closed after readiness");
         Equal(false, report.Contains("freeze_request_called=True"), "paused flight never dispatches Freeze");
-        Equal(1, FlightDriver.StartCalls, "paused-flight guard is reached only after fixture start");
+        Equal(1, Game.StartCalls, "paused-flight guard is reached only after Game.Start");
         Equal(0, FreezeModuleCalls(), "paused flight makes no pod call");
     }
 
@@ -82,7 +83,8 @@ static class CryoRefusalProbeTests
         Directory.CreateDirectory(wrong); KSPUtil.ApplicationRootPath = wrong;
         ResetEnvironment(); RunProbe();
         Equal(0, GamePersistence.LoadCalls, "unscoped probe never loads a save");
-        Equal(0, FlightDriver.StartCalls, "unscoped probe never starts flight");
+        Equal(0, Game.StartCalls, "unscoped probe never starts the game");
+        Equal(0, FlightDriver.StartCalls, "unscoped probe never calls FlightDriver directly");
         Equal(0, Application.QuitCount, "unscoped probe never quits KSP");
         Equal(false, File.Exists(Path.Combine(wrong, "CryoRefusalQA.running")), "unscoped probe writes no running marker");
         Equal(false, File.Exists(Path.Combine(wrong, "CryoRefusalQA-result.cfg")), "unscoped probe writes no report");
@@ -108,7 +110,8 @@ static class CryoRefusalProbeTests
         ResetEnvironment(); RunProbe();
         string report = ReadReport();
         Equal(0, GamePersistence.LoadCalls, "wrong provider hash refuses before save load");
-        Equal(0, FlightDriver.StartCalls, "wrong provider hash never starts flight");
+        Equal(0, Game.StartCalls, "wrong provider hash never starts the game");
+        Equal(0, FlightDriver.StartCalls, "wrong provider hash never calls FlightDriver directly");
         Equal(0, FreezeModuleCalls(), "wrong provider hash never invokes freezer action");
         Contains(report, "run_state=INCONCLUSIVE", "hash mismatch is inconclusive");
         Contains(report, "no cryo request made", "hash mismatch explains request was not made");
@@ -144,7 +147,23 @@ static class CryoRefusalProbeTests
         Contains(report, "resource_delta_cause_inferred=False", "resource changes are not attributed");
         Equal(false, report.Contains("transfer="), "probe never claims a transfer");
         Equal(1, GamePersistence.LoadCalls, "valid scoped run loads once");
-        Equal(1, FlightDriver.StartCalls, "valid scoped run starts one fixture flight");
+        Equal(1, Game.StartCalls, "valid scoped run calls Game.Start once");
+        Equal(0, FlightDriver.StartCalls, "valid scoped run never calls FlightDriver directly");
+        AssertNativeLifecycleOrder();
+        Contains(report, "scenario_module_update_called=True", "KSP scenario modules are updated before flight");
+        Contains(report, "scenario_module_count_after_update=1", "fixture has one scenario module after KSP updates scenario modules");
+        Contains(report, "scenario_module_names_after_update=DeepFreeze", "scenario instance name proves DeepFreeze was added by stock scenario update");
+        Equal(true, game.scenarios.Exists(s => s != null && s.moduleName == "DeepFreeze"), "recorded UpdateScenarioModules supplies the AddToAllGames DeepFreeze scenario node");
+        Equal(1, GamePersistence.UpdateScenarioModulesCalls, "UpdateScenarioModules is called once");
+        Equal(1, GamePersistence.SaveCalls, "one scoped native save call occurs");
+        Equal(0, GamePersistence.ThreeArgumentSaveCalls, "stock four-argument SaveGame overload is used");
+        Equal(true, System.Object.ReferenceEquals(game, GamePersistence.LastSavedGame), "SaveGame receives the exact CurrentGame object");
+        Contains(report, "native_lifecycle_save_performed=True", "fixture is saved through the native scoped save step");
+        Contains(report, "postload_event_fired=True", "native post-load event is fired");
+        Contains(report, "game_start_called=True", "native Game.Start lifecycle is used");
+        Equal("persistent", GamePersistence.LastSaveFile, "native save uses the persistent save filename");
+        Equal("MegaCrew Background QA", GamePersistence.LastSaveFolder, "native save targets the exact disposable save");
+        Equal(SaveMode.OVERWRITE, GamePersistence.LastSaveMode, "native save uses overwrite mode for the disposable clone");
         Equal(1, Application.QuitCount, "scoped completion quits once");
         Equal(1, CountFiles("CryoRefusalQA.running", "CryoRefusalQA.done"), "running token is consumed into one done token");
         Equal(0, FreezeModuleCalls(), "rejected request did not call a DeepFreezer module");
@@ -160,6 +179,7 @@ static class CryoRefusalProbeTests
     {
         ResetRoot(); WriteAuthorization(); ResetEnvironment();
         GamePersistence.NextGame = MakeGame(17, 4, false); DF.DeepFreeze.APIReady = false;
+        DF.DeepFreeze.InitializeOnNativeGameStart = false;
         RunProbe();
         string report = ReadReport();
         Contains(report, "run_state=INCONCLUSIVE", "provider initialization timeout is inconclusive");
@@ -285,7 +305,7 @@ static class CryoRefusalProbeTests
     {
         Time.realtimeSinceStartup += seconds;
         Planetarium.UniversalTime += seconds;
-        if (FlightDriver.StartCalls > 0 && !FlightGlobals.ready)
+        if (Game.StartCalls > 0 && !FlightGlobals.ready)
         {
             readyWaits++;
             if (FlightDriver.ReadyAfterWaits > 0 && readyWaits >= FlightDriver.ReadyAfterWaits) FlightDriver.SetFlightReady();
@@ -294,7 +314,12 @@ static class CryoRefusalProbeTests
 
     static void ResetEnvironment()
     {
-        GamePersistence.LoadCalls = 0; GamePersistence.NextGame = null; FlightDriver.StartCalls = 0;
+        GamePersistence.LoadCalls = 0; GamePersistence.UpdateScenarioModulesCalls = 0; GamePersistence.SaveCalls = 0;
+        GamePersistence.ThreeArgumentSaveCalls = 0; GamePersistence.LastSavedGame = null;
+        GamePersistence.LastSaveFile = null; GamePersistence.LastSaveFolder = null; GamePersistence.NextGame = null;
+        FlightDriver.StartCalls = 0; Game.StartCalls = 0; LifecycleLog.Calls.Clear();
+        GamePersistence.ScenarioModulesUpdated = false; GamePersistence.SavedForNativeStart = false;
+        GameEvents.onGameStatePostLoad.Reset();
         FlightDriver.ReadyAfterWaits = 0; readyWaits = 0; FlightDriver.Pause = false;
         FlightDriver.ReadyPause = false; FlightDriver.ReadyRateIndex = 0; FlightDriver.ReadyRate = 1f;
         FlightGlobals.ready = false; FlightGlobals.ActiveVessel = null;
@@ -302,7 +327,8 @@ static class CryoRefusalProbeTests
         TimeWarp.CurrentRateIndex = 0; TimeWarp.CurrentRate = 1f;
         Time.realtimeSinceStartup = 1f; Planetarium.UniversalTime = 1000;
         Application.QuitCount = 0;
-        DF.DeepFreeze.APIReady = true; DF.DeepFreeze.Instance = new DeepFreezeState();
+        DF.DeepFreeze.APIReady = false; DF.DeepFreeze.InitializeOnNativeGameStart = true;
+        DF.DeepFreeze.Instance = new DeepFreezeState();
     }
 
     static void ResetRoot()
@@ -332,6 +358,18 @@ static class CryoRefusalProbeTests
     }
     static string FromRoot(string relative) { return Path.Combine(root, relative.Replace('/', Path.DirectorySeparatorChar)); }
     static string ReadReport() { string path = Path.Combine(root, "CryoRefusalQA-result.cfg"); return File.Exists(path) ? File.ReadAllText(path) : ""; }
+    static void AssertNativeLifecycleOrder()
+    {
+        string[] expected = { "GamePersistence.LoadGame", "GamePersistence.UpdateScenarioModules", "GamePersistence.SaveGame(Game,...)", "GameEvents.onGameStatePostLoad.Fire", "game.Start", "GameEvents.onGameStarted.Fire", "DeepFreeze.OnLoad/APIReady" };
+        int previous = -1;
+        foreach (string step in expected)
+        {
+            int index = LifecycleLog.Calls.IndexOf(step);
+            Equal(true, index > previous, "native KSP lifecycle is ordered: " + step);
+            previous = index;
+        }
+        Equal(0, FlightDriver.StartCalls, "native sequence does not call FlightDriver.StartAndFocusVessel directly");
+    }
     static int CountFiles(string first, string second) { return (File.Exists(Path.Combine(root, first)) ? 1 : 0) + (File.Exists(Path.Combine(root, second)) ? 1 : 0); }
     static string ExpectedHash(string relative) { return Hash(Path.Combine(fixtureRoot, relative.Replace('/', Path.DirectorySeparatorChar))); }
     static string Hash(string path) { using (SHA256 sha = SHA256.Create()) using (FileStream s = File.OpenRead(path)) return BitConverter.ToString(sha.ComputeHash(s)).Replace("-", "").ToLowerInvariant(); }
