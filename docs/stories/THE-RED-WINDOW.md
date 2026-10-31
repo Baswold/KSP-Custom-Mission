@@ -67,3 +67,9 @@ and revision; in LMP, verify both clients see the same record and author identit
 Physical window visibility, actual Duna orbital observations and any scientific
 identification require separate evidence. The scene never certifies a landing,
 completed experiment, repair, route or two-human approval.
+
+Tooling follow-up: the new local logbook candidate can retain actual orbit,
+supply and retained-science readings with the selected author and a written
+caption. Image attachment, a timed story trigger, shared LMP records and actual
+Duna observations remain open. The scene still grants no discovery or mission
+completion from a caption.

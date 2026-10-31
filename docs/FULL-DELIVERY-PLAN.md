@@ -9,7 +9,7 @@ below is historical, not current authorization to alter either normal install.
 are preserved in its merge ancestry. The working tree starts from the published 0.3.7 core plus onboard/navigation
 additions, Finch craft and visuals. A subsequent bounded console layout fix
 intentionally changes MegaCrew.cs; the manifest records that deviation.
-The 40-source plugin rebuild, 82 Python tests, root model/boundary runners,
+The 43-source plugin rebuild, 82 Python tests, root model/boundary runners,
 navigation cases and IVA catalog harness pass. These are build/model evidence.
 
 The stable 36-source candidate separately completed an actual direct
@@ -530,3 +530,15 @@ A routine Duna story proposal, [The Red Window](stories/THE-RED-WINDOW.md),
 adds a cooperative observation/caption disagreement and recoverable handover
 question. It is not canon or a playable trigger, grants no science and adds
 no emergency. Persistence and the in-ship notebook remain implementation work.
+
+## Persistent onboard logbook candidate — 31 October 2026
+
+A separate local scenario now retains orbit/supplies/retained-science captures
+and written handover notes. First-record registration is explicit and uses
+public ProtoScenarioModule.Load on the active ScenarioRunner. The author is a
+locally selected awake crew label with live duty checks; it is not authenticated
+player identity. State is bounded, append-only and copied losslessly on rejected
+future/malformed loads. Source evidence: 575 model/scenario and 40 panel-boundary
+assertions, full 43-source compile. No native save/reload result is implied.
+Room, engineering, operations and navigation windows now also use fixed bounds
+and scrolling content; pixel/click behavior remains a runtime gate.

@@ -9,14 +9,15 @@ integration PR. Retiring branch names does not remove their commits.
 The merge reconciles the current source tree with the published cumulative
 0.3.7 packet, applied once to pristine 0.3.0 in an isolated reconstruction.
 The initial consolidation matched all 17 normal host source files byte for byte.
-The subsequent console fix intentionally changes `Source/MegaCrew.cs`; the
+The subsequent console/station fixes intentionally change `Source/MegaCrew.cs`
+and `Source/Interior.cs`; the
 manifest retains the canonical hashes and records this reviewed deviation.
 The 12 onboard/docking and nine navigation sources retain their topic content.
 The merged build helper compiles nested sources, supports `--output`, rejects
 an empty source tree and reports its count.
 
-The checked-in MegaCrew DLL was rebuilt from all 40 current source files
-(the original 38 plus two reviewed Duna planner files);
+The checked-in MegaCrew DLL was rebuilt from all 43 current source files
+(the original 38, two Duna planner files and three logbook files);
 its hash and the source hashes are in the manifest. No KSP/Unity reference
 assemblies or QA addon DLLs are packaged in that plugin. This new integrated
 DLL is a build candidate, distinct from the stable 36-source DLL used for the
@@ -48,3 +49,10 @@ console input-lock boundary harness pass. A temporary full-snapshot build from
 the normal plugin DLL. Prepare-only emitted no DLL. Its output hash and compiler
 provenance are recorded in the manifest separately from the checked-in binary.
 This source-only staging check does not install or launch KSP.
+
+The persistent logbook stores local selected-author observations and notes in
+native scenario state created on the first validated record. Its production
+model/persistence harness passes 575 assertions and its panel boundary harness
+passes 40 recording-double assertions. Native first-record registration, actual
+clicks and save/reload remain separate runtime gates. Basil has now explicitly
+resumed disposable runtime testing; prior active-play hold text is historical.

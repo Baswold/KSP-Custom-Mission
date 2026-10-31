@@ -41,3 +41,9 @@ reference design.
 
 This panel has compile and model-level qualification only. It has not been
 qualified in a running KSP session.
+
+Source verification: 575 production model/scenario assertions and 40 panel
+boundary assertions pass with recording doubles. The latter cover pause/warp/
+EVA, context binding, duplicate/pending/native registration, science read-only
+aggregation and resource observation. They cannot prove in-game GUI or native
+scenario persistence. A complete 43-source KSP assembly build also passes.

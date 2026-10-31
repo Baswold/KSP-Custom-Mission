@@ -12,14 +12,19 @@
     "flight_qualified": false,
     "path": "GameData/MegaCrew/Plugins/MegaCrew.dll",
     "qa_addons_included": false,
-    "sha256": "88a33077bd9e95b16decb1fc6d1d1d37cb0b77a49d60cf13fb6428cc1077b7e4",
+    "sha256": "2c0f5f9cc562566a60a6654c4bf482e8d2fe7f7c3c2833bacbbe621a95f41623",
     "ui_runtime_retest_passed": false
   },
   "canonical_core_deviations": {
+    "Source/Interior.cs": {
+      "candidate_sha256": "6c1a3ec7b8809f3ea997a8a167dc22cee00801baf88897282923aca552195a04",
+      "canonical_sha256": "cecc9b2c9c8e1eb828e769ef207f2250dca83b22cd5001fcd617208945045496",
+      "reason": "Bounded station/console layout and GUI state cleanup; original domain commands retained. Runtime retest pending."
+    },
     "Source/MegaCrew.cs": {
       "candidate_sha256": "0a6f66df2943ad199f73fbe832fce2a1a627c74b7643025434c62c3e844013bd",
       "canonical_sha256": "7c87788b3d279664e55ceec45009dab7c1d54bc0707110b9bf5921123370db91",
-      "reason": "Bounded console layout, GUI state restoration, and explicit EVA Crew-tab command gates; runtime retest pending."
+      "reason": "Bounded station/console layout and GUI state cleanup; original domain commands retained. Runtime retest pending."
     }
   },
   "canonical_core_packet_commit": "f76e4371d41ff6c246f3cea5b88d2a516f36bc38",
@@ -57,8 +62,8 @@
     "basil/visual-profile": "ca393928526664a09b39b3936eb8b6f0141c108b"
   },
   "schema": 1,
-  "source_commit": "6df8af479d7acd4be6118b5adf1dc3d6454d809c",
-  "source_count": 40,
+  "source_commit": "499ecd9c220c74a93ece4188bec5deba9a486099",
+  "source_count": 43,
   "source_sha256": {
     "Source/Campaign.cs": "37d4338d461aa48c9b52e530665533db5a09b56e85da57ec5ddd9ce55cfebe51",
     "Source/CampaignCoast.cs": "e882337c2177cd8ff7fd8f54c6bd6c42dc2f1036421316ad33ecded68dc2cdd8",
@@ -78,20 +83,23 @@
     "Source/DunaMission/DunaMissionPlanner.cs": "5e17a4e973d6f482894a3799e298bc196df7ebf119b8b77148163d67698fe34e",
     "Source/DunaMission/DunaRoutePlanner.cs": "7098dc2e693f616bc1cad6aa9c84c999686d7f752ed1d67afb92fb591dee9170",
     "Source/DutyReadinessBridge.cs": "da2cdbc9760759cd4bd40cd41ddb4b6221b3cda1f3e896bb120e849ba6d2dc44",
-    "Source/Interior.cs": "cecc9b2c9c8e1eb828e769ef207f2250dca83b22cd5001fcd617208945045496",
+    "Source/Interior.cs": "6c1a3ec7b8809f3ea997a8a167dc22cee00801baf88897282923aca552195a04",
+    "Source/Logbook/MissionLogModel.cs": "1a9f2d0a0aa5bde650d2008eee9a37dbe7a9d6274a70254d7dcfa40e3f15bddc",
+    "Source/Logbook/MissionLogPanel.cs": "ff7411a413046000c70feee0001f152d76093200775441d37ecb4b9ab55208d1",
+    "Source/Logbook/MissionLogScenario.cs": "6d7595b4eb4e5be973e8867f8a22f1ec15ad51daa7de9fefb11a14d4d5d43eba",
     "Source/MegaCrew.cs": "0a6f66df2943ad199f73fbe832fce2a1a627c74b7643025434c62c3e844013bd",
     "Source/Navigation/BurnApprovals.cs": "5dd7cdef215b3671d9822a9caadbe5b53d0465450c0081fd6d58b7624140b7ce",
     "Source/Navigation/BurnDurationEstimator.cs": "de30d1b7e898538dcb08b8446a8451ccf5a1a7a9a9b0d113a65df5384932ef53",
     "Source/Navigation/CircularLowerPeriapsisPreview.cs": "2ac5da3d0c4cd4406cf823090423653e313bacbf1ff4155ea9bbc07574a4c8c3",
     "Source/Navigation/Lambert.cs": "8efcbd6402d1a315735805e1bc6737f384d75ea522fdd13e63908c8e724bdcfc",
     "Source/Navigation/MissionControlMath.cs": "bb6825e45a94025084955d17dd2b2698c6aac34acb2480f450167fc0ac2ef90b",
-    "Source/Navigation/NavigationPreviewPanel.cs": "e12873c0976eb3aa47dd8636be1a1b5260b39f9fe6d0073d6f16abb4c1075823",
+    "Source/Navigation/NavigationPreviewPanel.cs": "8f699259930668330b179b5fd37fd3e00d8704ebceb4460d73140c781f5e09df",
     "Source/Navigation/NodeFrame.cs": "b6db03fda381f96d6039302b4cf4411e32a7af8546b76b63e94d08db700b5796",
     "Source/Navigation/PlanFingerprint.cs": "7ae0c0e3546f10962a7e023524d0ef3fc50a57fbe204935b176b6ae5ba36f4f9",
     "Source/Navigation/WatchCoverage.cs": "2139efd02d243e565e2cd580057ff5ce5f3f444813a79745721fb773f43c17fe",
     "Source/OnboardDockingInstruments.cs": "31b61cbf4f7cb1aa4372a521d1362f423a5e9f3244c2ef54c8ad583acd9a57cf",
-    "Source/OnboardEngineering.cs": "19911189ab26faa995501832f957eb92c39359e8ecb6d87671af94f5390fcf37",
-    "Source/OnboardOperations.cs": "58e0243f4da98bfba1cd59f35802b8441d5e663d5ab9a5eaa2ef6595ffbdfb01",
+    "Source/OnboardEngineering.cs": "9b1c710adb5d7277496db277f1390dad9920e91f895ac73d71780beac1ac97b0",
+    "Source/OnboardOperations.cs": "50fe1229a488349f771add8fbf7dd6c05041219ce6195d41852d6731c99d64a5",
     "Source/OnboardPowerSurvey.cs": "bc4413921914715944aa125797c8ebcf9c74c224aa114e35fda69806d54a1ab4",
     "Source/OnboardRendezvous.cs": "d66d2e6229b840dae30477210464402686037eb37fd2f05d52bb8548fdde330e",
     "Source/OnboardScienceObservation.cs": "7b489828b7789508da73d29167fc9dd75040158d8ae9b3e037c36314df1f263c",
@@ -101,7 +109,7 @@
     "Source/RendezvousModel.cs": "f95d73ba45cc159165ec732991d1b76b4e2e037ca2118849786f67afd3ad2684",
     "Source/ScienceObservationModel.cs": "970716096836229064e7c438463389fad3d811f5bb1db12b4bb9edbd2f95fdfe"
   },
-  "updated_utc": "2026-10-31T06:21:16.918323+00:00",
+  "updated_utc": "2026-10-31T12:46:19.268341+00:00",
   "upstream_base_commit": "3eddae54f97cd93502e2785fea5496debc501a87",
   "validation": {
     "console_input_boundary_rerun": "passed; FreeIVA lock preserved",
@@ -121,6 +129,9 @@
       "tree_sha256": "2f15b895cbe5fe99bce96c657ff27b0a790eb9351162a62f47b22931f536c6ac"
     },
     "iva_catalog_recording_assertions": 31,
+    "logbook_native_game_persistence_tested": false,
+    "mission_log_model_assertions": 575,
+    "mission_log_panel_boundary_assertions": 40,
     "navigation_failures": 0,
     "navigation_randomized_cases": 2000,
     "python_skipped": 0,
