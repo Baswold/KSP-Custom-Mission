@@ -1,16 +1,24 @@
 # MegaCrew KSP campaign implementation and acceptance plan
 
+**Basil host runtime hold — 31 October 2026:** Basil is playing KSP with Hamish
+and explicitly asked that Codex neither open KSP nor close/kill the game he is
+using. Continue source work, metadata inspection and compile/model tests only.
+Do not launch game tests or change running installation files until Basil says
+runtime work may resume. This holds even if a later process check finds no KSP.
+
 **Current development branch: `basil/megacrew`.** The six former topic histories
-are preserved in its merge ancestry. The working tree contains the exact
-published 0.3.7 core plus onboard/navigation additions, Finch craft and visuals.
+are preserved in its merge ancestry. The working tree starts from the published 0.3.7 core plus onboard/navigation
+additions, Finch craft and visuals. A subsequent bounded console layout fix
+intentionally changes MegaCrew.cs; the manifest records that deviation.
 The 38-source plugin rebuild, 59 Python tests, root model/boundary runners,
 navigation cases and IVA catalog harness pass. These are build/model evidence.
 
 The stable 36-source candidate separately completed an actual direct
 outside-pod cryo refusal with DeepFreeze ready and unchanged crew/pod state;
 see [the runtime record](CRYO-REFUSAL-RUNTIME-EVIDENCE.md). The native KSP load
-lifecycle fixed the earlier missing-scenario initialization. Manual UI testing
-is requested in [Human Help Requests #11](https://github.com/w4mdzzn8my-dotcom/KSP-Custom-Mission/issues/11).
+lifecycle fixed the earlier missing-scenario initialization. The human UI test exposed an oversized/cropping console. A bounded layout
+candidate now compiles; its click behavior awaits a permitted retest in
+[Human Help Requests #11](https://github.com/w4mdzzn8my-dotcom/KSP-Custom-Mission/issues/11).
 Full freeze/thaw, physical crew activities, lander operations, high-rate coast
 and LMP/shared authority remain open. Historical ledgers below retain the refs
 and limitations that applied when each result was recorded.
@@ -493,3 +501,23 @@ is restored; LMP authority and synchronization remain later gates.
 Next animation evidence is a catalog from an actual IVA model, followed only
 then by a separate opt-in gesture/restoration test. A successful catalog alone
 will not qualify animation, animated handover, autonomous NPCs or multiplayer.
+
+## Source progress during the active-play hold — 31 October 2026
+
+The main console now starts closed, uses a bounded window, a four-column/two-row
+tab grid, independent scrolling content and a wrapped status region. Global GUI
+skin/enabled state is restored after drawing. The Crew tab makes EVA context
+explicit and disables its crew/cryo mutations there. Source review and a complete
+38-source KSP build pass; the reported click/cropping problem is not yet verified
+as resolved in game. No active installation was updated.
+
+The full cryo probe now follows the public save-upgrade/scenario/start path for
+initial and frozen reloads, snapshots live state explicitly, and checks genuine
+1x within separate scene phases. A disabled or unknown electricity policy stops
+as inconclusive before a freeze request. The builder refuses reused roots and
+QA DLLs anywhere in live GameData, including folders named backups. Its report
+reader distinguishes incomplete preconditions from provider failures. These are
+source/compile/guard results; full freeze/thaw and background power remain open.
+
+Hamish's Duna planner v0.1 and vehicle v0.3 artifacts are under independent static
+review, with UI ownership kept here. No Duna mission is declared playable.

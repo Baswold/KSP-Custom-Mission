@@ -29,9 +29,11 @@ namespace MegaCrew
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     public sealed partial class MissionConsole : MonoBehaviour
     {
-        Rect window = new Rect(30, 65, 760, 650);
+        Rect window = new Rect(30, 65, 720, 520);
         Vector2 scroll;
-        bool visible = true, running, drillActive;
+        GUISkin statusStyleSkin;
+        GUIStyle statusLabelStyle;
+        bool visible, running, drillActive;
         Queue<string> wakeQueue = new Queue<string>();
         float nextWakePoll;
         string loadedSave = "", message = "Create a new Sandbox named MegaCrew. F8 opens this console.";
@@ -66,6 +68,7 @@ namespace MegaCrew
         bool Allowed { get { return InGame && (HighLogic.SaveFolder ?? "").StartsWith("MegaCrew", StringComparison.OrdinalIgnoreCase); } }
         string StatePath { get { return Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "MegaCrewMission.cfg"); } }
         Vessel Ship { get { return FlightGlobals.ActiveVessel; } }
+        bool ActiveVesselIsEva { get { return HighLogic.LoadedSceneIsFlight && Ship != null && Ship.isEVA; } }
         public void Update()
         {
             if (Input.GetKeyDown(KeyCode.F8)) visible=!visible;
@@ -111,25 +114,74 @@ namespace MegaCrew
         public void OnGUI()
         {
             if(!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene!=GameScenes.SPACECENTER && HighLogic.LoadedScene!=GameScenes.EDITOR && HighLogic.LoadedScene!=GameScenes.MAINMENU)return;
-            GUI.skin=HighLogic.Skin;
-            ClearConsoleFocusOutside();
+            GUISkin previousSkin=GUI.skin;bool previousEnabled=GUI.enabled;
             try {
+            GUI.skin=HighLogic.Skin;
+            if(!object.ReferenceEquals(statusStyleSkin,GUI.skin)||statusLabelStyle==null){statusStyleSkin=GUI.skin;statusLabelStyle=new GUIStyle(GUI.skin.label);statusLabelStyle.wordWrap=true;}
+            ClearConsoleFocusOutside();
             if(GUI.Button(new Rect(12,Screen.height-95,165,34),"MEGACREW  /  F8"))visible=!visible;
             DrawInterior();if(!visible)return;
-            window.width=Math.Min(760,Screen.width-20);window.height=Math.Min(650,Screen.height-45);
+            window.width=Math.Min(720,Math.Max(1,Screen.width-24));window.height=Math.Min(520,Math.Max(1,Screen.height-48));
             window.x=Mathf.Clamp(window.x,0,Math.Max(0,Screen.width-window.width));window.y=Mathf.Clamp(window.y,0,Math.Max(0,Screen.height-window.height));
-            window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.3.7 candidate",GUILayout.Width(window.width),GUILayout.Height(window.height));
+            window=GUI.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.3.7 candidate");
             }
-            finally { RefreshConsoleGuiFocus(); }
+            finally { GUI.skin=previousSkin;GUI.enabled=previousEnabled;RefreshConsoleGuiFocus(); }
         }
         void Draw(int id)
         {
-            GUILayout.BeginHorizontal();GUILayout.Label("COOPERATIVE CREW  /  SINGLE PLAYER FIRST  /  1x TIME");if(GUILayout.Button("Close",GUILayout.Width(65)))visible=false;GUILayout.EndHorizontal();
-            tab=GUILayout.Toolbar(tab,tabs);
-            scroll=GUILayout.BeginScrollView(scroll);
-            if(!Allowed)GUILayout.Label("MISSION EDITING LOCKED: create/load a Sandbox save whose name begins MegaCrew. Other saves are unaffected.");
-            if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else if(tab==5)DrawNeeds();else if(tab==6)DrawCampaign();else DrawSetup();
-            GUILayout.Space(12);GUILayout.Label(message);GUILayout.EndScrollView();GUI.DragWindow(new Rect(0,0,10000,24));
+            float width=Math.Max(1,window.width-20),height=Math.Max(1,window.height-35);
+            const float headerHeight=32, evaHeight=22, tabHeight=54, statusHeight=52;
+            float contextHeight=ActiveVesselIsEva?evaHeight:0;
+            float bodyY=headerHeight+contextHeight+tabHeight;
+            float statusY=Math.Max(bodyY+1,height-statusHeight);
+            float bodyHeight=Math.Max(1,statusY-bodyY);
+
+            GUILayout.BeginArea(new Rect(10,25,width,headerHeight));
+            try
+            {
+                GUI.Label(new Rect(0,2,width-82,28),"COOPERATIVE CREW  /  SINGLE PLAYER FIRST  /  1x TIME");
+                bool enabledBeforeClose=GUI.enabled;
+                GUI.enabled=true;
+                if(GUI.Button(new Rect(width-76,1,76,29),"Close"))visible=false;
+                GUI.enabled=enabledBeforeClose;
+            }
+            finally { GUILayout.EndArea(); }
+
+            if(contextHeight>0)
+            {
+                GUILayout.BeginArea(new Rect(10,25+headerHeight,width,evaHeight));
+                try { GUI.Label(new Rect(0,0,width,22),"ACTIVE VESSEL IS EVA — CREW / CRYO CONTROLS READ-ONLY"); }
+                finally { GUILayout.EndArea(); }
+            }
+
+            GUILayout.BeginArea(new Rect(10,25+headerHeight+contextHeight,width,tabHeight));
+            try { tab=GUI.SelectionGrid(new Rect(0,0,width,tabHeight),tab,tabs,4); }
+            finally { GUILayout.EndArea(); }
+
+            GUILayout.BeginArea(new Rect(10,25+bodyY,width,bodyHeight));
+            try
+            {
+                scroll=GUILayout.BeginScrollView(scroll,false,true,GUILayout.Width(width),GUILayout.Height(bodyHeight));
+                try
+                {
+                    if(!Allowed)GUILayout.Label("MISSION EDITING LOCKED: create/load a Sandbox save whose name begins MegaCrew. Other saves are unaffected.");
+                    if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else if(tab==5)DrawNeeds();else if(tab==6)DrawCampaign();else DrawSetup();
+                }
+                finally { GUILayout.EndScrollView(); }
+            }
+            finally { GUILayout.EndArea(); }
+
+            GUILayout.BeginArea(new Rect(10,25+statusY,width,statusHeight));
+            try
+            {
+                bool enabledBeforeStatus=GUI.enabled;GUI.enabled=true;
+                GUI.Label(new Rect(0,0,width,statusHeight-2),message,statusLabelStyle);
+                GUI.enabled=enabledBeforeStatus;
+            }
+            finally { GUILayout.EndArea(); }
+
+            // Restrict dragging to the native title bar; content rectangles never intercept it.
+            GUI.DragWindow(new Rect(0,0,window.width,22));
         }
         void DrawMission()
         {
@@ -149,6 +201,10 @@ namespace MegaCrew
         }
         void DrawCrew()
         {
+            bool guiWasEnabled=GUI.enabled;
+            bool eva=ActiveVesselIsEva;
+            bool crewActionsEnabled=guiWasEnabled&&Allowed&&!eva;
+            if(eva)GUILayout.Label("Read-only EVA view: return to the loaded ship to use crew or cryopod controls.");
             GUILayout.Label("Actual cryosleep uses DeepFreeze parts. Freezing is always deliberate via the pod controls; the console never fabricates frozen crew or removes them from the roster.");
             GUILayout.Label("Relief cycle: Hamish + Basil awake / Ada + Vikram frozen -> thaw Ada + Vikram -> medical assessment -> freeze Hamish + Basil -> relief alarm thaws outgoing watch.");
             GUILayout.Label("Current selected crew role: "+pilot+". NPCs perform timed watch/alert duties; autonomous walking, docking and repairs are not implemented.");
@@ -157,7 +213,7 @@ namespace MegaCrew
                 string state=Frozen(c.Name)?"CRYOSLEEP":Aboard(c.Name)?"AWAKE ON VESSEL":"NOT ON ACTIVE VESSEL";
                 GUILayout.Label(c.Name+" | "+c.Role+" | "+state);
                 GUILayout.Label("Watch fatigue "+c.Fatigue.ToString("F0")+"% | Injury: "+c.Injury+(c.Treated?" (treated, "+(c.Recovery/60).ToString("F1")+" min simulated recovery)":""));
-                GUI.enabled=Allowed&&Aboard(c.Name)&&!Frozen(c.Name);
+                GUI.enabled=crewActionsEnabled&&Aboard(c.Name)&&!Frozen(c.Name);
                 if(GUILayout.Button("Select as watch lead")){pilot=c.Name;message="Watch lead selected: "+pilot+". Use stock crew portraits / IVA controls to view or EVA this Kerbal.";Save();}
                 if(GUILayout.Button("Enter cryosleep in current pod")) {
                     int awake=0;foreach(var x in crew)if(Aboard(x.Name)&&!Frozen(x.Name))awake++;
@@ -165,11 +221,11 @@ namespace MegaCrew
                     else message=CryoBridge.Freeze(c.Name)?"Freeze requested for "+c.Name+". Confirm completion in pod UI.":"Transfer this Kerbal into an idle DeepFreeze cryopod first; verify power and Glykerol.";
                 }
                 if(c.Injury!="None"&&!c.Treated && GUILayout.Button("Treat at medical station (simulation)"))Treat(c);
-                GUI.enabled=true;GUILayout.EndVertical();
+                GUI.enabled=crewActionsEnabled;GUILayout.EndVertical();
             }
-            GUI.enabled=Allowed&&HighLogic.LoadedSceneIsFlight;
+            GUI.enabled=crewActionsEnabled&&HighLogic.LoadedSceneIsFlight;
             if(GUILayout.Button("Set relief wake alarm: 10 real-time minutes")){alarmTime=Planetarium.GetUniversalTime()+600;message="Ten-minute wake alarm set. Watch tracking must be running; keep this vessel loaded.";Save();}
-            if(GUILayout.Button("Wake frozen crew now"))WakeRelief();GUI.enabled=true;
+            if(GUILayout.Button("Wake frozen crew now"))WakeRelief();GUI.enabled=guiWasEnabled;
             DrawCryoPowerAudit();
             GUILayout.Label("Cryo API: "+CryoBridge.Status+". Thaw requests still require pod power and other DeepFreeze conditions. Always verify pod status.");
             GUILayout.Label("Health model: fatigue and minor injury records are custom gameplay abstractions, not physiological predictions. Cryosleep is fictional technology; no claim of real human feasibility.");

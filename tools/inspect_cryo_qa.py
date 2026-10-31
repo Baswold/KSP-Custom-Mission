@@ -25,6 +25,9 @@ def inspect(root):
   path=root/'HermesCryoQA-result.cfg'
   if not path.exists():result['problems'].append('No runtime report exists');return result
   data=parse(path.read_text());result['stage']=data.get('stage','unknown')
+  if data.get('run_state')=='inconclusive':
+   if data.get('probe_completed','').lower()!='false' or data.get('flight_qualification','').lower()!='false':raise ValueError('Inconclusive report contradicts its qualification fields')
+   result['problems'].append(data.get('failure','Probe recorded an inconclusive prerequisite or observation'));return result
   if 'failure' in data or data.get('run_state')=='failed':
    result['status']='failed';result['problems'].append(data.get('failure','Probe recorded failure'));return result
   if data.get('probe_completed','').lower()!='true' or data.get('run_state')!='completed':

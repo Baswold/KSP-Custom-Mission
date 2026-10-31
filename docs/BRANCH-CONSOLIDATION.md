@@ -8,7 +8,9 @@ integration PR. Retiring branch names does not remove their commits.
 
 The merge reconciles the current source tree with the published cumulative
 0.3.7 packet, applied once to pristine 0.3.0 in an isolated reconstruction.
-All 17 normal host source files match that reconstruction byte for byte.
+The initial consolidation matched all 17 normal host source files byte for byte.
+The subsequent console fix intentionally changes `Source/MegaCrew.cs`; the
+manifest retains the canonical hashes and records this reviewed deviation.
 The 12 onboard/docking and nine navigation sources retain their topic content.
 The merged build helper compiles nested sources, supports `--output`, rejects
 an empty source tree and reports its count.
@@ -33,5 +35,8 @@ staging builder for the complete addon/navigation candidate.
 
 Human UI checks are tracked in issue #11, **Human Help Requests**. Keep raw
 logs, local game copies, personal saves and server data outside the repository.
-The full freeze/thaw QA launcher's native-initialization correction remains
-pending; the direct refusal result does not complete that procedure.
+The full freeze/thaw QA launcher now includes the public native-load/reload
+pipeline and phase-specific guards; it compiles but has not run this procedure.
+The direct refusal result does not complete it. Source work continues while
+Basil and Hamish play: no KSP launches, termination or install changes until
+Basil explicitly releases the runtime hold.

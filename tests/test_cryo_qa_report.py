@@ -25,6 +25,13 @@ class CryoReportTests(unittest.TestCase):
  def test_saved_bare_and_explicit_wrapper_forms_match(self):
   bare="schema = 1\nprobe_completed = False\n"
   self.assertEqual(report.parse(bare),report.parse("HERMES_CRYO_QA\n{\n"+bare+"}\n"))
+ def test_inconclusive_precondition_is_incomplete_not_a_provider_failure(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=pathlib.Path(d)/'KSP-Hermes-QA';root.mkdir();data=self.fixture(root)
+   data.update(run_state='inconclusive',probe_completed='False',failure='Electricity requirement disabled')
+   self.write(root,data);result=report.inspect(root)
+   self.assertEqual(result['status'],'incomplete');self.assertFalse(result['procedure_complete']);self.assertFalse(result['flight_qualified'])
+   data['probe_completed']='True';self.write(root,data);self.assertEqual(report.inspect(root)['status'],'invalid')
  def test_duplicate_keys_rejected(self):
   with self.assertRaises(ValueError):report.parse('HERMES_CRYO_QA\n{\nprobe_completed = False\nprobe_completed = True\n}\n')
 if __name__=='__main__':unittest.main()

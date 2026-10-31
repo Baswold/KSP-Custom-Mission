@@ -19,5 +19,5 @@ class CryoQaGuards(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    k=pathlib.Path(d)/'KSP-Hermes-QA';k.mkdir()
    result=subprocess.run([sys.executable,str(ROOT/'tools/build_cryo_qa.py'),'--ksp-root',str(k),'--csc',str(k/'must-not-run.dll')],capture_output=True,text=True)
-   self.assertNotEqual(result.returncode,0);self.assertIn("Refusing to install a test addon",result.stderr);self.assertFalse((k/'GameData').exists())
+   self.assertNotEqual(result.returncode,0);self.assertIn("HermesCryoQA.scope",result.stderr);self.assertFalse((k/'GameData').exists())
 if __name__=='__main__':unittest.main()
