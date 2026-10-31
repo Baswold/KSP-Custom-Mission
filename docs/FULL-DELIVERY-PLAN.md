@@ -10,7 +10,7 @@ runtime work may resume. This holds even if a later process check finds no KSP.
 are preserved in its merge ancestry. The working tree starts from the published 0.3.7 core plus onboard/navigation
 additions, Finch craft and visuals. A subsequent bounded console layout fix
 intentionally changes MegaCrew.cs; the manifest records that deviation.
-The 38-source plugin rebuild, 59 Python tests, root model/boundary runners,
+The 40-source plugin rebuild, 82 Python tests, root model/boundary runners,
 navigation cases and IVA catalog harness pass. These are build/model evidence.
 
 The stable 36-source candidate separately completed an actual direct
@@ -519,8 +519,13 @@ QA DLLs anywhere in live GameData, including folders named backups. Its report
 reader distinguishes incomplete preconditions from provider failures. These are
 source/compile/guard results; full freeze/thaw and background power remain open.
 
-Hamish's Duna planner v0.1 and vehicle v0.3 artifacts are under independent static
-review, with UI ownership kept here. No Duna mission is declared playable.
+Hamish's Duna planner v0.1 passed independent review and 608 model assertions.
+Its six additive files are integrated with a bounded-panel refinement; the full
+40-source candidate compiles. A full Git-snapshot staging build preserves the
+new UI and mission data, strips old DLLs and records source/compiler provenance.
+The separate vehicle v0.3 review found a Station/Ship fixture mismatch, reported
+to its owner; that package is not silently overlaid here. No Duna mission is
+declared playable.
 
 A routine Duna story proposal, [The Red Window](stories/THE-RED-WINDOW.md),
 adds a cooperative observation/caption disagreement and recoverable handover

@@ -6,7 +6,8 @@ Custom cooperative crew gameplay for **Kerbal Space Program 1.12.5 build 03190**
 
 All active development is consolidated on **`basil/megacrew`**: published
 cumulative core **0.3.7**, onboard engineering/operations, docking instruments,
-navigation, Finch craft, optional Mac visuals, QA tools and the delivery plan.
+navigation, a read-only Duna route planner, Finch craft, optional Mac visuals,
+QA tools and the delivery plan.
 The complete shared-ship/LMP campaign is still in development.
 Core source is already expanded on this branch; the historical patch files
 are inputs for clean reconstruction, not patches to stack onto this checkout.
@@ -46,7 +47,8 @@ releases. Finch craft and optional visuals have separate guides below.
 **Evidence:** actual 17-part/four-crew Hermes flight and the direct outside-pod
 cryo refusal were observed on the stable 36-source candidate. See the
 [runtime evidence](docs/CRYO-REFUSAL-RUNTIME-EVIDENCE.md). The integrated
-integration build adds docking instruments and a bounded-console candidate; full flight, UI, freeze/thaw,
+40-source integration build adds docking instruments, a bounded-console
+candidate and the [Duna planning preview](docs/DUNA-EXPEDITION.md); full flight, UI, freeze/thaw,
 lander, high-rate coast, animation and multiplayer acceptance remain open.
 See the [full plan](docs/FULL-DELIVERY-PLAN.md) and
 [Human Help Requests](https://github.com/w4mdzzn8my-dotcom/KSP-Custom-Mission/issues/11).

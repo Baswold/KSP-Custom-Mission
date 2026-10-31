@@ -15,7 +15,8 @@ The 12 onboard/docking and nine navigation sources retain their topic content.
 The merged build helper compiles nested sources, supports `--output`, rejects
 an empty source tree and reports its count.
 
-The checked-in MegaCrew DLL was rebuilt from all 38 current source files;
+The checked-in MegaCrew DLL was rebuilt from all 40 current source files
+(the original 38 plus two reviewed Duna planner files);
 its hash and the source hashes are in the manifest. No KSP/Unity reference
 assemblies or QA addon DLLs are packaged in that plugin. This new integrated
 DLL is a build candidate, distinct from the stable 36-source DLL used for the
@@ -40,3 +41,10 @@ pipeline and phase-specific guards; it compiles but has not run this procedure.
 The direct refusal result does not complete it. Source work continues while
 Basil and Hamish play: no KSP launches, termination or install changes until
 Basil explicitly releases the runtime hold.
+
+Current follow-up checks: 82 Python tests, 608 Duna model assertions and the
+console input-lock boundary harness pass. A temporary full-snapshot build from
+6df8af4 compiled all 40 sources with byte-identical Git source inputs and only
+the normal plugin DLL. Prepare-only emitted no DLL. Its output hash and compiler
+provenance are recorded in the manifest separately from the checked-in binary.
+This source-only staging check does not install or launch KSP.
