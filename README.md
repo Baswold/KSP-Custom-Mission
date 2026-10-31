@@ -106,3 +106,10 @@ Tests: `python3 -m unittest discover -s tests -v` runs Basil’s six setup check
 ## Next phase: Luna and authored stories
 
 After the single-player systems, landers and maintenance mission pass testing, integrate Luna with authoritative shared state, then add authored cooperative stories. See [the ordered roadmap](docs/ROADMAP.md). These are future targets; the current package remains single-player with no time warp.
+
+## Finch lander development candidates
+
+A [two-crew vacuum lander and external Hermes docking cradle](docs/FINCH-LANDER.md)
+are available as separate craft files in the source checkout. Their intended
+mission is a Mun/Minmus low-orbit sortie; flight qualification remains pending.
+They do not replace the existing practice save or add a launch vehicle.
