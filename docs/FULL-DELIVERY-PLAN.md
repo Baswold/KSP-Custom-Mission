@@ -1,5 +1,20 @@
 # MegaCrew KSP campaign implementation and acceptance plan
 
+**Current development branch: `basil/megacrew`.** The six former topic histories
+are preserved in its merge ancestry. The working tree contains the exact
+published 0.3.7 core plus onboard/navigation additions, Finch craft and visuals.
+The 38-source plugin rebuild, 59 Python tests, root model/boundary runners,
+navigation cases and IVA catalog harness pass. These are build/model evidence.
+
+The stable 36-source candidate separately completed an actual direct
+outside-pod cryo refusal with DeepFreeze ready and unchanged crew/pod state;
+see [the runtime record](CRYO-REFUSAL-RUNTIME-EVIDENCE.md). The native KSP load
+lifecycle fixed the earlier missing-scenario initialization. Manual UI testing
+is requested in [Human Help Requests #11](https://github.com/w4mdzzn8my-dotcom/KSP-Custom-Mission/issues/11).
+Full freeze/thaw, physical crew activities, lander operations, high-rate coast
+and LMP/shared authority remain open. Historical ledgers below retain the refs
+and limitations that applied when each result was recorded.
+
 **Planning baseline:** cumulative core `f76e437`, newer upstream build-helper fix `3eddae5`, and open Issues/PRs checked on 2026-10-31. This plan preserves the complete requested campaign. It is an execution order and evidence map, not a claim that the work is implemented or qualified.
 
 

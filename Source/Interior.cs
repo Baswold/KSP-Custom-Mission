@@ -59,8 +59,9 @@ namespace MegaCrew
             bool quarters=name.Contains("habitation")||name.Contains("centrifuge");
             bool lab=name.Contains("lab");bool cryo=name.Contains("Freezer");bool engineering=name.Contains("tube")||name.Contains("centrifuge");bool cockpit=name.Contains("core");
             if(quarters){GUILayout.Label("GALLEY / BUNKS");GUI.enabled=!c.Resting&&!Frozen(c.Name);if(GUILayout.Button("Eat ration / 0.5 Food"))Eat(c);if(GUILayout.Button("Drink / 0.25 Water"))Drink(c);GUI.enabled=true;if(GUILayout.Button(c.Resting?"Wake from ordinary sleep":"Sleep in crew quarters"))Rest(c);}
+            if(quarters)DrawCare(c,room);
             bool fit=NeedsModel.Fit(c)&&!Frozen(c.Name);
-            if(!fit)GUILayout.Label("Address food, water or sleep before engineering/science duty. Wake through the galley/bunk controls; emergency care is available.");
+            if(!fit)GUILayout.Label("Address food, water, sleep or daily care before engineering/science duty. Wake through the galley/bunk controls; emergency care is available.");
             if(engineering){GUILayout.Label("ENGINEERING / POWER & COOLING");GUI.enabled=fit;foreach(var p in Ship.parts)foreach(PartModule m in p.Modules)if(m.moduleName=="ModuleDeployableSolarPanel"||m.moduleName=="ModuleDeployableRadiator"){
                 GUILayout.Label(p.partInfo.title+" #"+p.flightID);GUILayout.BeginHorizontal();if(GUILayout.Button("Extend"))Deploy(m,true);if(GUILayout.Button("Retract"))Deploy(m,false);GUILayout.EndHorizontal();
             }GUI.enabled=true;}
