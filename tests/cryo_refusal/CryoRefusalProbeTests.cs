@@ -29,6 +29,8 @@ static class CryoRefusalProbeTests
         TestMissingAndStaleAuthorizationRefuse();
         TestPinnedInputMismatchRefusesBeforeLoad();
         TestValidOriginalProviderRefusalAndLifecycle();
+        TestMenuClockStateIsObservedButDoesNotBlockReadiness();
+        TestStrictFlightClockGuardAfterReadiness();
         TestUnknownProviderReadinessDoesNotDispatch();
         TestUnknownCrewStateDoesNotDispatch();
         TestPreFrozenAdaDoesNotDispatch();
@@ -38,6 +40,40 @@ static class CryoRefusalProbeTests
 
         Console.WriteLine("Cryo refusal probe component-boundary tests passed (" + assertions + " assertions). Original plugin/API and fixture hashes were real; KSP save loading, scene changes and resources were recorded fakes.");
         try { Directory.Delete(Path.GetDirectoryName(root), true); } catch { }
+    }
+
+    static void TestMenuClockStateIsObservedButDoesNotBlockReadiness()
+    {
+        ResetRoot(); WriteAuthorization(); ResetEnvironment();
+        GamePersistence.NextGame = MakeGame(17, 4, false);
+        FlightDriver.Pause = true; TimeWarp.CurrentRateIndex = -1; TimeWarp.CurrentRate = 0f;
+        FlightDriver.ReadyAfterWaits = 2;
+        FlightDriver.ReadyPause = false; FlightDriver.ReadyRateIndex = 0; FlightDriver.ReadyRate = 1f;
+        RunProbe();
+        string report = ReadReport();
+        Contains(report, "menu_pause_observed=True", "uninitialized main-menu pause is recorded, not rejected");
+        Contains(report, "menu_time_warp_rate_index_observed=-1", "uninitialized main-menu warp index is recorded, not rejected");
+        Contains(report, "flight_pause_at_readiness=False", "flight pause is sampled after readiness");
+        Contains(report, "flight_time_warp_rate_index_at_readiness=0", "flight warp index is sampled after readiness");
+        Contains(report, "result=REFUSED_AS_EXPECTED", "normal flight clock allows the refusal observation");
+        Contains(report, "freeze_request_called=True", "normal ready flight reaches the one refusal request");
+        Equal(1, FlightDriver.StartCalls, "menu clock state did not prevent starting the scoped fixture");
+        Equal(0, FreezeModuleCalls(), "normal ready flight still receives a refusal");
+    }
+
+    static void TestStrictFlightClockGuardAfterReadiness()
+    {
+        ResetRoot(); WriteAuthorization(); ResetEnvironment();
+        GamePersistence.NextGame = MakeGame(17, 4, false);
+        FlightDriver.ReadyAfterWaits = 2;
+        FlightDriver.ReadyPause = true;
+        RunProbe();
+        string report = ReadReport();
+        Contains(report, "flight_pause_at_readiness=True", "paused flight is observed only after readiness");
+        Contains(report, "run_state=INCONCLUSIVE", "paused flight fails closed after readiness");
+        Equal(false, report.Contains("freeze_request_called=True"), "paused flight never dispatches Freeze");
+        Equal(1, FlightDriver.StartCalls, "paused-flight guard is reached only after fixture start");
+        Equal(0, FreezeModuleCalls(), "paused flight makes no pod call");
     }
 
     static void TestUnscopedRefusesWithoutWritesOrGameCalls()
@@ -260,6 +296,7 @@ static class CryoRefusalProbeTests
     {
         GamePersistence.LoadCalls = 0; GamePersistence.NextGame = null; FlightDriver.StartCalls = 0;
         FlightDriver.ReadyAfterWaits = 0; readyWaits = 0; FlightDriver.Pause = false;
+        FlightDriver.ReadyPause = false; FlightDriver.ReadyRateIndex = 0; FlightDriver.ReadyRate = 1f;
         FlightGlobals.ready = false; FlightGlobals.ActiveVessel = null;
         HighLogic.SaveFolder = "MainMenu"; HighLogic.CurrentGame = null; HighLogic.LoadedScene = GameScenes.MAINMENU;
         TimeWarp.CurrentRateIndex = 0; TimeWarp.CurrentRate = 1f;

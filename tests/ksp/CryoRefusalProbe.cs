@@ -149,6 +149,9 @@ public sealed class CryoRefusalProbe : MonoBehaviour
                 throw new InconclusiveException("Flight did not become ready before timeout.");
             yield return new WaitForSecondsRealtime(1f);
         }
+        Record("flight_pause_at_readiness", FlightDriver.Pause);
+        Record("flight_time_warp_rate_index_at_readiness", TimeWarp.CurrentRateIndex);
+        Record("flight_time_warp_rate_at_readiness", TimeWarp.CurrentRate);
         flightObserved = true;
         ValidateContext();
         IEnumerator observation = ObserveLoadedFixture();
@@ -413,8 +416,9 @@ public sealed class CryoRefusalProbe : MonoBehaviour
     {
         if (HighLogic.LoadedScene != GameScenes.MAINMENU)
             throw new InconclusiveException("Probe must load the explicit QA fixture from the main menu.");
-        if (TimeWarp.CurrentRateIndex != 0 || FlightDriver.Pause)
-            throw new InconclusiveException("Probe requires unpaused actual 1x before loading the fixture.");
+        Record("menu_pause_observed", FlightDriver.Pause);
+        Record("menu_time_warp_rate_index_observed", TimeWarp.CurrentRateIndex);
+        Record("menu_time_warp_rate_observed", TimeWarp.CurrentRate);
     }
 
     void ValidateContext()
@@ -423,11 +427,11 @@ public sealed class CryoRefusalProbe : MonoBehaviour
         if (!String.Equals(Path.GetFullPath(KSPUtil.ApplicationRootPath), root, StringComparison.Ordinal) ||
             HighLogic.SaveFolder != SaveName || !System.Object.ReferenceEquals(HighLogic.CurrentGame, loadedGame))
             throw new InconclusiveException("QA root or save context changed.");
-        if (FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0)
-            throw new InconclusiveException("Probe requires unpaused actual 1x with no time warp.");
         // Scene load/FlightGlobals.ready may legitimately lag StartAndFocusVessel.
         // The dedicated readiness loop has its own timeout; do not reject that transition.
         if (!flightObserved) return;
+        if (FlightDriver.Pause || TimeWarp.CurrentRateIndex != 0)
+            throw new InconclusiveException("Probe requires unpaused 1x with no time warp after flight initialization.");
         if (!HighLogic.LoadedSceneIsFlight || !FlightGlobals.ready || FlightGlobals.ActiveVessel == null ||
             !FlightGlobals.ActiveVessel.loaded || FlightGlobals.ActiveVessel.packed)
             throw new InconclusiveException("Flight readiness or loaded-vessel context was lost after initialization.");

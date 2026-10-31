@@ -25,6 +25,9 @@ public static class FlightDriver
     public static bool Pause;
     public static int StartCalls;
     public static int ReadyAfterWaits;
+    public static bool ReadyPause;
+    public static int ReadyRateIndex;
+    public static float ReadyRate = 1f;
     public static void StartAndFocusVessel(Game game, int index)
     {
         StartCalls++;
@@ -34,6 +37,9 @@ public static class FlightDriver
     }
     public static void SetFlightReady()
     {
+        Pause = ReadyPause;
+        TimeWarp.CurrentRateIndex = ReadyRateIndex;
+        TimeWarp.CurrentRate = ReadyRate;
         FlightGlobals.ready = true;
         HighLogic.LoadedScene = GameScenes.FLIGHT;
         if (FlightGlobals.ActiveVessel != null) { FlightGlobals.ActiveVessel.loaded = true; FlightGlobals.ActiveVessel.packed = false; }
