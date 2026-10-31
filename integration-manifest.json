@@ -4,7 +4,15 @@
     "flight_qualified": false,
     "path": "GameData/MegaCrew/Plugins/MegaCrew.dll",
     "qa_addons_included": false,
-    "sha256": "78cc09bcc0b4a8a7e764ab0f08e3abf414768f88c0020d7888155cefb0438a0a"
+    "sha256": "9c4e539d24f03820074fc974e93a805fe0ab4f4877c136e3464bd6ed257fc5d6",
+    "ui_runtime_retest_passed": false
+  },
+  "canonical_core_deviations": {
+    "Source/MegaCrew.cs": {
+      "candidate_sha256": "0a6f66df2943ad199f73fbe832fce2a1a627c74b7643025434c62c3e844013bd",
+      "canonical_sha256": "7c87788b3d279664e55ceec45009dab7c1d54bc0707110b9bf5921123370db91",
+      "reason": "Bounded console layout, GUI state restoration, and explicit EVA Crew-tab command gates; runtime retest pending."
+    }
   },
   "canonical_core_packet_commit": "f76e4371d41ff6c246f3cea5b88d2a516f36bc38",
   "canonical_core_source_sha256": {
@@ -41,7 +49,7 @@
     "basil/visual-profile": "ca393928526664a09b39b3936eb8b6f0141c108b"
   },
   "schema": 1,
-  "source_commit": "853d24e8fb232f45d0c9f190abf99053737d2250",
+  "source_commit": "b17dc26cf7ea722f77863e59e800f47d40763d8b",
   "source_count": 38,
   "source_sha256": {
     "Source/Campaign.cs": "37d4338d461aa48c9b52e530665533db5a09b56e85da57ec5ddd9ce55cfebe51",
@@ -61,7 +69,7 @@
     "Source/DockingGeometryModel.cs": "bf968ac532fb8e494a4f5b76123a4d4385f8eeac1f52972ea775b041dae4a511",
     "Source/DutyReadinessBridge.cs": "da2cdbc9760759cd4bd40cd41ddb4b6221b3cda1f3e896bb120e849ba6d2dc44",
     "Source/Interior.cs": "cecc9b2c9c8e1eb828e769ef207f2250dca83b22cd5001fcd617208945045496",
-    "Source/MegaCrew.cs": "7c87788b3d279664e55ceec45009dab7c1d54bc0707110b9bf5921123370db91",
+    "Source/MegaCrew.cs": "0a6f66df2943ad199f73fbe832fce2a1a627c74b7643025434c62c3e844013bd",
     "Source/Navigation/BurnApprovals.cs": "5dd7cdef215b3671d9822a9caadbe5b53d0465450c0081fd6d58b7624140b7ce",
     "Source/Navigation/BurnDurationEstimator.cs": "de30d1b7e898538dcb08b8446a8451ccf5a1a7a9a9b0d113a65df5384932ef53",
     "Source/Navigation/CircularLowerPeriapsisPreview.cs": "2ac5da3d0c4cd4406cf823090423653e313bacbf1ff4155ea9bbc07574a4c8c3",
@@ -83,14 +91,18 @@
     "Source/RendezvousModel.cs": "f95d73ba45cc159165ec732991d1b76b4e2e037ca2118849786f67afd3ad2684",
     "Source/ScienceObservationModel.cs": "970716096836229064e7c438463389fad3d811f5bb1db12b4bb9edbd2f95fdfe"
   },
+  "updated_utc": "2026-10-31T06:15:33.471197+00:00",
   "upstream_base_commit": "3eddae54f97cd93502e2785fea5496debc501a87",
   "validation": {
+    "console_input_boundary_rerun": "passed; FreeIVA lock preserved",
     "cryo_refusal_recording_assertions": 113,
+    "full_cryo_probe": "native-load source compiles; runtime execution pending",
     "iva_catalog_recording_assertions": 31,
     "navigation_failures": 0,
     "navigation_randomized_cases": 2000,
     "python_skipped": 0,
-    "python_tests": 59,
+    "python_test_source_commit": "b17dc26cf7ea722f77863e59e800f47d40763d8b",
+    "python_tests": 74,
     "real_backend_refusal": {
       "full_freeze_thaw_qualified": false,
       "plugin_sha256": "2d6fd46d353b1cac3b971deff623a2f7f24d2d52cb44cc605e01e8548c5ca986",
