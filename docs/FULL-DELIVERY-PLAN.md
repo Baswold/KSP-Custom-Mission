@@ -1,10 +1,9 @@
 # MegaCrew KSP campaign implementation and acceptance plan
 
-**Basil host runtime hold — 31 October 2026:** Basil is playing KSP with Hamish
-and explicitly asked that Codex neither open KSP nor close/kill the game he is
-using. Continue source work, metadata inspection and compile/model tests only.
-Do not launch game tests or change running installation files until Basil says
-runtime work may resume. This holds even if a later process check finds no KSP.
+**Basil host runtime testing resumed — 31 October 2026:** Basil explicitly said
+“Feel free to test things. I'm done.” Use fresh disposable copies only; preserve
+his play save and leave Hamish's separate session untouched. The earlier hold
+below is historical, not current authorization to alter either normal install.
 
 **Current development branch: `basil/megacrew`.** The six former topic histories
 are preserved in its merge ancestry. The working tree starts from the published 0.3.7 core plus onboard/navigation

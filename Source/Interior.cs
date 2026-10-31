@@ -40,17 +40,34 @@ namespace MegaCrew
         void DrawInterior()
         {
             if(!Allowed||!HighLogic.LoadedSceneIsFlight||!interiorOpen)return;
-            var room=CurrentRoom;
-            interiorWindow.width=Math.Min(410,Screen.width-20);interiorWindow.height=Math.Min(560,Screen.height-40);
+            interiorWindow.width=Math.Min(410,Math.Max(1,Screen.width-20));interiorWindow.height=Math.Min(560,Math.Max(1,Screen.height-40));
             interiorWindow.x=Mathf.Clamp(interiorWindow.x,0,Math.Max(0,Screen.width-interiorWindow.width));interiorWindow.y=Mathf.Clamp(interiorWindow.y,0,Math.Max(0,Screen.height-interiorWindow.height));
-            interiorWindow=GUILayout.Window(719305,interiorWindow,DrawRoom,"HERMES / INTERACT [I]",GUILayout.Width(interiorWindow.width),GUILayout.Height(interiorWindow.height));
+            interiorWindow=GUI.Window(719305,interiorWindow,DrawRoom,"HERMES / INTERACT [I]");
         }
         void DrawRoom(int id)
         {
-            if(GUILayout.Button("Close [I]"))interiorOpen=false;
-            interiorScroll=GUILayout.BeginScrollView(interiorScroll);
+            bool enabledBefore=GUI.enabled;
+            try
+            {
+                GUI.enabled=true;
+                float width=Math.Max(1,interiorWindow.width-20);
+                if(GUI.Button(new Rect(10,25,width,28),"Close [I]"))interiorOpen=false;
+                GUILayout.BeginArea(new Rect(10,58,width,Math.Max(1,interiorWindow.height-70)));
+                try
+                {
+                    interiorScroll=GUILayout.BeginScrollView(interiorScroll,false,true,GUILayout.Width(width),GUILayout.Height(Math.Max(1,interiorWindow.height-70)));
+                    try { DrawRoomContent(); }
+                    finally { GUILayout.EndScrollView(); }
+                }
+                finally { GUILayout.EndArea(); }
+                GUI.DragWindow(new Rect(0,0,interiorWindow.width,22));
+            }
+            finally { GUI.enabled=enabledBefore; }
+        }
+        void DrawRoomContent()
+        {
             var room=CurrentRoom;var c=InteriorCrew;
-            if(room==null||c==null){GUILayout.Label("Enter a mission Kerbal's IVA with C. Walk into a room, then press I. Interior operations require your actual room and viewed Kerbal.");GUILayout.EndScrollView();GUI.DragWindow();return;}
+            if(room==null||c==null){GUILayout.Label("Enter a mission Kerbal's IVA with C. Walk into a room, then press I. Interior operations require your actual room and viewed Kerbal.");return;}
             GUILayout.Label(room.partInfo.title+" | "+c.Name);
             GUILayout.Label("Hunger "+c.Hunger.ToString("F0")+"% | Thirst "+c.Thirst.ToString("F0")+"% | Fatigue "+c.Fatigue.ToString("F0")+"%");
             GUILayout.Label("Station controls operate this vessel. F still operates FreeIVA hatches. Decorative geometry is not a simulated mechanism.");
@@ -73,7 +90,7 @@ namespace MegaCrew
             }
             if(cockpit){GUILayout.Label("FLIGHT DECK");DrawTelemetry();GUILayout.Label("Navigation readout only; stock flight controls retain authority.");}
             if(!quarters&&!lab&&!cryo&&!engineering&&!cockpit)GUILayout.Label("Transit / storage compartment. Inspect fittings and use FreeIVA hatch controls.");
-            GUILayout.Label(message);GUILayout.EndScrollView();GUI.DragWindow(new Rect(0,0,10000,24));
+            GUILayout.Label(message);
         }
         void Deploy(PartModule m,bool extend)
         {

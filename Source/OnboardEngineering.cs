@@ -67,52 +67,84 @@ namespace MegaCrew
         void OnGUI()
         {
             if (!Mission(FlightGlobals.ActiveVessel)) return;
-            GUI.skin = HighLogic.Skin;
-            if (GUI.Button(new Rect(180, Screen.height - 95, 190, 34), "ENGINEERING / Ctrl+Alt+E")) visible = !visible;
-            if (!visible) return;
-            window.x = Mathf.Clamp(window.x, 0, Math.Max(0, Screen.width - window.width));
-            window.y = Mathf.Clamp(window.y, 0, Math.Max(0, Screen.height - 100));
-            window = GUILayout.Window(719315, window, Draw, "ONBOARD ENGINEERING", GUILayout.Width(560));
-            var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            if (window.Contains(mouse)) InputLockManager.SetControlLock(ControlTypes.ALL_SHIP_CONTROLS, LockName);
-            else InputLockManager.RemoveControlLock(LockName);
+            GUISkin previousSkin = GUI.skin;
+            bool previousEnabled = GUI.enabled;
+            try
+            {
+                GUI.skin = HighLogic.Skin;
+                if (GUI.Button(new Rect(180, Screen.height - 95, 190, 34), "ENGINEERING / Ctrl+Alt+E")) visible = !visible;
+                if (!visible) return;
+                float maxWidth = Mathf.Max(1f, Screen.width - 20f);
+                float maxHeight = Mathf.Max(1f, Screen.height - 30f);
+                float boundedWidth = Mathf.Min(560f, maxWidth);
+                float boundedHeight = Mathf.Min(480f, maxHeight);
+                window.width = Mathf.Clamp(window.width, Mathf.Min(300f, boundedWidth), boundedWidth);
+                window.height = Mathf.Clamp(window.height, Mathf.Min(220f, boundedHeight), boundedHeight);
+                window.x = Mathf.Clamp(window.x, 0f, Mathf.Max(0f, Screen.width - window.width));
+                window.y = Mathf.Clamp(window.y, 0f, Mathf.Max(0f, Screen.height - window.height));
+                window = GUI.Window(719315, window, Draw, "ONBOARD ENGINEERING");
+                var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+                if (visible && window.Contains(mouse)) InputLockManager.SetControlLock(ControlTypes.ALL_SHIP_CONTROLS, LockName);
+                else InputLockManager.RemoveControlLock(LockName);
+            }
+            finally
+            {
+                GUI.enabled = previousEnabled;
+                GUI.skin = previousSkin;
+            }
         }
 
         void Draw(int id)
         {
-            if (GUILayout.Button("Close")) visible = false;
-            var vessel = FlightGlobals.ActiveVessel;
-            if (!Mission(vessel)) return;
-            if (selectionVesselId != vessel.id || selectionSave != HighLogic.SaveFolder) { selectionVesselId = vessel.id; selectionSave = HighLogic.SaveFolder ?? ""; selectedEngineer = ""; }
-            GUILayout.Label(vessel.vesselName + " | power and cooling");
-            bool engineerReady = OperatorPicker(vessel);
-            string operatorName = selectedEngineer;
-            double ec = 0, capacity = 0;
-            foreach (var part in vessel.parts)
-                foreach (PartResource resource in part.Resources)
-                    if (resource.resourceName == "ElectricCharge") { ec += resource.amount; capacity += resource.maxAmount; }
-            GUILayout.Label("ElectricCharge: " + ec.ToString("F0") + " / " + capacity.ToString("F0"));
-            GUILayout.Label("Individual controls operate actual hardware; check clearance before deployment.");
-            scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(250));
-            int count = 0;
-            foreach (var part in vessel.parts)
-                foreach (PartModule module in part.Modules)
+            GUILayout.BeginArea(new Rect(8f, 22f, Mathf.Max(20f, window.width - 16f), Mathf.Max(30f, window.height - 30f)));
+            try
+            {
+                if (GUILayout.Button("Close", GUILayout.Height(24))) visible = false;
+                var vessel = FlightGlobals.ActiveVessel;
+                if (!Mission(vessel)) return;
+                float scrollHeight = Mathf.Max(36f, window.height - 100f);
+                scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(Mathf.Max(20f, window.width - 32f)), GUILayout.Height(scrollHeight));
+                try
                 {
-                    if (module.moduleName != "ModuleDeployableSolarPanel" && module.moduleName != "ModuleDeployableRadiator") continue;
-                    count++;
-                    GUILayout.BeginVertical(GUI.skin.box);
-                    var state = module.GetType().GetField("deployState");
-                    GUILayout.Label(part.partInfo.title + " [" + part.flightID + "] | " +
-                        (state == null ? "State unavailable" : Convert.ToString(state.GetValue(module))));
-                    DrawCommand(vessel, module, "Extend", "Deploy", engineerReady, operatorName);
-                    DrawCommand(vessel, module, "Retract", "Stow", engineerReady, operatorName);
-                    GUILayout.EndVertical();
+                    if (selectionVesselId != vessel.id || selectionSave != HighLogic.SaveFolder) { selectionVesselId = vessel.id; selectionSave = HighLogic.SaveFolder ?? ""; selectedEngineer = ""; }
+                    GUILayout.Label(vessel.vesselName + " | power and cooling");
+                    bool engineerReady = OperatorPicker(vessel);
+                    string operatorName = selectedEngineer;
+                    double ec = 0, capacity = 0;
+                    foreach (var part in vessel.parts)
+                        foreach (PartResource resource in part.Resources)
+                            if (resource.resourceName == "ElectricCharge") { ec += resource.amount; capacity += resource.maxAmount; }
+                    GUILayout.Label("ElectricCharge: " + ec.ToString("F0") + " / " + capacity.ToString("F0"));
+                    GUILayout.Label("Individual controls operate actual hardware; check clearance before deployment.");
+                    int count = 0;
+                    foreach (var part in vessel.parts)
+                        foreach (PartModule module in part.Modules)
+                        {
+                            if (module.moduleName != "ModuleDeployableSolarPanel" && module.moduleName != "ModuleDeployableRadiator") continue;
+                            count++;
+                            GUILayout.BeginVertical(GUI.skin.box);
+                            try
+                            {
+                                var state = module.GetType().GetField("deployState");
+                                GUILayout.Label(part.partInfo.title + " [" + part.flightID + "] | " +
+                                    (state == null ? "State unavailable" : Convert.ToString(state.GetValue(module))));
+                                DrawCommand(vessel, module, "Extend", "Deploy", engineerReady, operatorName);
+                                DrawCommand(vessel, module, "Retract", "Stow", engineerReady, operatorName);
+                            }
+                            finally { GUILayout.EndVertical(); }
+                        }
+                    if (count == 0) GUILayout.Label("No supported deployable solar arrays or radiators on this vessel.");
                 }
-            if (count == 0) GUILayout.Label("No supported deployable solar arrays or radiators on this vessel.");
-            GUILayout.EndScrollView();
-            GUILayout.Label(notice);
-            GUILayout.Label("Available in IVA. Local single-player controls; shared LMP authority is not implemented.");
-            GUI.DragWindow(new Rect(0, 0, 10000, 24));
+                finally { GUILayout.EndScrollView(); }
+                GUILayout.Label(notice);
+                GUILayout.Label("Available in IVA. Local single-player controls; shared LMP authority is not implemented.");
+            }
+            finally
+            {
+                GUILayout.EndArea();
+                GUI.enabled = true;
+            }
+            GUI.DragWindow(new Rect(0, 0, window.width, 22));
         }
 
         bool OperatorPicker(Vessel vessel)

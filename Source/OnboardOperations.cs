@@ -95,26 +95,68 @@ namespace MegaCrew
         void OnGUI()
         {
             if (!Allowed) return;
-            GUI.skin = HighLogic.Skin;
-            if (GUI.Button(new Rect(375, Screen.height - 95, 190, 34), "OPERATIONS / Ctrl+Alt+O")) visible = !visible;
-            if (!visible) return;
-            window.x = Mathf.Clamp(window.x, 0, Math.Max(0, Screen.width - window.width));
-            window.y = Mathf.Clamp(window.y, 0, Math.Max(0, Screen.height - 100));
-            window = GUILayout.Window(719316, window, Draw, "HERMES / ONBOARD OPERATIONS", GUILayout.Width(590));
-            if (window.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y))) InputLockManager.SetControlLock(ControlTypes.ALL_SHIP_CONTROLS, Lock);
-            else InputLockManager.RemoveControlLock(Lock);
+            GUISkin previousSkin = GUI.skin;
+            bool previousEnabled = GUI.enabled;
+            try
+            {
+                GUI.skin = HighLogic.Skin;
+                if (GUI.Button(new Rect(375, Screen.height - 95, 190, 34), "OPERATIONS / Ctrl+Alt+O")) visible = !visible;
+                if (!visible) return;
+                float maxWidth = Mathf.Max(1f, Screen.width - 20f);
+                float maxHeight = Mathf.Max(1f, Screen.height - 30f);
+                float boundedWidth = Mathf.Min(590f, maxWidth);
+                float boundedHeight = Mathf.Min(560f, maxHeight);
+                window.width = Mathf.Clamp(window.width, Mathf.Min(300f, boundedWidth), boundedWidth);
+                window.height = Mathf.Clamp(window.height, Mathf.Min(220f, boundedHeight), boundedHeight);
+                window.x = Mathf.Clamp(window.x, 0f, Mathf.Max(0f, Screen.width - window.width));
+                window.y = Mathf.Clamp(window.y, 0f, Mathf.Max(0f, Screen.height - window.height));
+                window = GUI.Window(719316, window, Draw, "HERMES / ONBOARD OPERATIONS");
+                if (visible && window.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y))) InputLockManager.SetControlLock(ControlTypes.ALL_SHIP_CONTROLS, Lock);
+                else InputLockManager.RemoveControlLock(Lock);
+            }
+            finally
+            {
+                GUI.enabled = previousEnabled;
+                GUI.skin = previousSkin;
+            }
         }
         void Draw(int id)
         {
-            if (GUILayout.Button("Close")) visible = false;
-            tab = GUILayout.Toolbar(tab, new[] { "Pilot", "Rendezvous", "Science", "Supplies", "Cryo checks", "Log" });
-            scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(410));
-            GUILayout.Label(Ship.vesselName + " | " + Ship.mainBody.bodyName + " | " + Ship.situation);
-            if (tab == 0) Pilot(); else if (tab == 1) rendezvous.Draw(Ship); else if (tab == 2) Science(); else if (tab == 3) Supplies(); else if (tab == 4) Cryo(); else Journal();
-            GUILayout.EndScrollView();
-            GUILayout.Label(status);
-            GUILayout.Label("Selected crew and shared duty readiness govern station commands. Physical room occupancy and player identity remain separate.");
-            GUI.DragWindow(new Rect(0, 0, 10000, 24));
+            GUILayout.BeginArea(new Rect(8f, 22f, Mathf.Max(20f, window.width - 16f), Mathf.Max(30f, window.height - 30f)));
+            try
+            {
+                if (GUILayout.Button("Close", GUILayout.Height(24))) visible = false;
+                string[] labels = { "Pilot", "Rendezvous", "Science", "Supplies", "Cryo checks", "Log" };
+                for (int row = 0; row < 2; row++)
+                {
+                    GUILayout.BeginHorizontal();
+                    try
+                    {
+                        for (int column = 0; column < 3; column++)
+                        {
+                            int index = row * 3 + column;
+                            if (GUILayout.Toggle(tab == index, labels[index], GUI.skin.button)) tab = index;
+                        }
+                    }
+                    finally { GUILayout.EndHorizontal(); }
+                }
+                float scrollHeight = Mathf.Max(36f, window.height - 176f);
+                scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(Mathf.Max(20f, window.width - 32f)), GUILayout.Height(scrollHeight));
+                try
+                {
+                    GUILayout.Label(Ship.vesselName + " | " + Ship.mainBody.bodyName + " | " + Ship.situation);
+                    if (tab == 0) Pilot(); else if (tab == 1) rendezvous.Draw(Ship); else if (tab == 2) Science(); else if (tab == 3) Supplies(); else if (tab == 4) Cryo(); else Journal();
+                }
+                finally { GUILayout.EndScrollView(); }
+                GUILayout.Label(status);
+                GUILayout.Label("Selected crew and shared duty readiness govern station commands. Physical room occupancy and player identity remain separate.");
+            }
+            finally
+            {
+                GUILayout.EndArea();
+                GUI.enabled = true;
+            }
+            GUI.DragWindow(new Rect(0, 0, window.width, 22));
         }
         void Pilot()
         {

@@ -29,9 +29,9 @@ See [build modes and manifest details](docs/BUILD-NAVIGATION-CANDIDATE.md).
 The historical ZIPs remain build inputs: **do not extract them over this
 integration checkout**, which would overwrite current source and DLLs.
 
-**Active-play hold:** source builds may continue, but do not launch, terminate
-or update KSP while Basil and Hamish play. Runtime testing requires Basil to
-explicitly release this hold.
+**Runtime testing:** Basil explicitly resumed testing after finishing play.
+Use fresh disposable copies; preserve the played save and any separate Hamish
+session. Never install a candidate into a running game.
 
 For a later isolated playtest, keep KSP closed and run the staged installer against
 a separate clean KSP copy:

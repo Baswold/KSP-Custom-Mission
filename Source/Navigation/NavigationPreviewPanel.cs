@@ -20,6 +20,7 @@ namespace MegaCrew.Navigation
         bool visible;
         bool keyboardLocked;
         Rect window = new Rect(140, 120, 430, 400);
+        Vector2 scroll;
         string targetPeriapsisKm = "80";
         string leadSeconds = "120";
         string status = "Enter target periapsis and lead time, then refresh the preview.";
@@ -130,67 +131,112 @@ namespace MegaCrew.Navigation
         void OnGUI()
         {
             if (!visible || HighLogic.LoadedScene != GameScenes.FLIGHT || Time.timeScale <= 0f) return;
-            GUI.skin = HighLogic.Skin;
-            window.width = Mathf.Clamp(window.width, 390f, Mathf.Max(390f, Screen.width - 20f));
-            window.height = Mathf.Clamp(window.height, 330f, Mathf.Max(330f, Screen.height - 35f));
-            window.x = Mathf.Clamp(window.x, 0f, Mathf.Max(0f, Screen.width - window.width));
-            window.y = Mathf.Clamp(window.y, 0f, Mathf.Max(0f, Screen.height - window.height));
-            Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            string focusedControl = GUI.GetNameOfFocusedControl();
-            bool focusedInput = focusedControl == "MegaCrewNavTargetPe" || focusedControl == "MegaCrewNavLeadSeconds";
-            if (window.Contains(mouse) || focusedInput) AcquireShipControlLock();
-            else ReleaseShipControlLock();
-            window = GUILayout.Window(GetInstanceID(), window, DrawWindow,
-                "MEGACREW  /  NAVIGATION PREVIEW", GUILayout.Width(window.width), GUILayout.Height(window.height));
+            GUISkin previousSkin = GUI.skin;
+            bool previousEnabled = GUI.enabled;
+            try
+            {
+                GUI.skin = HighLogic.Skin;
+                float maxWidth = Mathf.Max(1f, Screen.width - 20f);
+                float maxHeight = Mathf.Max(1f, Screen.height - 30f);
+                float boundedWidth = Mathf.Min(430f, maxWidth);
+                float boundedHeight = Mathf.Min(400f, maxHeight);
+                window.width = Mathf.Clamp(window.width, Mathf.Min(300f, boundedWidth), boundedWidth);
+                window.height = Mathf.Clamp(window.height, Mathf.Min(220f, boundedHeight), boundedHeight);
+                window.x = Mathf.Clamp(window.x, 0f, Mathf.Max(0f, Screen.width - window.width));
+                window.y = Mathf.Clamp(window.y, 0f, Mathf.Max(0f, Screen.height - window.height));
+                Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+                string focusedControl = GUI.GetNameOfFocusedControl();
+                bool focusedInput = focusedControl == "MegaCrewNavTargetPe" || focusedControl == "MegaCrewNavLeadSeconds";
+                if (window.Contains(mouse) || focusedInput) AcquireShipControlLock();
+                else ReleaseShipControlLock();
+                window = GUI.Window(GetInstanceID(), window, DrawWindow, "MEGACREW  /  NAVIGATION PREVIEW");
+            }
+            finally
+            {
+                GUI.enabled = previousEnabled;
+                GUI.skin = previousSkin;
+            }
         }
 
         void DrawWindow(int id)
         {
-            Vessel vessel = FlightGlobals.ActiveVessel;
-            DrawCurrentOrbit(vessel);
-            GUILayout.Space(5);
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Target periapsis [km]", GUILayout.Width(175));
-            GUI.SetNextControlName("MegaCrewNavTargetPe");
-            targetPeriapsisKm = GUILayout.TextField(targetPeriapsisKm, GUILayout.Width(95));
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Burn lead time [s]", GUILayout.Width(175));
-            GUI.SetNextControlName("MegaCrewNavLeadSeconds");
-            leadSeconds = GUILayout.TextField(leadSeconds, GUILayout.Width(95));
-            GUILayout.EndHorizontal();
-
-            if (proposal != null && snapshot != null &&
-                (targetPeriapsisKm != snapshot.TargetText || leadSeconds != snapshot.LeadText))
-                Invalidate("Inputs changed. Refresh the preview to calculate again.");
-
-            GUILayout.Space(4);
-            bool canPreview = vessel != null && !vessel.packed && vessel.situation == Vessel.Situations.ORBITING;
-            GUI.enabled = canPreview;
-            if (GUILayout.Button("Refresh preview", GUILayout.Height(30))) RefreshPreview(vessel);
-            GUI.enabled = true;
-
-            if (proposal != null)
+            GUILayout.BeginArea(new Rect(8f, 22f, Mathf.Max(20f, window.width - 16f), Mathf.Max(30f, window.height - 30f)));
+            try
             {
-                GUILayout.Space(5);
-                GUILayout.Label("Signed prograde Δv: " + proposal.SignedProgradeDeltaV.ToString("F3", CultureInfo.InvariantCulture) + " m/s (negative = retrograde)");
-                GUILayout.Label("Burn UT: " + proposal.BurnUT.ToString("F2", CultureInfo.InvariantCulture) + " s");
-                GUILayout.Label("Target Pe: " + (proposal.TargetPeriapsisAltitude / 1000.0).ToString("F3", CultureInfo.InvariantCulture) + " km");
-                GUILayout.Label("Detached predicted Pe: " + (proposal.PredictedPeriapsisAltitude / 1000.0).ToString("F3", CultureInfo.InvariantCulture) + " km");
-                GUILayout.Label("Snapshot only; it becomes invalid if vessel, orbit, inputs or UT change.");
+                if (GUILayout.Button("Close", GUILayout.Height(24)))
+                {
+                    visible = false;
+                    if (launcherButton != null) launcherButton.SetFalse(false);
+                    ReleaseShipControlLock();
+                }
+
+                float scrollHeight = Mathf.Max(36f, window.height - 68f);
+                scroll = GUILayout.BeginScrollView(scroll, GUILayout.Width(Mathf.Max(20f, window.width - 32f)), GUILayout.Height(scrollHeight));
+                try
+                {
+                    Vessel vessel = FlightGlobals.ActiveVessel;
+                    DrawCurrentOrbit(vessel);
+                    GUILayout.Space(5);
+                    GUILayout.BeginHorizontal();
+                    try
+                    {
+                        GUILayout.Label("Target periapsis [km]", GUILayout.Width(175));
+                        GUI.SetNextControlName("MegaCrewNavTargetPe");
+                        targetPeriapsisKm = GUILayout.TextField(targetPeriapsisKm, GUILayout.Width(95));
+                    }
+                    finally { GUILayout.EndHorizontal(); }
+                    GUILayout.BeginHorizontal();
+                    try
+                    {
+                        GUILayout.Label("Burn lead time [s]", GUILayout.Width(175));
+                        GUI.SetNextControlName("MegaCrewNavLeadSeconds");
+                        leadSeconds = GUILayout.TextField(leadSeconds, GUILayout.Width(95));
+                    }
+                    finally { GUILayout.EndHorizontal(); }
+
+                    if (proposal != null && snapshot != null &&
+                        (targetPeriapsisKm != snapshot.TargetText || leadSeconds != snapshot.LeadText))
+                        Invalidate("Inputs changed. Refresh the preview to calculate again.");
+
+                    GUILayout.Space(4);
+                    bool canPreview = vessel != null && !vessel.packed && vessel.situation == Vessel.Situations.ORBITING;
+                    bool wasEnabled = GUI.enabled;
+                    try
+                    {
+                        GUI.enabled = wasEnabled && canPreview;
+                        if (GUILayout.Button("Refresh preview", GUILayout.Height(30))) RefreshPreview(vessel);
+                    }
+                    finally { GUI.enabled = wasEnabled; }
+
+                    if (proposal != null)
+                    {
+                        GUILayout.Space(5);
+                        GUILayout.Label("Signed prograde Δv: " + proposal.SignedProgradeDeltaV.ToString("F3", CultureInfo.InvariantCulture) + " m/s (negative = retrograde)");
+                        GUILayout.Label("Burn UT: " + proposal.BurnUT.ToString("F2", CultureInfo.InvariantCulture) + " s");
+                        GUILayout.Label("Target Pe: " + (proposal.TargetPeriapsisAltitude / 1000.0).ToString("F3", CultureInfo.InvariantCulture) + " km");
+                        GUILayout.Label("Detached predicted Pe: " + (proposal.PredictedPeriapsisAltitude / 1000.0).ToString("F3", CultureInfo.InvariantCulture) + " km");
+                        GUILayout.Label("Snapshot only; it becomes invalid if vessel, orbit, inputs or UT change.");
+                    }
+                    else GUILayout.Label(status, GUI.skin.box);
+
+                    GUILayout.Space(6);
+                    GUILayout.Label("Candidate preview only: two-body detached prediction; no SOI, atmosphere, drag, terrain, finite burn, node, thrust, time warp, or approvals.");
+                    GUILayout.Label("Not runtime-verified. This station cannot create nodes or execute burns.");
+                }
+                finally { GUILayout.EndScrollView(); }
+
+                string focused = GUI.GetNameOfFocusedControl();
+                bool needsKeyboard = focused == "MegaCrewNavTargetPe" || focused == "MegaCrewNavLeadSeconds";
+                Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+                bool mouseOverPanel = window.Contains(mouse);
+                if (visible && (needsKeyboard || mouseOverPanel)) AcquireShipControlLock(); else ReleaseShipControlLock();
             }
-            else GUILayout.Label(status, GUI.skin.box);
-
-            GUILayout.Space(6);
-            GUILayout.Label("Candidate preview only: two-body detached prediction; no SOI, atmosphere, drag, terrain, finite burn, node, thrust, time warp, or approvals.");
-            GUILayout.Label("Not runtime-verified. This station cannot create nodes or execute burns.");
-
-            string focused = GUI.GetNameOfFocusedControl();
-            bool needsKeyboard = focused == "MegaCrewNavTargetPe" || focused == "MegaCrewNavLeadSeconds";
-            Vector2 mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            bool mouseOverPanel = window.Contains(mouse);
-            if (needsKeyboard || mouseOverPanel) AcquireShipControlLock(); else ReleaseShipControlLock();
-            GUI.DragWindow(new Rect(0, 0, 10000, 22));
+            finally
+            {
+                GUILayout.EndArea();
+                GUI.enabled = true;
+            }
+            GUI.DragWindow(new Rect(0, 0, window.width, 22));
         }
 
         void DrawCurrentOrbit(Vessel vessel)
