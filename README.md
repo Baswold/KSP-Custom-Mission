@@ -121,3 +121,10 @@ operations journal](docs/ONBOARD-OPERATIONS.md). Use **Ctrl+Alt+O** or OPERATION
 engineering uses **Ctrl+Alt+E**. The combined build incorporates upstream 0.3.0
 crew needs/interior sources. Compilation and model tests pass; flight checks are
 pending. Published release ZIPs do not yet contain these candidate addons.
+
+## Optional Mac visual profile
+
+See [docs/VISUAL-PROFILE.md](docs/VISUAL-PROFILE.md) for the pinned clouds v3,
+NativeParallax Mac renderer, Firefly and VaporCones profile requested in issue #3.
+Install the base mission first. Visual rendering and the F8 binding conflict need
+separate verification; this profile does not enable multiplayer.
