@@ -521,3 +521,8 @@ source/compile/guard results; full freeze/thaw and background power remain open.
 
 Hamish's Duna planner v0.1 and vehicle v0.3 artifacts are under independent static
 review, with UI ownership kept here. No Duna mission is declared playable.
+
+A routine Duna story proposal, [The Red Window](stories/THE-RED-WINDOW.md),
+adds a cooperative observation/caption disagreement and recoverable handover
+question. It is not canon or a playable trigger, grants no science and adds
+no emergency. Persistence and the in-ship notebook remain implementation work.
