@@ -80,3 +80,10 @@ but DeepFreeze never became ready. Logs showed its settings instance missing;
 inspection found the launcher had skipped native scenario initialization.
 That run was inconclusive and made no freeze request. The native lifecycle
 correction is now implemented; its live result remains pending.
+
+The subsequent native-lifecycle run completed the direct refusal observation.
+See [the runtime evidence record](CRYO-REFUSAL-RUNTIME-EVIDENCE.md) for exact
+scope, hashes and remaining gates. The historical report is preserved; newer
+probe source also emits an explicit false flight-qualification field and a
+finished stage label. Those label additions were tested at recording boundaries
+and have not been substituted into the historical live report.

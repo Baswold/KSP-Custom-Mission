@@ -55,6 +55,7 @@ public sealed class CryoRefusalProbe : MonoBehaviour
             Record("schema", 1);
             Record("run_state", "RUNNING");
             Record("probe_completed", false);
+            Record("flight_qualification", false);
             Record("refusal_scope", "direct crew-not-colocated-with-pod");
             Record("ui_gate_tested", false);
             Record("transfer_busy_tested", false);
@@ -393,6 +394,7 @@ public sealed class CryoRefusalProbe : MonoBehaviour
 
         Record("run_state", "COMPLETED");
         Record("result", "REFUSED_AS_EXPECTED");
+        Record("stage", "procedure_finished");
         Record("probe_completed", true);
     }
 
@@ -656,6 +658,7 @@ public sealed class CryoRefusalProbe : MonoBehaviour
         if (!scoped) return;
         if (!report.HasValue("run_state")) Record("run_state", "INCONCLUSIVE");
         if (!report.HasValue("probe_completed")) Record("probe_completed", false);
+        Record("flight_qualification", false);
         report.Save(Path.Combine(root, ReportFile));
         string running = Path.Combine(root, RunningFile);
         if (File.Exists(running)) File.Move(running, Path.Combine(root, DoneFile));

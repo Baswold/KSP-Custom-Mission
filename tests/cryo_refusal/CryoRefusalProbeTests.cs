@@ -144,6 +144,8 @@ static class CryoRefusalProbeTests
         Contains(report, "result=REFUSED_AS_EXPECTED", "only verified refusal completes");
         Contains(report, "run_state=COMPLETED", "validated observation completed");
         Contains(report, "probe_completed=True", "completed observation is explicit");
+        Contains(report, "flight_qualification=False", "backend observation never qualifies the whole flight");
+        Contains(report, "stage=procedure_finished", "successful report identifies finished observation");
         Contains(report, "resource_delta_cause_inferred=False", "resource changes are not attributed");
         Equal(false, report.Contains("transfer="), "probe never claims a transfer");
         Equal(1, GamePersistence.LoadCalls, "valid scoped run loads once");
