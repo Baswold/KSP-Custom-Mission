@@ -113,3 +113,11 @@ A [two-crew vacuum lander and external Hermes docking cradle](docs/FINCH-LANDER.
 are available as separate craft files in the source checkout. Their intended
 mission is a Mun/Minmus low-orbit sortie; flight qualification remains pending.
 They do not replace the existing practice save or add a launch vehicle.
+
+## Onboard operations development candidate
+
+The source checkout also includes [pilot, science, supplies, cryo checks and an
+operations journal](docs/ONBOARD-OPERATIONS.md). Use **Ctrl+Alt+O** or OPERATIONS;
+engineering uses **Ctrl+Alt+E**. The combined build incorporates upstream 0.3.0
+crew needs/interior sources. Compilation and model tests pass; flight checks are
+pending. Published release ZIPs do not yet contain these candidate addons.

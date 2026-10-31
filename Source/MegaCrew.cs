@@ -17,7 +17,8 @@ namespace MegaCrew
     public sealed class CrewRecord
     {
         public string Name, Role, Injury = "None";
-        public double Fatigue, Recovery;
+        public double Fatigue, Recovery, Hunger, Thirst;
+        public bool Resting;
         public bool Treated;
         public CrewRecord(string name, string role) { Name=name; Role=role; }
     }
@@ -43,7 +44,7 @@ namespace MegaCrew
             new CrewRecord("Ada Kerman", "NPC physician / relief commander"),
             new CrewRecord("Vikram Kerman", "NPC systems engineer")
         };
-        readonly string[] tabs = {"Mission", "Crew & cryosleep", "Engineering", "Emergency", "Practice", "Setup"};
+        readonly string[] tabs = {"Mission", "Crew & cryosleep", "Engineering", "Emergency", "Practice", "Crew needs", "Setup"};
         readonly string[] titles = {"01 / Design and assemble", "02 / Launch and rendezvous", "03 / Commission Hermes", "04 / Cryogenic handover", "05 / Emergency exercise", "06 / Orbital science", "07 / Prepare Duna expedition", "08 / Return and recovery"};
         readonly string[][] tasks = {
             new[]{"Design a Hermes-inspired long spine, rotating habitat, command deck and cryobay.","Fit four crew berths, four cryopod spaces, reserve batteries and an independent control core.","Choose the radius from the installed habitat's geometry; calculate rpm and gravity.","Provide docking, radiators, redundant power and a return vehicle. Record mass and delta-v."},
@@ -56,7 +57,7 @@ namespace MegaCrew
             new[]{"Wake and medically assess every crew member before recovery.","Return to Kerbin on a planned trajectory with a thermal protection and landing system.","Recover the crew and archive the mission log.","Review incidents and update the next mission's design."}
         };
 
-        public void Awake() { DontDestroyOnLoad(this); Debug.Log("[MegaCrew] Mission console 0.2.0 loaded; single-player / real-time watch operations."); }
+        public void Awake() { DontDestroyOnLoad(this); Debug.Log("[MegaCrew] Mission console 0.3.0 loaded; single-player / real-time watch operations."); }
         bool InGame { get { return HighLogic.CurrentGame != null && HighLogic.LoadedScene != GameScenes.MAINMENU; } }
         bool Allowed { get { return InGame && (HighLogic.SaveFolder ?? "").StartsWith("MegaCrew", StringComparison.OrdinalIgnoreCase); } }
         string StatePath { get { return Path.Combine(KSPUtil.ApplicationRootPath, "saves", HighLogic.SaveFolder, "MegaCrewMission.cfg"); } }
@@ -70,14 +71,16 @@ namespace MegaCrew
             // This rule applies only to the new MegaCrew save. Cryosleep never advances the clock.
             if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedScene==GameScenes.TRACKSTATION) && TimeWarp.CurrentRateIndex>0) TimeWarp.SetRate(0,true);
             double ut=Planetarium.GetUniversalTime(), dt=ut-lastUt; lastUt=ut;
+            UpdateNeeds(dt);
+            UpdateInterior();
             UpdatePractice(dt);
             // Do not count closed-game time, scene-load jumps, or a skipped/warped interval as a watch.
             if (dt<=0 || dt>5 || !HighLogic.LoadedSceneIsFlight || !running) return;
             shiftElapsed+=dt;
             foreach(var c in crew) {
                 if (!Aboard(c.Name) && !Frozen(c.Name)) continue;
-                bool sleeping=Frozen(c.Name);
-                c.Fatigue=Math.Max(0,Math.Min(100,c.Fatigue+dt*(sleeping?-0.012:0.003)));
+
+                // Fatigue is updated by NeedsModel, independently of watch tracking.
                 if(c.Treated && c.Injury!="None") { c.Recovery=Math.Max(0,c.Recovery-dt); if(c.Recovery==0){ c.Injury="None";c.Treated=false;message=c.Name+" completed simulated injury recovery."; } }
             }
             if(alarmTime>0 && ut>=alarmTime) { alarmTime=0; WakeRelief(); }
@@ -95,7 +98,7 @@ namespace MegaCrew
             return false;
         }
         bool Frozen(string name) { return CryoBridge.IsFrozen(name); }
-        void ResetState(){ResetPractice();checks.Clear();wakeQueue.Clear();phase=0;running=false;shiftElapsed=0;drillActive=false;alarmTime=0;pilot=crew[0].Name;foreach(var c in crew){c.Fatigue=0;c.Recovery=0;c.Injury="None";c.Treated=false;} }
+        void ResetState(){ResetPractice();checks.Clear();wakeQueue.Clear();phase=0;running=false;shiftElapsed=0;drillActive=false;alarmTime=0;pilot=crew[0].Name;foreach(var c in crew){c.Fatigue=0;c.Hunger=0;c.Thirst=0;c.Resting=false;c.Recovery=0;c.Injury="None";c.Treated=false;} }
         void WakeRelief() {
             wakeQueue.Clear();
             foreach(var c in crew)if(Frozen(c.Name))wakeQueue.Enqueue(c.Name);
@@ -107,10 +110,10 @@ namespace MegaCrew
             if(!HighLogic.LoadedSceneIsFlight && HighLogic.LoadedScene!=GameScenes.SPACECENTER && HighLogic.LoadedScene!=GameScenes.EDITOR && HighLogic.LoadedScene!=GameScenes.MAINMENU)return;
             GUI.skin=HighLogic.Skin;
             if(GUI.Button(new Rect(12,Screen.height-95,165,34),"MEGACREW  /  F8"))visible=!visible;
-            if(!visible)return;
+            DrawInterior();if(!visible)return;
             window.width=Math.Min(760,Screen.width-20);window.height=Math.Min(650,Screen.height-45);
             window.x=Mathf.Clamp(window.x,0,Math.Max(0,Screen.width-window.width));window.y=Mathf.Clamp(window.y,0,Math.Max(0,Screen.height-window.height));
-            window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.2",GUILayout.Width(window.width),GUILayout.Height(window.height));
+            window=GUILayout.Window(719304,window,Draw,"MEGACREW | HERMES OPERATIONS 0.3",GUILayout.Width(window.width),GUILayout.Height(window.height));
         }
         void Draw(int id)
         {
@@ -118,7 +121,7 @@ namespace MegaCrew
             tab=GUILayout.Toolbar(tab,tabs);
             scroll=GUILayout.BeginScrollView(scroll);
             if(!Allowed)GUILayout.Label("MISSION EDITING LOCKED: create/load a Sandbox save whose name begins MegaCrew. Other saves are unaffected.");
-            if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else DrawSetup();
+            if(tab==0)DrawMission();else if(tab==1)DrawCrew();else if(tab==2)DrawEngineering();else if(tab==3)DrawEmergency();else if(tab==4)DrawPractice();else if(tab==5)DrawNeeds();else DrawSetup();
             GUILayout.Space(12);GUILayout.Label(message);GUILayout.EndScrollView();GUI.DragWindow(new Rect(0,0,10000,24));
         }
         void DrawMission()
@@ -164,7 +167,7 @@ namespace MegaCrew
             GUILayout.Label("Health model: fatigue and minor injury records are custom gameplay abstractions, not physiological predictions. Cryosleep is fictional technology; no claim of real human feasibility.");
         }
         void Treat(CrewRecord patient) {
-            int medics=0;foreach(var c in crew)if(c!=patient&&Aboard(c.Name)&&!Frozen(c.Name)&&c.Injury=="None")medics++;
+            int medics=0;foreach(var c in crew)if(c!=patient&&Aboard(c.Name)&&!Frozen(c.Name)&&!c.Resting&&c.Injury=="None")medics++;
             if(medics==0){message="An awake, uninjured second crew member is required to treat this injury.";return;}
             patient.Treated=true;patient.Recovery=300;message="Simulated treatment complete. Five-minute recovery watch; no global flight controls or Kerbal abilities were changed.";Save();
         }
@@ -227,13 +230,13 @@ namespace MegaCrew
                 var n=new ConfigNode("MEGACREW");n.AddValue("version",1);n.AddValue("phase",phase);n.AddValue("pilot",pilot);n.AddValue("running",running);n.AddValue("watchSeconds",shiftElapsed);n.AddValue("wakeUT",alarmTime);n.AddValue("drill",drillActive);
                 foreach(var k in checks)n.AddValue("check",k);
                 foreach(var c in crew){var x=n.AddNode("CREW");x.AddValue("name",c.Name);x.AddValue("fatigue",c.Fatigue);x.AddValue("injury",c.Injury);x.AddValue("treated",c.Treated);x.AddValue("recovery",c.Recovery);}
-                SavePractice(n);n.Save(StatePath);
+                foreach(var queued in wakeQueue)n.AddValue("wakeQueued",queued);SavePractice(n);SaveNeeds(n);n.Save(StatePath);
             }catch(Exception e){Debug.LogError("[MegaCrew] State save failed: "+e.Message);message="Mission state could not save; see KSP.log.";}
         }
         void Load()
         {
             try {
-                if(!File.Exists(StatePath)){message="Open Practice for the orbital maintenance exercise, or Mission for the longer campaign.";return;}var n=ConfigNode.Load(StatePath);if(n==null)return;LoadPractice(n);
+                if(!File.Exists(StatePath)){message="Open Practice for the orbital maintenance exercise, or Mission for the longer campaign.";return;}var n=ConfigNode.Load(StatePath);if(n==null)return;if(n.HasNode("MEGACREW"))n=n.GetNode("MEGACREW");LoadPractice(n);LoadNeeds(n);foreach(var queued in n.GetValues("wakeQueued"))if(crew.Exists(c=>c.Name==queued)&&!wakeQueue.Contains(queued))wakeQueue.Enqueue(queued);
                 int.TryParse(n.GetValue("phase"),out phase);phase=Math.Max(0,Math.Min(titles.Length-1,phase));pilot=n.GetValue("pilot")??crew[0].Name;
                 bool.TryParse(n.GetValue("running"),out running);double.TryParse(n.GetValue("watchSeconds"),out shiftElapsed);double.TryParse(n.GetValue("wakeUT"),out alarmTime);bool.TryParse(n.GetValue("drill"),out drillActive);
                 foreach(var k in n.GetValues("check"))checks.Add(k);
