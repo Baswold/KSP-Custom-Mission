@@ -15,16 +15,24 @@ Build a complete staging candidate into a **new** directory using your own
 KSP 1.12.5 Managed assemblies and .NET SDK:
 
 ```sh
-python3 tools/build_navigation_candidate.py --repo . --upstream-ref f76e437 --navigation-ref HEAD --operations-ref HEAD --output /tmp/new-megacrew-candidate --managed "/path/to/KSP.app/Contents/Resources/Data/Managed" --csc "/path/to/dotnet/sdk/VERSION/Roslyn/bincore/csc.dll"
+python3 tools/build_navigation_candidate.py --repo . --upstream-ref f76e437 --integration-ref HEAD --output /tmp/new-megacrew-candidate --managed "/path/to/KSP.app/Contents/Resources/Data/Managed" --csc "/path/to/dotnet/sdk/VERSION/Roslyn/bincore/csc.dll"
 ```
 
 The staging builder reconstructs the pristine 0.3.0 package and applies the
-single cumulative 0.3.7 source packet, then the allowlisted addon sources.
-It supplies the save/craft and installation tools in that separate directory.
+single cumulative 0.3.7 source packet, then replaces the package source/data
+with the committed integration snapshot. This preserves newer core UI changes
+and includes Duna mission data. Commit edits first; uncommitted files are not
+build inputs. Tracked and historical DLLs are excluded and the plugin is rebuilt
+fresh. It supplies the save/craft and installation tools in that separate directory.
+See [build modes and manifest details](docs/BUILD-NAVIGATION-CANDIDATE.md).
 The historical ZIPs remain build inputs: **do not extract them over this
 integration checkout**, which would overwrite current source and DLLs.
 
-For an isolated playtest, keep KSP closed and run the staged installer against
+**Active-play hold:** source builds may continue, but do not launch, terminate
+or update KSP while Basil and Hamish play. Runtime testing requires Basil to
+explicitly release this hold.
+
+For a later isolated playtest, keep KSP closed and run the staged installer against
 a separate clean KSP copy:
 
 ```sh
@@ -38,7 +46,7 @@ releases. Finch craft and optional visuals have separate guides below.
 **Evidence:** actual 17-part/four-crew Hermes flight and the direct outside-pod
 cryo refusal were observed on the stable 36-source candidate. See the
 [runtime evidence](docs/CRYO-REFUSAL-RUNTIME-EVIDENCE.md). The integrated
-38-source build adds docking instruments; full flight, UI, freeze/thaw,
+integration build adds docking instruments and a bounded-console candidate; full flight, UI, freeze/thaw,
 lander, high-rate coast, animation and multiplayer acceptance remain open.
 See the [full plan](docs/FULL-DELIVERY-PLAN.md) and
 [Human Help Requests](https://github.com/w4mdzzn8my-dotcom/KSP-Custom-Mission/issues/11).

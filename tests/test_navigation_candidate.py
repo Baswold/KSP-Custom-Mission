@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unittest
 import zipfile
+from unittest import mock
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
@@ -425,6 +426,273 @@ diff --git a/README.md b/README.md
                 stdout=subprocess.PIPE, text=True,
             ).stdout
             self.assertEqual(repo_status, "")
+
+
+class IntegrationSnapshotTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix="navigation-full-snapshot-")
+        self.base = Path(self.temp.name)
+        self.repo = self.base / "repo"
+        self.repo.mkdir()
+        subprocess.run(["git", "init", "--quiet", str(self.repo)], check=True)
+        subprocess.run(["git", "-C", str(self.repo), "config", "user.name", "Fixture"], check=True)
+        subprocess.run(["git", "-C", str(self.repo), "config", "user.email",
+                        "fixture@example.invalid"], check=True)
+
+        archive = make_zip([
+            (zipfile.ZipInfo("README.md"), b"canonical README\n"),
+            (zipfile.ZipInfo("Source/MegaCrew.cs"), b"canonical source\n"),
+            (zipfile.ZipInfo("Source/Stale.cs"), b"stale source\n"),
+            (zipfile.ZipInfo("GameData/MegaCrew/Plugins/MegaCrew.dll"), b"old plugin bytes"),
+            (zipfile.ZipInfo("docs/stale.md"), b"stale docs\n"),
+            (zipfile.ZipInfo("tests/stale.py"), b"stale tests\n"),
+            (zipfile.ZipInfo("tools/stale.py"), b"stale tools\n"),
+            (zipfile.ZipInfo("Ships/stale.craft"), b"stale craft\n"),
+            (zipfile.ZipInfo("Missions/stale/old.json"), b"stale mission\n"),
+        ])
+        (self.repo / builder.ZIP_PATH).write_bytes(archive)
+        self.archive = archive
+        self.patch = (
+            "diff --git a/README.md b/README.md\n"
+            "--- a/README.md\n"
+            "+++ b/README.md\n"
+            "@@ -1 +1 @@\n"
+            "-canonical README\n"
+            "+patched base README\n"
+        ).encode("utf-8")
+        patch_path = self.repo / builder.PATCH_SEQUENCE[0]["path"]
+        patch_path.write_bytes(self.patch)
+
+        snapshot = {
+            "README.md": b"snapshot README\n",
+            "dependencies.json": b'{"dependencies":[]}\n',
+            "visual-profile.json": b'{"profiles":[]}\n',
+            "Source/MegaCrew.cs": b"snapshot source core\n",
+            "Source/New.cs": b"snapshot new source\n",
+            "Source/Navigation/Fixture.cs": b"// navigation fixture\n",
+            "Source/OnboardDockingInstruments.cs": b"snapshot docking instruments\n",
+            "docs/current.md": b"snapshot docs\n",
+            "tools/current.py": b"snapshot tools\n",
+            "tests/current.py": b"snapshot tests\n",
+            "Ships/VAB/current.craft": b"snapshot craft\n",
+            "Missions/Duna/mission.json": b'{"mission":"duna"}\n',
+            "GameData/MegaCrew/CrewSystems.cfg": b"snapshot config\n",
+            "GameData/MegaCrew/Plugins/MegaCrew.dll": b"stale tracked dll must not ship",
+        }
+        for relative in builder.NAVIGATION_TEST_PATHS:
+            snapshot[relative] = b"// navigation test fixture\n"
+        for relative, data in snapshot.items():
+            path = self.repo / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        (self.repo / "integration-manifest.json").write_text(
+            '{"historical":"not the new stage report"}\n', encoding="utf-8")
+        self.snapshot = snapshot
+        subprocess.run(["git", "-C", str(self.repo), "add", "."], check=True)
+        subprocess.run([
+            "git", "-C", str(self.repo), "-c", "commit.gpgsign=false",
+            "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "snapshot fixture",
+        ], check=True)
+        self.ref = subprocess.run(["git", "-C", str(self.repo), "rev-parse", "HEAD"], check=True,
+                                  stdout=subprocess.PIPE, text=True).stdout.strip()
+        self.patch_sequence = ({
+            "ref": self.ref,
+            "path": builder.PATCH_SEQUENCE[0]["path"],
+            "expected_sha256": builder.sha256(self.patch),
+        },)
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def args(self, output, **overrides):
+        values = {
+            "repo": self.repo,
+            "upstream_ref": self.ref,
+            "navigation_ref": None,
+            "operations_ref": None,
+            "integration_ref": self.ref,
+            "output": output,
+            "prepare_only": True,
+            "managed": None,
+            "csc": None,
+        }
+        values.update(overrides)
+        return type("Args", (), values)()
+
+    def test_full_snapshot_replaces_roots_and_never_keeps_baseline_dll(self):
+        # A dirty checkout must not bleed into this immutable-ref build.
+        (self.repo / "Source/MegaCrew.cs").write_text("uncommitted poison\n", encoding="utf-8")
+        args = self.args(self.base / "candidate")
+        built = builder.build(args, patch_sequence=self.patch_sequence,
+                              expected_zip_sha256=builder.sha256(self.archive))
+
+        self.assertEqual((built / "Source/MegaCrew.cs").read_bytes(), self.snapshot["Source/MegaCrew.cs"])
+        self.assertTrue((built / "Source/New.cs").is_file())
+        self.assertFalse((built / "Source/Stale.cs").exists())
+        self.assertFalse((built / "GameData/MegaCrew/Plugins/MegaCrew.dll").exists())
+        self.assertEqual((built / "GameData/MegaCrew/CrewSystems.cfg").read_bytes(),
+                         self.snapshot["GameData/MegaCrew/CrewSystems.cfg"])
+        self.assertFalse((built / "docs/stale.md").exists())
+        self.assertFalse((built / "tests/stale.py").exists())
+        self.assertFalse((built / "tools/stale.py").exists())
+        self.assertFalse((built / "Ships/stale.craft").exists())
+        self.assertTrue((built / "Missions/Duna/mission.json").is_file())
+        self.assertFalse((built / "Missions/stale/old.json").exists())
+        self.assertEqual((built / "README.md").read_bytes(), self.snapshot["README.md"])
+
+        manifest = json.loads((built / "manifest.json").read_text())
+        self.assertEqual(manifest["mode"], "full_git_snapshot")
+        self.assertEqual(manifest["integration_ref"], self.ref)
+        self.assertEqual(manifest["integration_commit"], self.ref)
+        self.assertFalse(manifest["compiled"])
+        self.assertEqual(manifest["integration_snapshot_files"], {
+            path: builder.sha256(data) for path, data in self.snapshot.items()
+            if not path.lower().endswith(".dll")
+        })
+        self.assertEqual(manifest["integration_excluded_tracked_dlls"], {
+            "GameData/MegaCrew/Plugins/MegaCrew.dll": builder.sha256(
+                self.snapshot["GameData/MegaCrew/Plugins/MegaCrew.dll"])
+        })
+        self.assertEqual(manifest["integration_excluded_historical_metadata"], {
+            "integration-manifest.json": builder.sha256(
+                b'{"historical":"not the new stage report"}\n')
+        })
+        self.assertFalse((built / "integration-manifest.json").exists())
+        self.assertEqual(manifest["docking_group"]["status"], "from_full_snapshot")
+        self.assertEqual(manifest["docking_group"]["files"], {
+            "Source/OnboardDockingInstruments.cs": builder.sha256(
+                self.snapshot["Source/OnboardDockingInstruments.cs"])
+        })
+        deviations = manifest["canonical_source_deviations"]
+        self.assertEqual(deviations["Source/MegaCrew.cs"]["status"], "modified")
+        self.assertEqual(deviations["Source/Stale.cs"]["status"], "removed")
+        self.assertEqual(deviations["Source/New.cs"]["status"], "added")
+        self.assertIsNone(deviations["Source/New.cs"]["canonical_sha256"])
+
+    def test_compile_uses_the_same_snapshot_source_and_emits_compile_provenance(self):
+        managed = self.base / "Managed"
+        managed.mkdir()
+        (managed / "Assembly-CSharp.dll").write_bytes(b"managed fixture")
+        csc = self.base / "csc.dll"
+        csc.write_bytes(b"compiler fixture")
+        capture = self.base / "compile-inputs.json"
+        fake_dotnet = self.base / "dotnet"
+        fake_dotnet.write_text("""#!/usr/bin/env python3
+import json, pathlib, shlex, sys
+response = pathlib.Path(sys.argv[-1][1:])
+tokens = shlex.split(response.read_text())
+output = pathlib.Path(next(x[len('-out:'):] for x in tokens if x.startswith('-out:')))
+sources = [pathlib.Path(x.strip('\\\"')) for x in tokens if x.endswith('.cs')]
+output.parent.mkdir(parents=True, exist_ok=True)
+output.write_bytes(b'compiled from immutable snapshot')
+pathlib.Path(%r).write_text(json.dumps({p.name: p.read_text() for p in sources}))
+""" % str(capture), encoding="utf-8")
+        fake_dotnet.chmod(0o755)
+
+        args = self.args(self.base / "compiled-candidate", prepare_only=False,
+                         managed=managed, csc=csc)
+        old_path = os.environ.get("PATH", "")
+        try:
+            os.environ["PATH"] = str(self.base) + os.pathsep + old_path
+            built = builder.build(args, patch_sequence=self.patch_sequence,
+                                  expected_zip_sha256=builder.sha256(self.archive))
+        finally:
+            os.environ["PATH"] = old_path
+
+        assembly = built / "GameData/MegaCrew/Plugins/MegaCrew.dll"
+        self.assertEqual(assembly.read_bytes(), b"compiled from immutable snapshot")
+        captured = json.loads(capture.read_text())
+        self.assertEqual(captured["MegaCrew.cs"], self.snapshot["Source/MegaCrew.cs"].decode())
+        self.assertNotIn("Stale.cs", captured)
+        manifest = json.loads((built / "manifest.json").read_text())
+        self.assertTrue(manifest["compiled"])
+        self.assertEqual(manifest["compiler_language_version"], "7.3")
+        self.assertEqual(manifest["compiler_inputs"]["compiler_sha256"], builder.sha256(csc.read_bytes()))
+        self.assertEqual(manifest["compiler_inputs"]["managed_assemblies"], {
+            "Assembly-CSharp.dll": builder.sha256(b"managed fixture")
+        })
+
+    def test_integration_mode_rejects_legacy_overlay_flags_before_output(self):
+        cases = (
+            {"navigation_ref": "294c667"},
+            {"operations_ref": self.ref},
+        )
+        for index, options in enumerate(cases):
+            with self.subTest(options=options):
+                output = self.base / ("rejected-{}".format(index))
+                args = self.args(output, **options)
+                with self.assertRaisesRegex(builder.BuildError, "cannot be combined"):
+                    builder.build(args, patch_sequence=self.patch_sequence,
+                                  expected_zip_sha256=builder.sha256(self.archive))
+                self.assertFalse(output.exists())
+
+    def test_integration_ref_missing_or_unresolvable_fails_before_output(self):
+        output = self.base / "missing-ref"
+        args = self.args(output, integration_ref="no-such-ref")
+        with self.assertRaisesRegex(builder.BuildError, "Could not resolve Git ref"):
+            builder.build(args, patch_sequence=self.patch_sequence,
+                          expected_zip_sha256=builder.sha256(self.archive))
+        self.assertFalse(output.exists())
+
+    def test_snapshot_rejects_git_symlink_inside_package_roots(self):
+        source = self.repo / "Source/Linked.cs"
+        source.symlink_to("MegaCrew.cs")
+        subprocess.run(["git", "-C", str(self.repo), "add", "Source/Linked.cs"], check=True)
+        subprocess.run([
+            "git", "-C", str(self.repo), "-c", "commit.gpgsign=false",
+            "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "snapshot symlink",
+        ], check=True)
+        ref = subprocess.run(["git", "-C", str(self.repo), "rev-parse", "HEAD"], check=True,
+                             stdout=subprocess.PIPE, text=True).stdout.strip()
+        with self.assertRaisesRegex(builder.BuildError, "symlink or non-regular"):
+            builder.integration_snapshot_files(self.repo, ref)
+
+    def test_snapshot_rejects_case_colliding_git_paths(self):
+        for path, data in (("Source/Case.cs", b"one\n"), ("Source/case.cs", b"two\n")):
+            blob = subprocess.run(["git", "-C", str(self.repo), "hash-object", "-w", "--stdin"],
+                                  input=data, check=True, stdout=subprocess.PIPE,
+                                  text=False).stdout.decode().strip()
+            subprocess.run(["git", "-C", str(self.repo), "update-index", "--add", "--cacheinfo",
+                            "100644", blob, path], check=True)
+        subprocess.run([
+            "git", "-C", str(self.repo), "-c", "commit.gpgsign=false",
+            "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "snapshot case collision",
+        ], check=True)
+        ref = subprocess.run(["git", "-C", str(self.repo), "rev-parse", "HEAD"], check=True,
+                             stdout=subprocess.PIPE, text=True).stdout.strip()
+        with self.assertRaisesRegex(builder.BuildError, "Case-colliding"):
+            builder.integration_snapshot_files(self.repo, ref)
+
+    def test_snapshot_rejects_case_colliding_ancestor_directories(self):
+        records = []
+        paths = (
+            "README.md", "dependencies.json", "visual-profile.json", "Source/MegaCrew.cs",
+            "Source/Nav/a.cs", "Source/nav/b.cs",
+        )
+        for index, path in enumerate(paths, 1):
+            oid = ("%040x" % index)
+            records.append("100644 blob {}\t{}\0".format(oid, path).encode("utf-8"))
+
+        def fake_git(_repo, *args, **kwargs):
+            self.assertEqual(args[:3], ("ls-tree", "-r", "-z"))
+            return b"".join(records)
+
+        with mock.patch.object(builder, "_git", side_effect=fake_git), \
+             mock.patch.object(builder, "git_blob", side_effect=lambda _r, _c, p: p.encode()):
+            with self.assertRaisesRegex(builder.BuildError, "Case-colliding"):
+                builder.integration_snapshot_files(Path("unused"), "a" * 40)
+
+    def test_legacy_allowlist_mode_still_uses_legacy_default_navigation_ref(self):
+        subprocess.run(["git", "-C", str(self.repo), "update-ref", "refs/heads/294c667", self.ref],
+                       check=True)
+        args = self.args(self.base / "legacy", integration_ref=None, navigation_ref=None)
+        built = builder.build(args, patch_sequence=self.patch_sequence,
+                              expected_zip_sha256=builder.sha256(self.archive))
+        manifest = json.loads((built / "manifest.json").read_text())
+        self.assertEqual(manifest["mode"], "legacy_allowlist")
+        self.assertEqual(manifest["navigation_ref"], "294c667")
+        self.assertEqual(manifest["navigation_commit"], self.ref)
+        self.assertTrue((built / "Source/Stale.cs").is_file())
 
 
 if __name__ == "__main__":

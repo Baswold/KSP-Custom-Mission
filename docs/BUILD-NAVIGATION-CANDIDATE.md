@@ -1,4 +1,36 @@
-# Build an isolated 0.3.7 navigation candidate
+# Build an isolated MegaCrew candidate
+
+
+## Current consolidated branch
+
+Use `--integration-ref HEAD` for the complete reviewed branch, including core
+UI changes and Duna mission files. Commit source changes first: the builder
+reads immutable Git objects, never uncommitted files. This mode cannot be
+combined with explicit `--navigation-ref` or `--operations-ref` overlays.
+
+```sh
+python3 tools/build_navigation_candidate.py --repo . --integration-ref HEAD \
+  --output /tmp/new-megacrew-candidate \
+  --managed /path/to/KSP_Data/Managed \
+  --csc /path/to/dotnet/sdk/Roslyn/bincore/csc.dll
+```
+
+It verifies/reconstructs the pinned base, then replaces Source, docs, tools,
+tests, Ships, Missions and GameData/MegaCrew with the tracked snapshot. README,
+dependencies and visual profile metadata also come from that commit. Deleted
+base sources do not linger. Tracked DLLs and the historical base DLL are omitted;
+normal compilation is fresh, and `--prepare-only` produces no plugin DLL.
+The staging manifest records snapshot/source hashes, exclusions, changes from
+the canonical core, builder/compiler/reference provenance and actual output
+hashes. It is the authority for this staging output, separate from the repo's
+historical integration manifest.
+
+No game is launched or installed. During Basil's active-play hold, preparation
+and compilation may use a new temporary source output only; do not run its
+installer or copy it into any game directory. Full flight/UI qualification is
+still pending.
+
+## Historical addon overlay mode
 
 The builder defaults to upstream commit `f76e437` and navigation commit
 `294c667`. It reads the published `Hermes-Practice-v0.3.0.zip`, verifies its
@@ -62,8 +94,10 @@ behavior, core-source preservation, and navigation-only, pre-docking combined,
 and full/absent/partial seven-file docking groups in synthetic candidates.
 
 
-Rebuild a combined candidate with this script into a new output directory. The
-extracted host packet's `tools/build.py` currently scans only flat `Source/*.cs`,
+Rebuild a combined candidate with this script into a new output directory. In historical overlay mode the
+extracted host packet's `tools/build.py` scans only flat `Source/*.cs`,
 so it omits nested navigation sources. This builder compiles `Source/**/*.cs`
 recursively. Keep using it for combined builds until the host helper is updated;
 an in-place rebuild with the flat helper would produce a different plugin.
+
+The consolidated snapshot instead carries the reviewed recursive build helper.

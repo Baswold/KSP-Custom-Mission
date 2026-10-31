@@ -73,6 +73,13 @@ PATCH_SEQUENCE = (
 MAX_ENTRIES = 1000
 MAX_MEMBER_BYTES = 128 * 1024 * 1024
 MAX_TOTAL_BYTES = 512 * 1024 * 1024
+INTEGRATION_SNAPSHOT_DIRS = (
+    "Source", "docs", "tools", "tests", "Ships", "Missions", "GameData/MegaCrew",
+)
+INTEGRATION_SNAPSHOT_FILES = (
+    "README.md", "dependencies.json", "visual-profile.json",
+)
+INTEGRATION_EXCLUDED_SUFFIXES = (".dll",)
 
 
 class BuildError(RuntimeError):
@@ -269,6 +276,121 @@ def operations_files(repo, commit):
     return base
 
 
+def integration_snapshot_files(repo, commit):
+    """Read a complete package snapshot from one immutable Git commit."""
+    raw = _git(repo, "ls-tree", "-r", "-z", "--full-tree", commit)
+    files = {}
+    excluded_dlls = {}
+    excluded_historical_metadata = {}
+    folded_prefixes_seen = {}
+    directories = set(INTEGRATION_SNAPSHOT_DIRS)
+    prefixes = tuple(directory + "/" for directory in INTEGRATION_SNAPSHOT_DIRS)
+    folded_prefixes = tuple(prefix.casefold() for prefix in prefixes)
+    folded_directories = {directory.casefold() for directory in INTEGRATION_SNAPSHOT_DIRS}
+    folded_root_files = {path.casefold() for path in INTEGRATION_SNAPSHOT_FILES}
+
+    for record in raw.split(b"\0"):
+        if not record:
+            continue
+        metadata, separator, raw_path = record.partition(b"\t")
+        if not separator:
+            raise BuildError("Malformed Git tree record in integration snapshot")
+        try:
+            path = raw_path.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise BuildError("Integration snapshot contains a non-UTF8 path") from exc
+
+        historical_metadata = path == "integration-manifest.json"
+        selected = (path in INTEGRATION_SNAPSHOT_FILES or path in directories or
+                    path.startswith(prefixes))
+        casefold_selected = (path.casefold() in folded_root_files or
+                             path.casefold() in folded_directories or
+                             path.casefold().startswith(folded_prefixes) or
+                             path.casefold() == "integration-manifest.json")
+        if not selected and not casefold_selected and not historical_metadata:
+            continue
+
+        rel = PurePosixPath(path)
+        if (not path or rel.is_absolute() or "\\" in path or
+                any(part in ("", ".", "..") for part in path.split("/")) or
+                re.match(r"^[A-Za-z]:", path)):
+            raise BuildError("Unsafe path in integration snapshot: {!r}".format(path))
+        if not selected:
+            if not historical_metadata:
+                raise BuildError("Integration snapshot path uses noncanonical package-root casing: {}".format(path))
+
+        if path in directories:
+            raise BuildError("Integration snapshot package root is not a directory: {}".format(path))
+
+        fields = metadata.decode("ascii", errors="strict").split()
+        if len(fields) != 3:
+            raise BuildError("Malformed Git tree metadata for {}".format(path))
+        mode, object_type, object_id = fields
+        if object_type != "blob" or mode not in ("100644", "100755"):
+            raise BuildError("Integration snapshot contains a symlink or non-regular file: {}".format(path))
+
+        # Check every ancestor too: two differently-cased directories can
+        # alias on a case-insensitive volume even when their leaves differ.
+        for part_count in range(1, len(rel.parts) + 1):
+            prefix = PurePosixPath(*rel.parts[:part_count]).as_posix()
+            collision_key = prefix.casefold()
+            prior = folded_prefixes_seen.get(collision_key)
+            if prior is not None and prior != prefix:
+                raise BuildError("Case-colliding integration snapshot paths: {} and {}".format(
+                    prior, prefix))
+            folded_prefixes_seen[collision_key] = prefix
+
+        is_dll = PurePosixPath(path).suffix.casefold() in INTEGRATION_EXCLUDED_SUFFIXES
+        blob = git_blob(repo, commit, path)
+        if historical_metadata:
+            excluded_historical_metadata[path] = sha256(blob)
+            continue
+        if is_dll:
+            excluded_dlls[path] = sha256(blob)
+        else:
+            files[path] = blob
+
+    for required in INTEGRATION_SNAPSHOT_FILES:
+        if required not in files:
+            raise BuildError("Integration snapshot is missing required package file: {}".format(required))
+    if not any(path.startswith("Source/") and path.endswith(".cs") for path in files):
+        raise BuildError("Integration snapshot has no tracked C# source under Source/")
+    if "Source/MegaCrew.cs" not in files:
+        raise BuildError("Integration snapshot is missing Source/MegaCrew.cs")
+    return {"files": files, "excluded_dlls": excluded_dlls,
+            "excluded_historical_metadata": excluded_historical_metadata}
+
+
+def replace_snapshot_trees(root, snapshot_files):
+    """Replace complete package roots from a verified snapshot, removing stale base files."""
+    for relative in INTEGRATION_SNAPSHOT_DIRS:
+        target = root / relative
+        if target.is_symlink():
+            target.unlink()
+        elif target.is_dir():
+            shutil.rmtree(target)
+        elif target.exists():
+            target.unlink()
+    for relative in INTEGRATION_SNAPSHOT_FILES:
+        target = root / relative
+        if target.is_symlink() or target.exists():
+            target.unlink()
+    overlay_files(root, [("full Git integration snapshot", snapshot_files)])
+
+
+def source_tree_hashes(root):
+    result = {}
+    source_root = root / "Source"
+    if not source_root.is_dir():
+        return result
+    for path in sorted(source_root.rglob("*")):
+        if path.is_symlink():
+            raise BuildError("Non-regular source file in canonical base: {}".format(path))
+        if path.is_file():
+            result[path.relative_to(root).as_posix()] = sha256(path.read_bytes())
+    return result
+
+
 def apply_patch_once(root, patch_bytes, patch_label, sequence_number):
     patch_file = root / (".integration-patch-{}.patch".format(sequence_number))
     patch_file.write_bytes(patch_bytes)
@@ -377,13 +499,13 @@ def ensure_new_destination(path, repo=None):
     return path
 
 
-def collect_inputs(repo, upstream_ref, navigation_ref, patch_sequence=PATCH_SEQUENCE,
+def collect_inputs(repo, upstream_ref, navigation_ref=None, patch_sequence=PATCH_SEQUENCE,
                    expected_zip_sha256=EXPECTED_ZIP_SHA256, operations_ref=None):
     """Read and verify every pinned input before creating an output directory."""
     if not patch_sequence:
         raise BuildError("Patch sequence must contain at least one patch")
     upstream_commit = resolve_commit(repo, upstream_ref)
-    nav_commit = resolve_commit(repo, navigation_ref)
+    nav_commit = resolve_commit(repo, navigation_ref) if navigation_ref is not None else None
     zip_bytes = git_blob(repo, upstream_commit, ZIP_PATH)
     zip_hash = verify_sha256(zip_bytes, expected_zip_sha256, ZIP_PATH)
 
@@ -415,8 +537,8 @@ def collect_inputs(repo, upstream_ref, navigation_ref, patch_sequence=PATCH_SEQU
             "bytes": patch_bytes,
         })
 
-    nav_files = navigation_sources(repo, nav_commit)
-    nav_test_files = navigation_tests(repo, nav_commit)
+    nav_files = navigation_sources(repo, nav_commit) if nav_commit is not None else None
+    nav_test_files = navigation_tests(repo, nav_commit) if nav_commit is not None else None
     operations_commit = None
     operations = None
     if operations_ref is not None:
@@ -440,10 +562,26 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
     repo = Path(args.repo).resolve()
     if not repo.is_dir() or not (repo / ".git").exists():
         raise BuildError("--repo must be a Git checkout")
+    integration_ref = getattr(args, "integration_ref", None)
+    explicit_navigation_ref = getattr(args, "navigation_ref", None)
     operations_ref = getattr(args, "operations_ref", None)
-    inputs = collect_inputs(repo, args.upstream_ref, args.navigation_ref,
+    if integration_ref is not None:
+        if explicit_navigation_ref is not None:
+            raise BuildError("--integration-ref cannot be combined with an explicit --navigation-ref")
+        if operations_ref is not None:
+            raise BuildError("--integration-ref cannot be combined with --operations-ref")
+        navigation_ref = None
+        integration_commit = resolve_commit(repo, integration_ref)
+        integration_snapshot = integration_snapshot_files(repo, integration_commit)
+    else:
+        navigation_ref = explicit_navigation_ref or "294c667"
+        integration_commit = None
+        integration_snapshot = None
+
+    inputs = collect_inputs(repo, args.upstream_ref, navigation_ref,
                             PATCH_SEQUENCE if patch_sequence is None else patch_sequence,
-                            expected_zip_sha256, operations_ref=operations_ref)
+                            expected_zip_sha256,
+                            operations_ref=None if integration_commit is not None else operations_ref)
 
     output = ensure_new_destination(args.output, repo)
     try:
@@ -456,18 +594,25 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
         count = safe_extract(inputs["zip_bytes"], output)
         for patch in inputs["patches"]:
             apply_patch_once(output, patch["bytes"], patch["path"], patch["index"])
-        overlay_groups = [
-            ("Navigation source", inputs["navigation_files"]),
-            ("Navigation tests", inputs["navigation_tests"]),
-        ]
-        if inputs["operations"] is not None:
-            overlay_groups.extend([
-                ("Operations source", inputs["operations"]["sources"]),
-                ("Operations tests", inputs["operations"]["tests"]),
-            ])
-            if inputs["operations"]["docking"] is not None:
-                overlay_groups.append(("Docking instruments", inputs["operations"]["docking"]))
-        overlay_files(output, overlay_groups)
+        baseline_source_hashes = source_tree_hashes(output) if integration_commit is not None else None
+        if integration_commit is not None:
+            replace_snapshot_trees(output, integration_snapshot["files"])
+            candidate_dll = output / "GameData/MegaCrew/Plugins/MegaCrew.dll"
+            if candidate_dll.exists() or candidate_dll.is_symlink():
+                raise BuildError("Full snapshot retained a baseline MegaCrew DLL; compilation must be fresh")
+        else:
+            overlay_groups = [
+                ("Navigation source", inputs["navigation_files"]),
+                ("Navigation tests", inputs["navigation_tests"]),
+            ]
+            if inputs["operations"] is not None:
+                overlay_groups.extend([
+                    ("Operations source", inputs["operations"]["sources"]),
+                    ("Operations tests", inputs["operations"]["tests"]),
+                ])
+                if inputs["operations"]["docking"] is not None:
+                    overlay_groups.append(("Docking instruments", inputs["operations"]["docking"]))
+            overlay_files(output, overlay_groups)
         compiled = False
         compiler_inputs = None
         if not args.prepare_only:
@@ -475,18 +620,55 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
                 raise BuildError("--managed and --csc are required unless --prepare-only is set")
             _, compiler_inputs = compile_sources(output, args.managed, args.csc)
             compiled = True
+        integration_snapshot_hashes = None
+        canonical_source_deviations = None
+        excluded_tracked_dlls = None
+        if integration_commit is not None:
+            integration_snapshot_hashes = {
+                path: sha256(data) for path, data in sorted(integration_snapshot["files"].items())
+            }
+            snapshot_sources = {path: value for path, value in integration_snapshot_hashes.items()
+                                if path.startswith("Source/")}
+            canonical_source_deviations = {}
+            for path in sorted(set(baseline_source_hashes) | set(snapshot_sources)):
+                before = baseline_source_hashes.get(path)
+                after = snapshot_sources.get(path)
+                if before != after:
+                    canonical_source_deviations[path] = {
+                        "status": ("added" if before is None else "removed" if after is None else "modified"),
+                        "canonical_sha256": before,
+                        "integration_sha256": after,
+                    }
+            excluded_tracked_dlls = integration_snapshot["excluded_dlls"]
+        docking_group_manifest = ({
+            "status": "from_full_snapshot",
+            "ref": integration_ref,
+            "commit": integration_commit,
+            "files": {path: integration_snapshot_hashes[path] for path in DOCKING_GROUP_PATHS
+                      if path in integration_snapshot_hashes},
+        } if integration_commit is not None else {
+            "status": ("present" if inputs["operations"] is not None and
+                       inputs["operations"]["docking"] is not None else "absent"),
+            "ref": inputs["operations_ref"],
+            "commit": inputs["operations_commit"],
+            "files": ({path: sha256(data) for path, data in sorted(inputs["operations"]["docking"].items())}
+                      if inputs["operations"] is not None and
+                      inputs["operations"]["docking"] is not None else None),
+        })
         files, output_hash = hash_tree(output)
         manifest = {
             "tool": "megacrew-integration-builder",
+            "mode": "full_git_snapshot" if integration_commit is not None else "legacy_allowlist",
             "builder_sha256": sha256(Path(__file__).read_bytes()),
             "upstream_ref": args.upstream_ref,
             "upstream_commit": inputs["upstream_commit"],
-            "navigation_ref": args.navigation_ref,
+            "navigation_ref": navigation_ref,
             "navigation_commit": inputs["navigation_commit"],
             "navigation_tests": {
-                "ref": args.navigation_ref,
+                "ref": navigation_ref,
                 "commit": inputs["navigation_commit"],
-                "files": {path: sha256(data) for path, data in sorted(inputs["navigation_tests"].items())},
+                "files": ({path: sha256(data) for path, data in sorted(inputs["navigation_tests"].items())}
+                          if inputs["navigation_tests"] is not None else None),
             },
             "operations_ref": inputs["operations_ref"],
             "operations_commit": inputs["operations_commit"],
@@ -500,20 +682,21 @@ def build(args, patch_sequence=None, expected_zip_sha256=EXPECTED_ZIP_SHA256):
                                 ("index", "ref", "commit", "path", "sha256", "expected_sha256")}
                                for patch in inputs["patches"]],
             "zip_member_count": count,
-            "navigation_files": {path: sha256(data) for path, data in sorted(inputs["navigation_files"].items())},
+            "navigation_files": ({path: sha256(data) for path, data in sorted(inputs["navigation_files"].items())}
+                                 if inputs["navigation_files"] is not None else None),
             "operations_sources": ({path: sha256(data) for path, data in sorted(inputs["operations"]["sources"].items())}
                                    if inputs["operations"] is not None else None),
             "operations_tests": ({path: sha256(data) for path, data in sorted(inputs["operations"]["tests"].items())}
                                  if inputs["operations"] is not None else None),
-            "docking_group": {
-                "status": ("present" if inputs["operations"] is not None and
-                           inputs["operations"]["docking"] is not None else "absent"),
-                "ref": inputs["operations_ref"],
-                "commit": inputs["operations_commit"],
-                "files": ({path: sha256(data) for path, data in sorted(inputs["operations"]["docking"].items())}
-                          if inputs["operations"] is not None and
-                          inputs["operations"]["docking"] is not None else None),
-            },
+            "integration_ref": integration_ref,
+            "integration_commit": integration_commit,
+            "integration_snapshot_files": integration_snapshot_hashes,
+            "integration_excluded_tracked_dlls": excluded_tracked_dlls,
+            "integration_excluded_historical_metadata": (
+                integration_snapshot["excluded_historical_metadata"]
+                if integration_commit is not None else None),
+            "canonical_source_deviations": canonical_source_deviations,
+            "docking_group": docking_group_manifest,
             "compiled": compiled,
             "compiler_language_version": "7.3" if compiled else None,
             "compiler_inputs": compiler_inputs,
@@ -531,8 +714,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", required=True, help="Git checkout to read (no writes)")
     parser.add_argument("--upstream-ref", default="f76e437", help="Pinned upstream artifact ref (default: f76e437)")
-    parser.add_argument("--navigation-ref", default="294c667", help="Explicit navigation source ref (default: 294c667)")
+    parser.add_argument("--navigation-ref", help="Explicit navigation source ref (legacy overlay mode; default: 294c667)")
     parser.add_argument("--operations-ref", help="Optional explicit commit/ref for reviewed onboard operations addons and focused tests; no default")
+    parser.add_argument("--integration-ref", help="Build a complete package snapshot from this immutable Git ref; incompatible with explicit navigation/operations overlays")
     parser.add_argument("--output", required=True, type=Path, help="New output directory; must not exist")
     parser.add_argument("--managed", type=Path, help="KSP Data/Managed directory")
     parser.add_argument("--csc", type=Path, help="Roslyn csc.dll")
